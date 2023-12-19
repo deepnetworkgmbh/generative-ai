@@ -35,6 +35,6 @@ Azure AI Search prices can be calculated with the below formula:
 
     price = # of partitions x # of replicas x price per SU
 
-For high availability Microsoft recommends at least 2 replicas. As a result, Azure AI Search can get quite expensive as the required storage increases.
+For high availability Microsoft recommends at least 2 replicas. As a result, Azure AI Search can get quite expensive as the storage size increases.
 
 There is also extra costs if you want to use [Custom Entity Lookup Skill](https://learn.microsoft.com/en-us/azure/search/cognitive-search-skill-custom-entity-lookup), [Image Extraction](https://learn.microsoft.com/en-us/azure/search/cognitive-search-skill-document-extraction) or [Semantic Ranker](https://learn.microsoft.com/en-us/azure/search/semantic-search-overview).
