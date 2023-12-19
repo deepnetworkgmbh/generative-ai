@@ -1,0 +1,38 @@
+2023-12-15 22:06:49 +0300  267321 execution.flow     INFO     Executing node summarize_text_content. node run id: b90935eb-9491-4602-b504-4e912438cc99_summarize_text_content_f8a2e887-252d-4cc5-9d5f-49c5704b48ce
+2023-12-15 22:06:49 +0300  267321 execution          WARNING  [summarize_text_content in line None (index starts from 0)] stderr> Exception occurs: NotFoundError: 404 page not found
+2023-12-15 22:06:49 +0300  267321 execution          ERROR    Node summarize_text_content in line None failed. Exception: OpenAI API hits NotFoundError: 404 page not found [Error reference: https://platform.openai.com/docs/guides/error-codes/api-errors].
+Traceback (most recent call last):
+  File "/home/userwsl/.virtualenvs/generative-ai/lib/python3.10/site-packages/promptflow/tools/common.py", line 196, in wrapper
+    return func(*args, **kwargs)
+  File "/home/userwsl/.virtualenvs/generative-ai/lib/python3.10/site-packages/promptflow/tools/aoai.py", line 151, in chat
+    completion = self._client.chat.completions.create(**params)
+  File "/home/userwsl/.virtualenvs/generative-ai/lib/python3.10/site-packages/promptflow/_core/openai_injector.py", line 93, in wrapper
+    return f(*args, **kwargs)
+  File "/home/userwsl/.virtualenvs/generative-ai/lib/python3.10/site-packages/promptflow/_core/openai_injector.py", line 47, in wrapped_method
+    result = f(*args, **kwargs)
+  File "/home/userwsl/.virtualenvs/generative-ai/lib/python3.10/site-packages/openai/_utils/_utils.py", line 303, in wrapper
+    return func(*args, **kwargs)
+  File "/home/userwsl/.virtualenvs/generative-ai/lib/python3.10/site-packages/openai/resources/chat/completions.py", line 598, in create
+    return self._post(
+  File "/home/userwsl/.virtualenvs/generative-ai/lib/python3.10/site-packages/openai/_base_client.py", line 1088, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+  File "/home/userwsl/.virtualenvs/generative-ai/lib/python3.10/site-packages/openai/_base_client.py", line 853, in request
+    return self._request(
+  File "/home/userwsl/.virtualenvs/generative-ai/lib/python3.10/site-packages/openai/_base_client.py", line 930, in _request
+    raise self._make_status_error_from_response(err.response) from None
+openai.NotFoundError: 404 page not found
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/userwsl/.virtualenvs/generative-ai/lib/python3.10/site-packages/promptflow/_core/flow_execution_context.py", line 89, in invoke_tool
+    result = self._invoke_tool_with_timer(node, f, kwargs)
+  File "/home/userwsl/.virtualenvs/generative-ai/lib/python3.10/site-packages/promptflow/_core/flow_execution_context.py", line 191, in _invoke_tool_with_timer
+    raise e
+  File "/home/userwsl/.virtualenvs/generative-ai/lib/python3.10/site-packages/promptflow/_core/flow_execution_context.py", line 185, in _invoke_tool_with_timer
+    return f(**kwargs)
+  File "/home/userwsl/.virtualenvs/generative-ai/lib/python3.10/site-packages/promptflow/_core/tool.py", line 100, in decorated_tool
+    output = func(*args, **kwargs)
+  File "/home/userwsl/.virtualenvs/generative-ai/lib/python3.10/site-packages/promptflow/tools/common.py", line 211, in wrapper
+    raise WrappedOpenAIError(e)
+promptflow.tools.exception.WrappedOpenAIError: OpenAI API hits NotFoundError: 404 page not found [Error reference: https://platform.openai.com/docs/guides/error-codes/api-errors]
