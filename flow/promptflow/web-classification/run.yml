@@ -3,7 +3,7 @@ flow: .
 data: data.jsonl
 
 # define cloud resource
-runtime: promptflow-runtime
+runtime: test-runtime
 
 connections:
   classify_with_llm:
