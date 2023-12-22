@@ -56,11 +56,7 @@ jobs:
           \"computeInstanceName\": \"${{env.COMPUTE_NAME}}\",
         }"
         
-        http_response=400
-        if [ "$http_response" -eq 400 ]; then
-          echo "Runtime Already Exists, Continue..."
-        fi
-        while [ $http_response -gt 400 ]; do
+        while [ $http_response -gt 399 ]; do
           runtime_url_get=$(echo "https://ml.azure.com/api/${{env.LOCATION}}/flow/api/subscriptions/${{env.SUBSCRIPTION}}/resourceGroups/${{env.GROUP}}/providers/Microsoft.MachineLearningServices/workspaces/${{env.WORKSPACE}}/FlowRuntimes/${{env.RUNTIME_NAME}}")
           http_response=$(curl --request GET \
             --url "$runtime_url_get" \
@@ -101,4 +97,3 @@ jobs:
         az identity delete -g ${{env.GROUP}} -n ${{env.MANAGED_IDENTITY_NAME}} --yes
         az ml compute delete --name ${{env.COMPUTE_NAME}} --resource-group ${{env.GROUP}} --workspace-name ${{env.WORKSPACE}} --yes
         az ml model archive --name ${{env.MODEL_NAME}}
-        
