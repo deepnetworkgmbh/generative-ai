@@ -32,7 +32,7 @@ jobs:
       with:
         python-version: '3.11.4'
     - name: Install promptflow
-      run: pip install -r promptflow/web-classification/requirements.txt
+      run: pip install -r flow/promptflow/web-classification/requirements.txt
     - name: Create Test Compute Source
       run: |
         az account set -s ${{env.SUBSCRIPTION}}
