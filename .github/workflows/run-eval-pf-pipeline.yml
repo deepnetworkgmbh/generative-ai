@@ -11,7 +11,7 @@ env:
   SUBSCRIPTION: ${{secrets.SUBSCRIPTION}}
   RUN_NAME: web_classification_variant_1_20230816_215600_605116
   EVAL_RUN_NAME: classification_accuracy_eval_default_20230821_111809_077086
-  COMPUTE_NAME: llm-devops
+  COMPUTE_NAME: llm-devops-compute-source
   MANAGED_IDENTITY_NAME: test-promptflow-msi
   RUNTIME_NAME: llm-devops-runtime
 
@@ -41,10 +41,14 @@ jobs:
         user_managed_id="$(echo $um_details | jq -r '.[0]')"
         principalId="$(echo $um_details | jq -r '.[2]')"
         az role assignment create --assignee-object-id $principalId --assignee-principal-type ServicePrincipal --role "AzureML Data Scientist" --scope "/subscriptions/${{env.SUBSCRIPTION}}/resourcegroups/${{env.GROUP}}/providers/Microsoft.MachineLearningServices/workspaces/${{env.WORKSPACE}}"
-    - name: Create Test Runtime
-      run: |
-        az ml compute create --name ${{env.COMPUTE_NAME}} --size ? --identity-type UserAssigned --type ComputeInstance --resource-group ${{env.GROUP}} --workspace-name ${{env.WORKSPACE}} --user-assigned-identities $user_managed_id
+        az ml compute create --name ${{env.COMPUTE_NAME}} --size Standard_DS1_v2 --identity-type UserAssigned --type ComputeInstance --resource-group ${{env.GROUP}} --workspace-name ${{env.WORKSPACE}} --user-assigned-identities $user_managed_id
         access_token=$(az account get-access-token | jq -r ".accessToken")
         runtime_url_post=$(echo "https://ml.azure.com/api/$location/flow/api/subscriptions/${{env.SUBSCRIPTION}}/resourceGroups/${{env.GROUP}}/providers/Microsoft.MachineLearningServices/workspaces/${{env.WORKSPACE}}/FlowRuntimes/${{env.RUNTIME_NAME}}?asyncCall=true")
-
-
+        curl --request POST \
+          --url "$runtime_url_post" \
+          --header "Authorization: Bearer $access_token" \
+          --header 'Content-Type: application/json' \
+          --data "{
+          \"runtimeType\": \"ComputeInstance\",
+          \"computeInstanceName\": \"${{env.COMPUTE_NAME}}\",
+        }"
