@@ -46,3 +46,5 @@ jobs:
         az ml compute create --name ${{env.COMPUTE_NAME}} --size ? --identity-type UserAssigned --type ComputeInstance --resource-group ${{env.GROUP}} --workspace-name ${{env.WORKSPACE}} --user-assigned-identities $user_managed_id
         access_token=$(az account get-access-token | jq -r ".accessToken")
         runtime_url_post=$(echo "https://ml.azure.com/api/$location/flow/api/subscriptions/${{env.SUBSCRIPTION}}/resourceGroups/${{env.GROUP}}/providers/Microsoft.MachineLearningServices/workspaces/${{env.WORKSPACE}}/FlowRuntimes/${{env.RUNTIME_NAME}}?asyncCall=true")
+
+
