@@ -1,9 +1,12 @@
 import json
+import os
 from urllib.parse import quote
 import requests
 from bs4 import BeautifulSoup
 from re import search, match
 
+from openai import AzureOpenAI, ChatCompletion
+from openai import OpenAI
 
 def get_comments_link_for_product(query):
     # Encode the query string in HTML encoding
@@ -97,22 +100,25 @@ def get_product_with_rating(query):
 ayristir = lambda berisi, gerisi, yazi: search(f'{berisi}(.*){gerisi}', yazi).group(1)
 
 
-def get_comments(product_id, product_url):
-    print("Product ID:", product_id)
+def get_comments(product_id, product_url, page):
+    #print("Product ID:", product_id)
     try:
         product_url, _ = product_url.split("?")
     except ValueError:
         product_url = product_url
-    print("Product URL:", product_url)
-    comments_url = f"https://public-mdc.trendyol.com/discovery-web-socialgw-service/reviews/{product_url}/yorumlar"
+    #print("Product URL:", product_url)
+    comments_url = f"https://public-mdc.trendyol.com/discovery-web-socialgw-service/reviews{product_url}/yorumlar?page={page}"
 
     kimlik = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36'}
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0'}
+
     response = requests.get(comments_url, headers=kimlik)
     content_json = json.loads(response.content)
-    comments_section = json.loads(ayristir("STATE__ = ", ";", content_json['result']['hydrateScript']))
-    comments_data = comments_section['ratingAndReviewResponse']['ratingAndReview']['productReviews']['content']
-    return [
+    hydrate_script_section = json.loads(ayristir("STATE__ = ", ";", content_json['result']['hydrateScript']))
+    comments_section = hydrate_script_section['ratingAndReviewResponse']['ratingAndReview']['productReviews']
+    total_pages = comments_section['totalPages']
+    comments_content = comments_section['content']
+    comments = [
         {
             'tarih': comment['lastModifiedDate'],
             'satici': comment['sellerName'],
@@ -120,17 +126,67 @@ def get_comments(product_id, product_url):
             'yildiz': comment['rate'],
             'yorum': comment['comment']
         }
-        for comment in comments_data
+        for comment in comments_content if comment['rate'] < 5
     ]
+    if total_pages > page + 1:
+        comments += get_comments(product_id, product_url, page+1)
+    return comments
+
+
+def ask_gpt(type, messages):
+    if type == 'azure':
+        openai_client = AzureOpenAI(
+            api_key=os.getenv("AZURE_OPENAI_KEY"),
+            api_version="2023-12-01-preview",
+            azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+        )
+        response = openai_client.chat.completions.create(
+            model="test-deployment",
+            messages=messages
+        )
+        return response.choices[0].message.content
+    elif type == 'openai':
+        openai_client = OpenAI(
+            api_key=os.environ['OPENAI_API_KEY']
+        )
+        response = openai_client.chat.completions.create(
+            model="gpt-3.5-turbo-0301",
+            messages=messages
+        )
+        return response.choices[0].message.content
+    elif type == 'ollama':
+        response = requests.post(
+            "http://0.0.0.0:11434/api/chat",
+            json={"model": "llama2:13b", "messages": messages, "stream": False},
+        )
+        return json.loads(response.content)['message']['content']
 
 
 # Given query string
-query = "iphone 15"
+query = "iphone 14"
 
 product = get_product_with_rating(query)
-comments = get_comments(product['id'], product['url'])
+comments = get_comments(product['id'], product['url'], page=0)
+pure_comments = [comment['yorum'] for comment in comments]
+message_content = f"PRODUCT: {query}\n" + '\n'.join(pure_comments)
+print("User comments: \n\n" + message_content)
+print("--------------------------------------")
 
-print("comments:", comments)
+messages=[
+    {"role": "system", "content": "You are an expert that reads user comments and point out 3 main problems that the users have experienced about the product."
+                                  "User will give you a list comments for the product."
+                                  "Tell up to 3 main problems as bullets points."
+                                  "Tell problems only about the product. Don't list problems about delivery or seller communication."
+                                  "Don't give explanations before the problems, just list the problems."
+                                  "Try to give detail about the problem. Don't use other information, just use the information in the comments."
+                                  "If you cannot infer any problems, return None as message content."
+                                  "Product name will be given as PRODUCT:product name in the user's message."},
+    {"role": "user", "content": message_content}
+]
 
-# comments_link = get_comments_link_for_product(query)
-# comments = get_comment_texts(comments_link)
+azure_response = ask_gpt("azure", messages)
+ollama_response = ask_gpt("ollama", messages)
+
+print(f"Azure AI says:\n{azure_response}")
+print("--------------------------------------")
+print(f"Ollama says:\n{ollama_response}")
