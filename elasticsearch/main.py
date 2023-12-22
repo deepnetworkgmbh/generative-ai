@@ -1,39 +1,42 @@
 from rag_elasticsearch import chain
 
 if __name__ == "__main__":
-    """questions = [
-        "What is the nasa sales team?",
-        "What is our work from home policy?",
-        "Does the company own my personal project?",
-        "How does compensation work?",
-    ]
-
+    """
+    question = "What is included in my Northwind Health Plus plan that is not in standard?"
     response = chain.invoke(
         {
-            "question": questions[0],
+            "question": question,
             "chat_history": [],
         }
     )
     print(response)
 
-    follow_up_question = "What are their objectives?"
+    follow_up_question = "Does my plan cover eye exams?"
 
     response = chain.invoke(
         {
             "question": follow_up_question,
             "chat_history": [
-                "What is the nasa sales team?",
-                "The sales team of NASA consists of Laura Martinez, the Area "
-                "Vice-President of North America, and Gary Johnson, the Area "
-                "Vice-President of South America. (Sales Organization Overview)",
+                question,
+                response
             ],
         }
     )
-    """
-    response = chain.invoke(
-        {
-            "question": "Does the Northwind Health Plus Plan cover eye exams?",
-            "chat_history": [],
-        }
-    )
     print(response)
+    """
+    history=[]
+    print("You can ask a question.")
+    while True:
+        user_prompt = input()
+        if(user_prompt == "exit"):
+            break
+        response = chain.invoke(
+            {
+                "question": user_prompt,
+                "chat_history": history
+            }
+        )
+        print(response)
+        history.append(user_prompt)
+        history.append(response)
+        

@@ -19,7 +19,7 @@ vectorstore = ElasticsearchStore(
     embedding=HuggingFaceEmbeddings(
         model_name="all-MiniLM-L6-v2", model_kwargs={"device": "cpu"}
     ),
-    index_name="azure-demo-example",
+    index_name="demo-example",
 )
 print(vectorstore)
 retriever = vectorstore.as_retriever()

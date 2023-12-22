@@ -1,11 +1,19 @@
 from langchain.prompts import ChatPromptTemplate, PromptTemplate
 
 # Used to condense a question and chat history into a single question
-condense_question_prompt_template = """Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language. If there is no chat history, just rephrase the question to be a standalone question.
+condense_question_prompt_template = """
+Below is a history of the chat so far, and a new question asked by the user that needs to be answered by searching in a knowledge.
+You have access to ElasticSearch index with 100's of documents.
+Generate a search query based on the chat and the new question.
+Do not include cited source filenames and document names e.g info.txt or doc.pdf in the search query terms.
+Do not include any text inside [] or <<>> in the search query terms.
+Do not include any special characters like '+'.
+If the question is not in English, translate the question to English before generating the search query.
+Do not include "Search Query:" in the beginning of the answer.
 
 Chat History:
 {chat_history}
-Follow Up Input: {question}
+New Question: {question}
 """  # noqa: E501
 CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(
     condense_question_prompt_template
@@ -30,7 +38,8 @@ LLM_CONTEXT_PROMPT = ChatPromptTemplate.from_template(llm_context_prompt_templat
 # Used to build a context window from passages retrieved
 document_prompt_template = """
 ---
-NAME: {name}
+SOURCE: {source}
+PAGE: {page}
 PASSAGE:
 {page_content}
 ---

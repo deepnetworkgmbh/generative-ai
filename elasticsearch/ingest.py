@@ -48,8 +48,8 @@ all_splits = text_splitter.split_documents(loader.load())
 vectorstore = ElasticsearchStore.from_documents(
     documents=all_splits,
     embedding=HuggingFaceEmbeddings(
-        model_name=f"{os.getcwd()}/elasticsearch/all-MiniLM-L6-v2", model_kwargs={"device": "cpu"}
+        model_name="all-MiniLM-L6-v2", model_kwargs={"device": "cpu"}
     ),
     **es_connection_details,
-    index_name="azure-demo-example",
+    index_name="demo-example",
 )
