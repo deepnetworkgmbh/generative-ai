@@ -11,9 +11,9 @@ env:
   SUBSCRIPTION: ${{secrets.SUBSCRIPTION}}
   RUN_NAME: web_classification_variant_1_20230816_215600_605116
   EVAL_RUN_NAME: classification_accuracy_eval_default_20230821_111809_077086
-  COMPUTE_NAME: test-compute
+  COMPUTE_NAME: compute-instance
   MANAGED_IDENTITY_NAME: test-promptflow-msi
-  RUNTIME_NAME: test-runtime
+  RUNTIME_NAME: runtime
   LOCATION: westeurope
   MODEL_NAME:  web-classification-model
 
