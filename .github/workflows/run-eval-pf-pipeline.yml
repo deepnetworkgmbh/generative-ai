@@ -57,7 +57,10 @@ jobs:
         }"
         
         http_response=400
-        while [ $http_response -gt 399 ]; do
+        if [ "$http_response" -eq 400 ]; then
+          echo "Runtime Already Exists, Continue..."
+        fi
+        while [ $http_response -gt 400 ]; do
           runtime_url_get=$(echo "https://ml.azure.com/api/${{env.LOCATION}}/flow/api/subscriptions/${{env.SUBSCRIPTION}}/resourceGroups/${{env.GROUP}}/providers/Microsoft.MachineLearningServices/workspaces/${{env.WORKSPACE}}/FlowRuntimes/${{env.RUNTIME_NAME}}")
           http_response=$(curl --request GET \
             --url "$runtime_url_get" \
