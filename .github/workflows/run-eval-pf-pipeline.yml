@@ -95,6 +95,6 @@ jobs:
       run: az ml model create --file flow/promptflow/deployment/model.yaml  -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
     - name: Delete Test Sources
       run: |
-        az identity delete -g ${{env.GROUP}} -n ${{env.MANAGED_IDENTITY_NAME}}
-        az ml compute delete --name ${{env.COMPUTE_NAME}} --resource-group ${{env.GROUP}} --workspace-name ${{env.WORKSPACE}}
+        az identity delete -g ${{env.GROUP}} -n ${{env.MANAGED_IDENTITY_NAME}} --yes
+        az ml compute delete --name ${{env.COMPUTE_NAME}} --resource-group ${{env.GROUP}} --workspace-name ${{env.WORKSPACE}} --yes
         az ml model archive --name ${{env.MODEL_NAME}}
