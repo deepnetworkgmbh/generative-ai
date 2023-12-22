@@ -11,9 +11,9 @@ env:
   SUBSCRIPTION: ${{secrets.SUBSCRIPTION}}
   RUN_NAME: web_classification_variant_1_20230816_215600_605116
   EVAL_RUN_NAME: classification_accuracy_eval_default_20230821_111809_077086
-  COMPUTE_NAME: llm-c
+  COMPUTE_NAME: llm-c2
   MANAGED_IDENTITY_NAME: test-promptflow-msi
-  RUNTIME_NAME: llm-rt
+  RUNTIME_NAME: llm-rt2
   LOCATION: westeurope
   MODEL_NAME:  web-classification-model
 
@@ -58,6 +58,7 @@ jobs:
         
         http_response=400
         while [ "$http_response" -gt 399 ]; do
+          echo "LOWOWERRR"
           runtime_url_get=$(echo "https://ml.azure.com/api/${{env.LOCATION}}/flow/api/subscriptions/${{env.SUBSCRIPTION}}/resourceGroups/${{env.GROUP}}/providers/Microsoft.MachineLearningServices/workspaces/${{env.WORKSPACE}}/FlowRuntimes/${{env.RUNTIME_NAME}}")
           http_response=$(curl --request GET \
             --url "$runtime_url_get" \
