@@ -57,6 +57,7 @@ jobs:
         sleep 20 # wait for runtime
     - name: Run promptflow
       run: |
+        pfazure run create -f flow/promptflow/web-classification/run.yml --subscription ${{env.SUBSCRIPTION}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}} --stream
         pfazure run create -f flow/promptflow/web-classification/run.yml --subscription ${{env.SUBSCRIPTION}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}} --stream > flow/promptflow/llmops-helper/run_info.txt
         echo "RUN_NAME=$(python flow/promptflow/llmops-helper/parse_run_output.py run_info.txt)" >> "$GITHUB_ENV"
     - name: Show promptflow results
