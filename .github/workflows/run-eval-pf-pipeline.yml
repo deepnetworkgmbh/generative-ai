@@ -54,7 +54,11 @@ jobs:
           \"runtimeType\": \"ComputeInstance\",
           \"computeInstanceName\": \"${{env.COMPUTE_NAME}}\",
         }"
-        sleep 20 # wait for runtime
+        sleep 100 # wait for runtime
+        runtime_url_get=$(echo "https://ml.azure.com/api/${{env.LOCATION}}/flow/api/subscriptions/${{env.SUBSCRIPTION}}/resourceGroups/${{env.GROUP}}/providers/Microsoft.MachineLearningServices/workspaces/${{env.WORKSPACE}}/FlowRuntimes/${{env.RUNTIME_NAME}}")
+        url --request GET \
+          --url "$runtime_url_get" \
+          --header "Authorization: Bearer $access_token"
     - name: Run promptflow
       run: |
         pfazure run create -f flow/promptflow/web-classification/run.yml --subscription ${{env.SUBSCRIPTION}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}} --stream
