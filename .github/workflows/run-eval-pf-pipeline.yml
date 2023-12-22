@@ -14,6 +14,7 @@ env:
   COMPUTE_NAME: llm-devops-compute
   MANAGED_IDENTITY_NAME: test-promptflow-msi
   RUNTIME_NAME: promptflow-runtime
+  LOCATION: westeurope
 
 jobs:
   login-and-run-and-evalpf:
@@ -43,7 +44,7 @@ jobs:
         az role assignment create --assignee-object-id $principalId --assignee-principal-type ServicePrincipal --role "AzureML Data Scientist" --scope "/subscriptions/${{env.SUBSCRIPTION}}/resourcegroups/${{env.GROUP}}/providers/Microsoft.MachineLearningServices/workspaces/${{env.WORKSPACE}}"
         az ml compute create --name ${{env.COMPUTE_NAME}} --size Standard_DS1_v2 --identity-type UserAssigned --type ComputeInstance --resource-group ${{env.GROUP}} --workspace-name ${{env.WORKSPACE}} --user-assigned-identities $user_managed_id
         access_token=$(az account get-access-token | jq -r ".accessToken")
-        runtime_url_post=$(echo "https://ml.azure.com/api/$location/flow/api/subscriptions/${{env.SUBSCRIPTION}}/resourceGroups/${{env.GROUP}}/providers/Microsoft.MachineLearningServices/workspaces/${{env.WORKSPACE}}/FlowRuntimes/${{env.RUNTIME_NAME}}?asyncCall=true")
+        runtime_url_post=$(echo "https://ml.azure.com/api/${{env.LOCATION}}/flow/api/subscriptions/${{env.SUBSCRIPTION}}/resourceGroups/${{env.GROUP}}/providers/Microsoft.MachineLearningServices/workspaces/${{env.WORKSPACE}}/FlowRuntimes/${{env.RUNTIME_NAME}}?asyncCall=true")
         curl --request POST \
           --url "$runtime_url_post" \
           --header "Authorization: Bearer $access_token" \
