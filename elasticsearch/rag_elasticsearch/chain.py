@@ -10,14 +10,14 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.runnables import RunnableParallel, RunnablePassthrough
 
-from connection import es_connection_details
-from prompts import CONDENSE_QUESTION_PROMPT, DOCUMENT_PROMPT, LLM_CONTEXT_PROMPT
+from .connection import es_connection_details
+from .prompts import CONDENSE_QUESTION_PROMPT, DOCUMENT_PROMPT, LLM_CONTEXT_PROMPT
 
 # Setup connecting to Elasticsearch
 vectorstore = ElasticsearchStore(
     **es_connection_details,
     embedding=HuggingFaceEmbeddings(
-        model_name=f"{os.getcwd()}/elasticsearch/all-MiniLM-L6-v2", model_kwargs={"device": "cpu"}
+        model_name="all-MiniLM-L6-v2", model_kwargs={"device": "cpu"}
     ),
     index_name="azure-demo-example",
 )
