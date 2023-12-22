@@ -1,11 +1,11 @@
 ![MLOps Diagram](images/mlops_diagram2.png)
-## Whats the MLOps ##
-Different teams (Data Scientists, ML Engineers etc.) are working on same project's different step.
-These stes are:    
+## What is the MLOps ##
+Different teams (Data Scientists, ML Engineers etc.).       
+MLOps Stages are:    
 * Train Data Collection
 * Development of ML model
 * Evaluation
-* Feedback (*)
+* Feedback
 * If evaluation is successfull, deploy/store model 
 * Create endpoint 
 * Deploy model to endpoint
@@ -24,11 +24,11 @@ MLOps is aiming to automate repetitive tasks such as:
 ![MLOps Diagram 2 - Google](images/mlops_diagram3.png)
 ![MLOps Diagram 3 - Google](images/mlops_diagram4.png)
 
-## Whats the LLMOps ##
+## What is the LLMOps ##
 LLMOps is MLOps for LLMs.      
 Manage the lifecycle of LLM-powered applications, including development, deployment, and maintenance.    
       
-* Instead of training model like in MLOps with huge amount of data, use zero or few-shot learning (High wuality selected samples)
+* Instead of training model like in MLOps with huge amount of data, use zero or few-shot learning (High quality selected samples)
 * Feature engineering is less important than MLOps because LLM can learn from raw data.
 * In MLOps we have evaluation metrics such as accuracy, precision, recall, F1-score etc., but in LLMOps we have ROUGE, BERT, and BLEU score which focus on measuring the similarity of a response to a provided reference answer.
 
