@@ -44,6 +44,7 @@ jobs:
         principalId="$(echo $um_details | jq -r '.[2]')"
         az role assignment create --assignee-object-id $principalId --assignee-principal-type ServicePrincipal --role "AzureML Data Scientist" --scope "/subscriptions/${{env.SUBSCRIPTION}}/resourcegroups/${{env.GROUP}}/providers/Microsoft.MachineLearningServices/workspaces/${{env.WORKSPACE}}"
         az ml compute create --name ${{env.COMPUTE_NAME}} --size Standard_DS1_v2 --identity-type UserAssigned --type ComputeInstance --resource-group ${{env.GROUP}} --workspace-name ${{env.WORKSPACE}} --user-assigned-identities $user_managed_id
+        
         access_token=$(az account get-access-token | jq -r ".accessToken")
         runtime_url_post=$(echo "https://ml.azure.com/api/${{env.LOCATION}}/flow/api/subscriptions/${{env.SUBSCRIPTION}}/resourceGroups/${{env.GROUP}}/providers/Microsoft.MachineLearningServices/workspaces/${{env.WORKSPACE}}/FlowRuntimes/${{env.RUNTIME_NAME}}?asyncCall=true")
         curl --request POST \
@@ -54,11 +55,16 @@ jobs:
           \"runtimeType\": \"ComputeInstance\",
           \"computeInstanceName\": \"${{env.COMPUTE_NAME}}\",
         }"
-        sleep 100 # wait for runtime
-        runtime_url_get=$(echo "https://ml.azure.com/api/${{env.LOCATION}}/flow/api/subscriptions/${{env.SUBSCRIPTION}}/resourceGroups/${{env.GROUP}}/providers/Microsoft.MachineLearningServices/workspaces/${{env.WORKSPACE}}/FlowRuntimes/${{env.RUNTIME_NAME}}")
-        curl --request GET \
-          --url "$runtime_url_get" \
-          --header "Authorization: Bearer $access_token"
+        
+        http_response=400
+        while [ $http_response -gt 399 ]; do
+          runtime_url_get=$(echo "https://ml.azure.com/api/${{env.LOCATION}}/flow/api/subscriptions/${{env.SUBSCRIPTION}}/resourceGroups/${{env.GROUP}}/providers/Microsoft.MachineLearningServices/workspaces/${{env.WORKSPACE}}/FlowRuntimes/${{env.RUNTIME_NAME}}")
+          http_response =$(curl --request GET \
+            --url "$runtime_url_get" \
+            --header "Authorization: Bearer $access_token" \
+            -s -o /dev/null -w "%{http_code}")
+          sleep 10
+        done
     - name: Run promptflow
       run: |
         az account set -s ${{env.SUBSCRIPTION}}
