@@ -15,6 +15,7 @@ env:
   MANAGED_IDENTITY_NAME: test-promptflow-msi
   RUNTIME_NAME: promptflow-runtime
   LOCATION: westeurope
+  MODEL_NAME:  web-classification-model
 
 jobs:
   login-and-run-and-evalpf:
@@ -34,13 +35,29 @@ jobs:
         python-version: '3.11.4'
     - name: Install promptflow
       run: pip install -r flow/promptflow/web-classification/requirements.txt
-    - name: Create Test Compute Source
+    - name: Create Test Sources
       run: |
         az account set -s ${{env.SUBSCRIPTION}}
+        az identity create -g ${{env.GROUP}} -n ${{env.MANAGED_IDENTITY_NAME}} --query "id"
+        um_details=$(az identity show -g ${{env.GROUP}} -n ${{env.MANAGED_IDENTITY_NAME}} --query "[id, clientId, principalId]")
+        user_managed_id="$(echo $um_details | jq -r '.[0]')"
+        principalId="$(echo $um_details | jq -r '.[2]')"
+        az role assignment create --assignee-object-id $principalId --assignee-principal-type ServicePrincipal --role "AzureML Data Scientist" --scope "/subscriptions/${{env.SUBSCRIPTION}}/resourcegroups/${{env.GROUP}}/providers/Microsoft.MachineLearningServices/workspaces/${{env.WORKSPACE}}"
+        az ml compute create --name ${{env.COMPUTE_NAME}} --size Standard_DS1_v2 --identity-type UserAssigned --type ComputeInstance --resource-group ${{env.GROUP}} --workspace-name ${{env.WORKSPACE}} --user-assigned-identities $user_managed_id
+        access_token=$(az account get-access-token | jq -r ".accessToken")
+        runtime_url_post=$(echo "https://ml.azure.com/api/${{env.LOCATION}}/flow/api/subscriptions/${{env.SUBSCRIPTION}}/resourceGroups/${{env.GROUP}}/providers/Microsoft.MachineLearningServices/workspaces/${{env.WORKSPACE}}/FlowRuntimes/${{env.RUNTIME_NAME}}?asyncCall=true")
+        curl --request POST \
+          --url "$runtime_url_post" \
+          --header "Authorization: Bearer $access_token" \
+          --header 'Content-Type: application/json' \
+          --data "{
+          \"runtimeType\": \"ComputeInstance\",
+          \"computeInstanceName\": \"${{env.COMPUTE_NAME}}\",
+        }"
+        sleep 20 # wait for runtime
     - name: Run promptflow
       run: |
-        pfazure run create -f flow/promptflow/web-classification/run.yml --subscription ${{env.SUBSCRIPTION}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}} --stream
-        pfazure run create -f flow/promptflow/web-classification/run.yml --subscription ${{env.SUBSCRIPTION}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}} --stream > promptflow/llmops-helper/run_info.txt
+        pfazure run create -f flow/promptflow/web-classification/run.yml --subscription ${{env.SUBSCRIPTION}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}} --stream > flow/promptflow/llmops-helper/run_info.txt
         echo "RUN_NAME=$(python flow/promptflow/llmops-helper/parse_run_output.py run_info.txt)" >> "$GITHUB_ENV"
     - name: Show promptflow results
       run: pfazure run show-details --name ${{env.RUN_NAME}} --subscription ${{env.SUBSCRIPTION}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
@@ -64,3 +81,8 @@ jobs:
     - name: Register promptflow model
       if: ${{ steps.jobMetricAssert.outputs.result == 'true' }}
       run: az ml model create --file flow/promptflow/deployment/model.yaml  -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
+    - name: Delete Test Sources
+      run: |
+        az identity delete -g ${{env.GROUP}} -n ${{env.MANAGED_IDENTITY_NAME}}
+        az ml compute delete --name ${{env.COMPUTE_NAME}} --resource-group ${{env.GROUP}} --workspace-name ${{env.WORKSPACE}}
+        az ml model archive --name ${{env.MODEL_NAME}}
