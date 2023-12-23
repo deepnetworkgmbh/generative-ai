@@ -11,11 +11,14 @@ env:
   SUBSCRIPTION: ${{secrets.SUBSCRIPTION}}
   RUN_NAME: web_classification_variant_1_20230816_215600_605116
   EVAL_RUN_NAME: classification_accuracy_eval_default_20230821_111809_077086
-  COMPUTE_NAME: llm-c5
+  COMPUTE_NAME: llm-c6
   MANAGED_IDENTITY_NAME: test-promptflow-msi
-  RUNTIME_NAME: llm-rt5
+  RUNTIME_NAME: llm-rt6
   LOCATION: westeurope
   MODEL_NAME:  web-classification-model
+  SP_USER: ${{secrets.SP_USER}}
+  SP_PASS: ${{secrets.SP_PASS}}
+  SP_TENANT: ${{secrets.SP_TENANT}}
 
 jobs:
   login-and-run-and-evalpf:
@@ -26,9 +29,7 @@ jobs:
     - name: Install az ml extension
       run: az extension add -n ml -y
     - name: Azure login
-      uses: azure/login@v1
-      with:
-        creds: ${{secrets.AZURE_CREDENTIALS}}
+        az login --service-principal -u ${{env.SP_USER}} -p ${{env.SP_PASS}} --tenant ${{env.SP_TENANT}}
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
