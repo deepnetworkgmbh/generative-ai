@@ -3,7 +3,7 @@ flow: .
 data: data.jsonl
 
 # define cloud resource
-runtime: llm-rt19
+runtime: llm-rt20
 
 connections:
   classify_with_llm:
