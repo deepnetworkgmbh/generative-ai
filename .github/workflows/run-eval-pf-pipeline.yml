@@ -29,6 +29,7 @@ jobs:
     - name: Install az ml extension
       run: az extension add -n ml -y
     - name: Azure login
+      run: |
         az login --service-principal -u ${{env.SP_USER}} -p ${{env.SP_PASS}} --tenant ${{env.SP_TENANT}}
     - name: Set up Python
       uses: actions/setup-python@v2
