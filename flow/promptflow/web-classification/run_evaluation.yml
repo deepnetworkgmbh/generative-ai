@@ -7,4 +7,4 @@ column_mapping:
   prediction: ${run.outputs.category}
 
 # define cloud resource
-runtime: llm-rt11
+runtime: llm-rt12
