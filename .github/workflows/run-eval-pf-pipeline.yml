@@ -11,9 +11,9 @@ env:
   SUBSCRIPTION: ${{secrets.SUBSCRIPTION}}
   RUN_NAME: web_classification_variant_1_20230816_215600_605116
   EVAL_RUN_NAME: classification_accuracy_eval_default_20230821_111809_077086
-  COMPUTE_NAME: llm-c20
+  COMPUTE_NAME: llm-c21
   MANAGED_IDENTITY_NAME: test-promptflow-msi
-  RUNTIME_NAME: llm-rt20
+  RUNTIME_NAME: llm-rt21
   LOCATION: westeurope
   MODEL_NAME:  web-classification-model
   SP_USER: ${{secrets.SP_USER}}
@@ -103,5 +103,5 @@ jobs:
       run: az ml model create --file flow/promptflow/deployment/model.yaml  -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
     - name: Delete Test Sources
       run: |
-        az ml compute delete --name ${{env.COMPUTE_NAME}} --resource-group ${{env.GROUP}} --workspace-name ${{env.WORKSPACE}}
+        az ml compute delete --yes --name ${{env.COMPUTE_NAME}} --resource-group ${{env.GROUP}} --workspace-name ${{env.WORKSPACE}}
 
