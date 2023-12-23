@@ -11,9 +11,9 @@ env:
   SUBSCRIPTION: ${{secrets.SUBSCRIPTION}}
   RUN_NAME: web_classification_variant_1_20230816_215600_605116
   EVAL_RUN_NAME: classification_accuracy_eval_default_20230821_111809_077086
-  COMPUTE_NAME: llm-c13
+  COMPUTE_NAME: llm-c14
   MANAGED_IDENTITY_NAME: test-promptflow-msi
-  RUNTIME_NAME: llm-rt13
+  RUNTIME_NAME: llm-rt14
   LOCATION: westeurope
   MODEL_NAME:  web-classification-model
   SP_USER: ${{secrets.SP_USER}}
@@ -61,7 +61,7 @@ jobs:
         http_response="Unavailable"
         while : ; do
           echo "Waiting runtime... 1"
-          if [ -n "$http_response" ]; then
+          if [ -z "$http_response" ]; then
               echo "Exiting from the while loop..."
               break
           fi
