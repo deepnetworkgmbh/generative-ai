@@ -56,13 +56,13 @@ jobs:
           \"computeInstanceName\": \"${{env.COMPUTE_NAME}}\",
         }"
         
-        http_response=400
-        while [ "$http_response" -gt 399 ]; do
+        http_response="Unavailable"
+        while [ "$http_response" == *"Unavailable"* ]; do
           runtime_url_get=$(echo "https://ml.azure.com/api/${{env.LOCATION}}/flow/api/subscriptions/${{env.SUBSCRIPTION}}/resourceGroups/${{env.GROUP}}/providers/Microsoft.MachineLearningServices/workspaces/${{env.WORKSPACE}}/FlowRuntimes/${{env.RUNTIME_NAME}}")
           http_response=$(curl --request GET \
             --url "$runtime_url_get" \
             --header "Authorization: Bearer $access_token" \
-            -s -o /dev/null -w "%{http_code}")
+            | jq -r '.statusMessage')
           echo $http_response
           sleep 10
         done
