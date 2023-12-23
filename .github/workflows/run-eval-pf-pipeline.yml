@@ -64,7 +64,8 @@ jobs:
           http_response=$(curl --request GET \
             --url "$runtime_url_get" \
             --header "Authorization: Bearer $access_token" \
-            | jq -r '.statusMessage')
+            | jq -r '.status')
+          echo "Waiting runtime..."
           echo $http_response
           sleep 10
         done
