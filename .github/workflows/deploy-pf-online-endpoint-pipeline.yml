@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   workflow_run:
     workflows: ["Test and Evaulate Prompts with Promptflow"]
-    branches: [cenk]
+    branches: [ feature/cenkOpenAI ]
     types:
       - completed
 
@@ -14,8 +14,8 @@ env:
   SUBSCRIPTION: ${{secrets.SUBSCRIPTION}}
   RUN_NAME: web_classification_variant_1_20230816_215600_605116
   EVAL_RUN_NAME: classification_accuracy_eval_default_20230821_111809_077086
-  ENDPOINT_NAME: web-classification-endpoint-2
-  DEPLOYMENT_NAME: test-1
+  ENDPOINT_NAME: web-classification-endpoint
+  DEPLOYMENT_NAME: deployment
 
 jobs:
   create-endpoint-and-deploy-pf:
@@ -27,11 +27,8 @@ jobs:
     - name: Install az ml extension
       run: az extension add -n ml -y
     - name: Azure login
-      uses: azure/login@v1
-      with:
-        creds: ${{secrets.AZURE_CREDENTIALS}}
-    - name: List current directory
-      run: ls
+      run: |
+        az login --service-principal -u ${{env.SP_USER}} -p ${{env.SP_PASS}} --tenant ${{env.SP_TENANT}}
     - name: Set default subscription
       run: |
          az account set -s ${{env.SUBSCRIPTION}}
