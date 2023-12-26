@@ -41,9 +41,9 @@ jobs:
       run: pip install -r flow/promptflow/web-classification/requirements.txt
     - name: Set Compute and Runtime Names
       run: |
-        random_number=$((1 + RANDOM % 10000))
-        echo "COMPUTE_NAME=${{env.COMPUTE_NAME}}$random_number" >> "$GITHUB_ENV"
-        echo "RUNTIME_NAME=${{env.RUNTIME_NAME}}$random_number" >> "$GITHUB_ENV"
+        echo "-${{ github.run_id }}-${{ github.run_attempt }}"
+        echo "COMPUTE_NAME=${{env.COMPUTE_NAME}}-${{ github.run_id }}-${{ github.run_attempt }}" >> "$GITHUB_ENV"
+        echo "RUNTIME_NAME=${{env.RUNTIME_NAME}}-${{ github.run_id }}-${{ github.run_attempt }}" >> "$GITHUB_ENV"
         
         sed 's#runtime: llm-runtime#runtime: ${{env.RUNTIME_NAME}}#' flow/promptflow/web-classification/run.yml > flow/promptflow/web-classification/run_temp.yml && mv flow/promptflow/web-classification/run_temp.yml flow/promptflow/web-classification/run.yml
         sed 's#runtime: llm-runtime#runtime: ${{env.RUNTIME_NAME}}#' flow/promptflow/web-classification/run_evaluation.yml > flow/promptflow/web-classification/run_evaluation_temp.yml && mv flow/promptflow/web-classification/run_evaluation_temp.yml flow/promptflow/web-classification/run_evaluation.yml
