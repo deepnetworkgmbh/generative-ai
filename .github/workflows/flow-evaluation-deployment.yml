@@ -63,7 +63,7 @@ jobs:
         rm -rf flow/promptflow/web-classification/run_temp.yml
         rm -rf flow/promptflow/web-classification/run_evaluation_temp.yml
         
-        cat flow/promptflow/web-classification/runx.yml
+        cat flow/promptflow/web-classification/run.yml
         cat flow/promptflow/web-classification/run_evaluation.yml
 
     - name: Create Managed Identity
