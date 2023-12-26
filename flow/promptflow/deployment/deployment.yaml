@@ -1,7 +1,7 @@
 $schema: https://azuremlschemas.azureedge.net/latest/managedOnlineDeployment.schema.json
 name: test-1
 endpoint_name: web-classification-endpoint
-model: azureml:web-classification-model
+model: azureml:web-classification-model:33
   # You can also specify model files path inline
   # path: examples/flows/chat/basic-chat
 environment: 
