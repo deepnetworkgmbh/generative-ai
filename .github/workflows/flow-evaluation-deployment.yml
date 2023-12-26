@@ -57,8 +57,9 @@ jobs:
         echo ${{env.COMPUTE_NAME}}
         echo ${{env.RUNTIME_NAME}}
         
-        sed 's#runtime: llm-runtime#runtime: ${{env.RUNTIME_NAME}}#' flow/promptflow/web-classification/run.yml > flow/promptflow/web-classification/run_temp.yml && mv flow/promptflow/web-classification/run_temp.yml flow/promptflow/web-classification/run.yml
-        sed 's#runtime: llm-runtime#runtime: ${{env.RUNTIME_NAME}}#' flow/promptflow/web-classification/run_evaluation.yml > flow/promptflow/web-classification/run_evaluation_temp.yml && mv flow/promptflow/web-classification/run_evaluation_temp.yml flow/promptflow/web-classification/run_evaluation.yml
+        replacer=${{env.RUNTIME_NAME}}
+        sed "s#runtime: llm-runtime#runtime: $replacer#" flow/promptflow/web-classification/run.yml > flow/promptflow/web-classification/run_temp.yml && mv flow/promptflow/web-classification/run_temp.yml flow/promptflow/web-classification/run.yml
+        sed "s#runtime: llm-runtime#runtime: $replacer#" flow/promptflow/web-classification/run_evaluation.yml > flow/promptflow/web-classification/run_evaluation_temp.yml && mv flow/promptflow/web-classification/run_evaluation_temp.yml flow/promptflow/web-classification/run_evaluation.yml
         
         rm -rf flow/promptflow/web-classification/run_temp.yml
         rm -rf flow/promptflow/web-classification/run_evaluation_temp.yml
