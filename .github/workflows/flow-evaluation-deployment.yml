@@ -11,14 +11,16 @@ env:
   SUBSCRIPTION: ${{secrets.SUBSCRIPTION}}
   RUN_NAME: web_classification_variant_1_20230816_215600_605116
   EVAL_RUN_NAME: classification_accuracy_eval_default_20230821_111809_077086
-  COMPUTE_NAME: llm-compute101
+  COMPUTE_NAME: llm-compute102
   MANAGED_IDENTITY_NAME: test-promptflow-msi
-  RUNTIME_NAME: llm-runtime101
+  RUNTIME_NAME: llm-runtime102
   LOCATION: germanywestcentral
   MODEL_NAME:  web-classification-model
   SP_USER: ${{secrets.SP_USER}}
   SP_PASS: ${{secrets.SP_PASS}}
   SP_TENANT: ${{secrets.SP_TENANT}}
+  ENDPOINT_NAME: web-classification-endpoint
+  DEPLOYMENT_NAME: deployment
 
 jobs:
   login-and-run-and-evalpf:
