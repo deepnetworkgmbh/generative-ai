@@ -43,6 +43,13 @@ jobs:
       run: |
         echo "COMPUTE_NAME=${{env.COMPUTE_NAME}}$(shuf -i 1-10000 -n 1)" >> "$GITHUB_ENV"
         echo "RUNTIME_NAME=${{env.RUNTIME_NAME}}$(shuf -i 1-10000 -n 1)" >> "$GITHUB_ENV"
+        
+        sed 's/runtime: llm-runtime.*/runtime: llm-runtime500/' flow/promptflow/web-classification/run.yml > flow/promptflow/web-classification/run_temp.yml && mv flow/promptflow/web-classification/run_temp.yml flow/promptflow/web-classification/run.yml
+        sed 's/runtime: llm-runtime.*/runtime: llm-runtime500/' flow/promptflow/web-classification/run_evaluation.yml > flow/promptflow/web-classification/run_evaluation_temp.yml && mv flow/promptflow/web-classification/run_evaluation_temp.yml flow/promptflow/web-classification/run_evaluation.yml
+        
+        rm -rf flow/promptflow/web-classification/run_temp.yml
+        rm -rf flow/promptflow/web-classification/run_evaluation_temp.yml
+
     - name: Create Managed Identity
       run: |
         az account set -s ${{env.SUBSCRIPTION}}
