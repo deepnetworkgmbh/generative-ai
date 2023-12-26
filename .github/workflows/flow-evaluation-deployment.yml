@@ -47,8 +47,10 @@ jobs:
         unique_identifier_first_10="${unique_identifier:0:10}"
         echo "$unique_identifier_first_10"
         
-        echo "COMPUTE_NAME=${{env.COMPUTE_NAME}}$unique_identifier" >> "$GITHUB_ENV"
-        echo "RUNTIME_NAME=${{env.RUNTIME_NAME}}$unique_identifier" >> "$GITHUB_ENV"
+        echo "COMPUTE_NAME=${{env.COMPUTE_NAME}}$unique_identifier_first_10" >> "$GITHUB_ENV"
+        echo "RUNTIME_NAME=${{env.RUNTIME_NAME}}$unique_identifier_first_10" >> "$GITHUB_ENV"
+        echo ${{env.COMPUTE_NAME}}
+        echo ${{env.RUNTIME_NAME}}
         
         sed 's#runtime: llm-runtime#runtime: ${{env.RUNTIME_NAME}}#' flow/promptflow/web-classification/run.yml > flow/promptflow/web-classification/run_temp.yml && mv flow/promptflow/web-classification/run_temp.yml flow/promptflow/web-classification/run.yml
         sed 's#runtime: llm-runtime#runtime: ${{env.RUNTIME_NAME}}#' flow/promptflow/web-classification/run_evaluation.yml > flow/promptflow/web-classification/run_evaluation_temp.yml && mv flow/promptflow/web-classification/run_evaluation_temp.yml flow/promptflow/web-classification/run_evaluation.yml
@@ -70,6 +72,7 @@ jobs:
         az role assignment create --assignee-object-id ${{env.PRINCIPAL_ID}} --assignee-principal-type ServicePrincipal --role "AzureML Data Scientist" --scope "/subscriptions/${{env.SUBSCRIPTION}}/resourcegroups/${{env.GROUP}}/providers/Microsoft.MachineLearningServices/workspaces/${{env.WORKSPACE}}"
     - name: Create Azure ML Compute Instance
       run: |
+        echo "Creating compute instance: ${{env.COMPUTE_NAME}}"
         az ml compute create --name ${{env.COMPUTE_NAME}} --size Standard_DS1_v2 --identity-type UserAssigned --type ComputeInstance --resource-group ${{env.GROUP}} --workspace-name ${{env.WORKSPACE}} --user-assigned-identities ${{env.USER_MANAGED_ID}}
     - name: Create Test Runtime
       run: |
