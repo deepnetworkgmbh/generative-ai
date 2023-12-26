@@ -24,8 +24,8 @@ def recognize_from_microphone():
     speech_recognition_result = speech_recognizer.recognize_once_async().get()
 
     if speech_recognition_result.reason == speechsdk.ResultReason.RecognizedSpeech:
-        print("Our question: ", speech_recognition_result.text)
-        response = openai.Completion.create(engine="test-deployment", prompt=speech_recognition_result.text, max_tokens=100)
+        print("Our question: ", speech_recognition_result.text, " only with 10 words.")
+        response = openai.Completion.create(engine="test-deployment", prompt=speech_recognition_result.text, max_tokens=10)
         text_response = response['choices'][0]['text'] # response['choices'][0]['text'].replace('\n', '').replace(' .', '.').strip()
         print(text_response)
 
