@@ -49,21 +49,14 @@ jobs:
         
         new_compute_name="${{env.COMPUTE_NAME_PRE}}$unique_identifier_first_10"
         new_runtime_name="${{env.RUNTIME_NAME_PRE}}$unique_identifier_first_10"
-        
         echo $new_compute_name
         echo $new_runtime_name
+        
         echo "COMPUTE_NAME=$new_compute_name" >> "$GITHUB_ENV"
         echo "RUNTIME_NAME=$new_runtime_name" >> "$GITHUB_ENV"
-        echo $new_compute_name
-        echo $new_runtime_name
-        echo ${{env.COMPUTE_NAME}}
-        echo ${{env.RUNTIME_NAME}}
         
-        echo "$GITHUB_ENV"
-        
-        replacer=${{env.RUNTIME_NAME}}
-        sed "s#runtime: llm-runtime#runtime: $replacer#" flow/promptflow/web-classification/run.yml > flow/promptflow/web-classification/run_temp.yml && mv flow/promptflow/web-classification/run_temp.yml flow/promptflow/web-classification/run.yml
-        sed "s#runtime: llm-runtime#runtime: $replacer#" flow/promptflow/web-classification/run_evaluation.yml > flow/promptflow/web-classification/run_evaluation_temp.yml && mv flow/promptflow/web-classification/run_evaluation_temp.yml flow/promptflow/web-classification/run_evaluation.yml
+        sed "s#runtime: llm-runtime#runtime: $new_runtime_name#" flow/promptflow/web-classification/run.yml > flow/promptflow/web-classification/run_temp.yml && mv flow/promptflow/web-classification/run_temp.yml flow/promptflow/web-classification/run.yml
+        sed "s#runtime: llm-runtime#runtime: $new_runtime_name#" flow/promptflow/web-classification/run_evaluation.yml > flow/promptflow/web-classification/run_evaluation_temp.yml && mv flow/promptflow/web-classification/run_evaluation_temp.yml flow/promptflow/web-classification/run_evaluation.yml
         
         rm -rf flow/promptflow/web-classification/run_temp.yml
         rm -rf flow/promptflow/web-classification/run_evaluation_temp.yml
