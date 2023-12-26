@@ -4,7 +4,6 @@ on:
   workflow_dispatch:
   workflow_run:
     workflows: ["Test and Evaluate Prompts with Promptflow"]
-    branches: [ feature/cenkOpenAI ]
     types:
       - completed
 
