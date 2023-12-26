@@ -47,8 +47,11 @@ jobs:
         unique_identifier_first_10="${unique_identifier:0:10}"
         echo "$unique_identifier_first_10"
         
-        echo "COMPUTE_NAME=${{env.COMPUTE_NAME}}$unique_identifier_first_10" >> "$GITHUB_ENV"
-        echo "RUNTIME_NAME=${{env.RUNTIME_NAME}}$unique_identifier_first_10" >> "$GITHUB_ENV"
+        new_compute_name="${{env.COMPUTE_NAME}}$unique_identifier_first_10"
+        new_runtime_name="${{env.RUNTIME_NAME}}$unique_identifier_first_10"
+        
+        echo "COMPUTE_NAME=$new_compute_name" >> "$GITHUB_ENV"
+        echo "RUNTIME_NAME=$new_runtime_name" >> "$GITHUB_ENV"
         echo ${{env.COMPUTE_NAME}}
         echo ${{env.RUNTIME_NAME}}
         
