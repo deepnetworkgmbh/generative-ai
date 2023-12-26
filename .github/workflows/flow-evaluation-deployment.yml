@@ -44,7 +44,7 @@ jobs:
         echo "${{ github.run_id }}"
         unique_identifier=${{ github.run_id }}
         echo "$unique_identifier"
-        unique_identifier_first_10="${$unique_identifier:0:10}"
+        unique_identifier_first_10="${unique_identifier:0:10}"
         echo "$unique_identifier_first_10"
         
         echo "COMPUTE_NAME=${{env.COMPUTE_NAME}}$unique_identifier" >> "$GITHUB_ENV"
