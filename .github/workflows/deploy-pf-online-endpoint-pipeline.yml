@@ -3,7 +3,7 @@ name: Deploy Prompts with Promptflow
 on:
   workflow_dispatch:
   workflow_run:
-    workflows: ["Test and Evaulate Prompts with Promptflow"]
+    workflows: ["Test and Evaluate Prompts with Promptflow"]
     branches: [ feature/cenkOpenAI ]
     types:
       - completed
