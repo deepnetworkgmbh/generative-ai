@@ -52,6 +52,8 @@ jobs:
         
         echo "COMPUTE_NAME=$new_compute_name" >> "$GITHUB_ENV"
         echo "RUNTIME_NAME=$new_runtime_name" >> "$GITHUB_ENV"
+        echo $new_compute_name
+        echo $new_runtime_name
         echo ${{env.COMPUTE_NAME}}
         echo ${{env.RUNTIME_NAME}}
         
