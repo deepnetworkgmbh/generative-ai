@@ -1,32 +1,31 @@
-from langchain.prompts import ChatPromptTemplate, PromptTemplate
+from langchain.prompts import ChatPromptTemplate, PromptTemplate, SystemMessagePromptTemplate
 
 # Used to condense a question and chat history into a single question
-condense_question_prompt_template = """
-Below is a history of the chat so far, and a new question asked by the user that needs to be answered by searching in a knowledge.
-You have access to ElasticSearch index with 100's of documents.
-Generate a search query based on the chat and the new question.
-Do not include cited source filenames and document names e.g info.txt or doc.pdf in the search query terms.
-Do not include any text inside [] or <<>> in the search query terms.
-Do not include any special characters like '+'.
-If the question is not in English, translate the question to English before generating the search query.
-Do not include "Search Query:" in the beginning of the answer.
+query_message = """
+Below is the chat history so far, and a new question asked by the user that needs to be answered by searching a knowledge.
+You have access to an ElasticSearch index with 100's of documents.
+Generate a search query based on the chat history and the new question while obeying all of the following.
+- Do not include cited source filenames and document names e.g info.txt or doc.pdf in the search query terms.
+- Do not include any text inside [] or <<>> in the search query terms.
+- Do not include any special characters like '+'.
+- Search query must be human readable.
+- If the question is not in English, translate the question to English before generating the search query.
 
 Chat History:
 {chat_history}
 New Question: {question}
-"""  # noqa: E501
-CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(
-    condense_question_prompt_template
+"""  
+GET_QUERY_PROMPT = PromptTemplate.from_template(
+    query_message
 )
 
 # RAG Prompt to provide the context and question for LLM to answer
 # We also ask the LLM to cite the source of the passage it is answering from
 llm_context_prompt_template = """
-Use the following passages to answer the user's question.
-Each passage has a SOURCE which is the title of the document. When answering, cite source name of the passages you are answering from below the answer in a unique bullet point list.
-
-If you don't know the answer, just say that you don't know, don't try to make up an answer.
-
+Use the  to answer the user's question.
+Answer the question ONLY with the facts listed in the passages below. If there isn't enough information below, say you don't know. Do not generate answers that don't use the sources below. If asking a clarifying question to the user would help, ask the question.
+Each passage has a SOURCE and PAGE. Always include the source name and page number for each fact you use in the response. Use square brackets to reference the source, for example [info1.txt/page 2]. Don't combine sources, list each source separately, for example [info1.txt/page 1][info2.pdf/page 8].
+If the question is not in English, answer in the language used in the question.
 ----
 {context}
 ----

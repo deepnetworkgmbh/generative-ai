@@ -5,3 +5,4 @@ elasticsearch
 openai
 langchain-cli[serve]
 pypdf
+tiktoken

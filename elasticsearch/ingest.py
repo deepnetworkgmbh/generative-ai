@@ -1,7 +1,7 @@
 import os
 
 from langchain.document_loaders import PyPDFLoader, PyPDFDirectoryLoader
-from langchain.embeddings import HuggingFaceEmbeddings
+from langchain.embeddings import HuggingFaceEmbeddings, AzureOpenAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores.elasticsearch import ElasticsearchStore
 
@@ -19,37 +19,27 @@ if ELASTIC_CLOUD_ID and ELASTIC_USERNAME and ELASTIC_PASSWORD:
 else:
     es_connection_details = {"es_url": ES_URL}
 
-"""
-# Metadata extraction function
-def metadata_func(record: dict, metadata: dict) -> dict:
-    metadata["name"] = record.get("name")
-    metadata["summary"] = record.get("summary")
-    metadata["url"] = record.get("url")
-    metadata["category"] = record.get("category")
-    metadata["updated_at"] = record.get("updated_at")
-
-    return metadata
-
-
-## Load Data
-loader = JSONLoader(
-    file_path="./data/documents.json",
-    jq_schema=".[]",
-    content_key="content",
-    metadata_func=metadata_func,
-)
-"""
 loader = PyPDFDirectoryLoader(f"{os.getcwd()}/elasticsearch/pdf-data")
 
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=400)
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
 all_splits = text_splitter.split_documents(loader.load())
+
+embeddings = AzureOpenAIEmbeddings(
+    azure_endpoint="https://openai-dn.openai.azure.com",
+    azure_deployment="ada-embedding",
+    openai_api_version="2023-09-01-preview",
+)
+"""
+embeddings = HuggingFaceEmbeddings(
+    model_name="all-MiniLM-L6-v2", 
+    model_kwargs={"device": "cpu"}
+)
+"""
 
 # Add to vectorDB
 vectorstore = ElasticsearchStore.from_documents(
     documents=all_splits,
-    embedding=HuggingFaceEmbeddings(
-        model_name="all-MiniLM-L6-v2", model_kwargs={"device": "cpu"}
-    ),
+    embedding = embeddings,
     **es_connection_details,
-    index_name="demo-example",
+    index_name="demo-ada-example",
 )
