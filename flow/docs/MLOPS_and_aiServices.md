@@ -34,3 +34,16 @@ Manage the lifecycle of LLM-powered applications, including development, deploym
 
 ![MLOps - Microsoft](images/llmops_vs_mlops1.png)
 ![LLMOps - Microsoft](images/llmops_vs_mlops_2.png)
+
+## What is the Azure Speech Service ##
+Two types of language detection mechanisms: 
+* **At-start LID:** Identifies the language once within the first few seconds of audio. 
+Use at-start LID if the language in the audio won't change. 
+With at-start LID, a single language is detected and returned in less than 5 seconds.
+        
+* **Continuous LID:** Can identify multiple languages for the duration of the audio. 
+Use continuous LID if the language in the audio could change. 
+Continuous LID doesn't support changing languages within the same sentence. 
+For example, if you're primarily speaking Spanish and insert some English words, it will not detect the language change per word
+
+## What is the Azure Translater Service ##

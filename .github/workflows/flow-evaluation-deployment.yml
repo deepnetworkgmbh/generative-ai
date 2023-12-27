@@ -23,7 +23,7 @@ env:
   DEPLOYMENT_NAME: deployment
 
 jobs:
-  login-and-run-and-evalpf:
+  test-and-evaluation:
     runs-on: ubuntu-latest 
     steps:
     - name: Check out repo
@@ -133,12 +133,17 @@ jobs:
         else
           echo "::set-output name=result::false"
         fi
-    - name: Register promptflow model
-      if: ${{ steps.jobMetricAssert.outputs.result == 'true' }}
-      run: az ml model create --file flow/promptflow/deployment/model.yaml  -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
     - name: Delete Test Sources
       run: |
         az ml compute delete --yes --name ${{env.COMPUTE_NAME}} --resource-group ${{env.GROUP}} --workspace-name ${{env.WORKSPACE}}
+
+  deployment:
+    runs-on: ubuntu-latest
+    needs: test-and-evaluation
+    if: needs.test-and-evaluation.outputs.result == 'true'
+    steps:
+    - name: Register promptflow model
+      run: az ml model create --file flow/promptflow/deployment/model.yaml  -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
     - name: Setup endpoint
       run: |
         az ml online-endpoint create --file flow/promptflow/deployment/endpoint.yaml  --name ${{env.ENDPOINT_NAME}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}}

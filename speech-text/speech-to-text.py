@@ -1,38 +1,106 @@
 import os
-import openai
+from openai import AzureOpenAI
+from azure.ai.translation.text import TextTranslationClient, TranslatorCredential
+from azure.ai.translation.text.models import InputTextItem
+from azure.core.exceptions import HttpResponseError
 import azure.cognitiveservices.speech as speechsdk
-
-# OpenAI
-openai.api_key = '44d2c6a693354551bddeb90429201899'
-openai.api_base = 'https://openai-dn.openai.azure.com/'
-openai.api_type = 'azure'
-openai.api_version = '2023-05-15' # this might change in the future
 
 # Speech-to-Text
 stt_key='05e0d71cfca242cbaa7117d138f394ff'
 stt_location='germanywestcentral'
 
+# Translate Service
+key = "61e121063c40410fb33dd78f35e8f9ce"
+endpoint = "https://api.cognitive.microsofttranslator.com/"
+region = "westeurope"
+
+
+def language_determine(raw_user_input):
+    messages=[
+        {"role": "system", "content": "You are an expert that reads user comments give answer the question."
+                                      "Find the language user uses"
+                                      "Return only the language name such as 'English' or 'German' etc."
+                                      "Do not return anything else."
+         },
+        {"role": "user", "content": raw_user_input}
+    ]
+    openai_client = AzureOpenAI(
+        api_key=os.getenv("AZURE_OPENAI_KEY"),
+        api_version="2023-12-01-preview",
+        azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+    )
+    response = openai_client.chat.completions.create(model="test-deployment", messages=messages)
+    if(response.choices[0].message.content == "Language: Unknown." or response.choices[0].message.content[:10] == "I am sorry"):
+        print("Language is Unknown.")
+    else:
+        language = response.choices[0].message.content
+        return language
+
+
+def translater(from_language, to_language, raw_user_input):
+    credential = TranslatorCredential(key, region)
+    text_translator = TextTranslationClient(endpoint=endpoint, credential=credential)
+
+    try:
+        target_languages = [to_language]
+        input_text_elements = [InputTextItem(text=raw_user_input)]
+
+        response = text_translator.translate(content=input_text_elements, to=target_languages, from_parameter=from_language)
+        translation = response[0] if response else None
+        if translation:
+            for translated_text in translation.translations:
+                return translated_text.text
+    except HttpResponseError as exception:
+        print(f"Error Code: {exception.error.code}")
+        print(f"Message: {exception.error.message}")
+
+
+def azure_openai_ask(user_input):
+    messages=[
+        {"role": "system", "content": "You are an expert that answer user question in English"
+                                      "Try to answer in only one sentence with few words."
+                                      "Do not answer with only 1-2 words."
+                                      "Do not give so much details."},
+        {"role": "user", "content": user_input}
+    ]
+
+    openai_client = AzureOpenAI(
+        api_key=os.getenv("AZURE_OPENAI_KEY"),
+        api_version="2023-12-01-preview",
+        azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+    )
+    response = openai_client.chat.completions.create(
+        model="test-deployment",
+        messages=messages
+    )
+    return response.choices[0].message.content
+
+
+
 def recognize_from_microphone():
     # This example requires environment variables named "SPEECH_KEY" and "SPEECH_REGION"
     speech_config = speechsdk.SpeechConfig(stt_key, stt_location)
-    speech_config.speech_recognition_language="en-US"
-
+    auto_detect_source_language_config = speechsdk.languageconfig.AutoDetectSourceLanguageConfig(languages=["en-US", "de-DE", "fr-FR", "tr-TR"])
     audio_config = speechsdk.audio.AudioConfig(use_default_microphone=True)
-    speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
+    speech_recognizer = speechsdk.SpeechRecognizer(
+        speech_config=speech_config,
+        auto_detect_source_language_config=auto_detect_source_language_config,
+        audio_config=audio_config)
+    user_input = speech_recognizer.recognize_once()
+    auto_detect_source_language_result = speechsdk.AutoDetectSourceLanguageResult(user_input)
+    detected_language = auto_detect_source_language_result.language
 
-    print("Speak into your microphone.")
-    speech_recognition_result = speech_recognizer.recognize_once_async().get()
-
-    if speech_recognition_result.reason == speechsdk.ResultReason.RecognizedSpeech:
-        print("Our question: ", speech_recognition_result.text, " only with 10 words.")
-        response = openai.Completion.create(engine="test-deployment", prompt=speech_recognition_result.text, max_tokens=10)
-        text_response = response['choices'][0]['text'] # response['choices'][0]['text'].replace('\n', '').replace(' .', '.').strip()
-        print(text_response)
-
-    elif speech_recognition_result.reason == speechsdk.ResultReason.NoMatch:
-        print("No speech could be recognized: {}".format(speech_recognition_result.no_match_details))
-    elif speech_recognition_result.reason == speechsdk.ResultReason.Canceled:
-        cancellation_details = speech_recognition_result.cancellation_details
+    if user_input.reason == speechsdk.ResultReason.RecognizedSpeech:
+        print("Question: ", user_input.text)
+        print("Question Language: ", detected_language)
+        # user_input_language = language_determine(user_input.text) # 'speech_recognizer' determines the language
+        english_user_input = translater(detected_language[:2], "en", user_input.text)
+        response_to_user_input = azure_openai_ask(english_user_input)
+        print(translater("en", detected_language[:2], response_to_user_input))
+    elif user_input.reason == speechsdk.ResultReason.NoMatch:
+        print("No speech could be recognized: {}".format(user_input.no_match_details))
+    elif user_input.reason == speechsdk.ResultReason.Canceled:
+        cancellation_details = user_input.cancellation_details
         print("Speech Recognition canceled: {}".format(cancellation_details.reason))
         if cancellation_details.reason == speechsdk.CancellationReason.Error:
             print("Error details: {}".format(cancellation_details.error_details))
