@@ -44,6 +44,14 @@ The Speech service provides speech to text and text to speech capabilities with 
 * Speech translation
 * Language identification
 
+Two types of transaltion:
+* Real-time speech to text
+  * With real-time speech to text, the audio is transcribed as speech is recognized from a microphone or file.
+  * Transcriptions, captions, or subtitles for live meetings
+* Batch transcription
+  * Used to transcribe a large amount of audio in storage.
+  * Transcriptions, captions, or subtitles for pre-recorded audio
+
 Two types of language detection mechanisms: 
 * **At-start LID:** Identifies the language once within the first few seconds of audio. 
 Use at-start LID if the language in the audio won't change. 
