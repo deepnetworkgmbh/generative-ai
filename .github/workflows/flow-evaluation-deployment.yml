@@ -34,7 +34,6 @@ jobs:
       id: EvalResult
       run: |
         echo "eval_result=true" >> $GITHUB_OUTPUT
-        echo "::set-output name=eval_result::true"
 
   deployment:
     runs-on: ubuntu-latest
