@@ -33,7 +33,7 @@ jobs:
     - name: Test Output
       id: EvalResult
       run: |
-        echo "eval_result=true" >> $GITHUB_OUTPUT
+        echo "eval_result=false" >> $GITHUB_OUTPUT
 
   deployment:
     runs-on: ubuntu-latest
