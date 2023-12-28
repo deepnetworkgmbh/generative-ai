@@ -3,7 +3,7 @@ name: Test and Evaluate Prompts with Promptflow
 on:
   workflow_dispatch:
   push:
-    branches: [ feature/cenkOpenAI ]
+    branches: [ main ]
 
 env: 
   GROUP: ${{secrets.GROUP}}
