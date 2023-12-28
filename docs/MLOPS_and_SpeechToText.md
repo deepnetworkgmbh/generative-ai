@@ -50,7 +50,7 @@ Two types of transaltion:
   * Transcriptions, captions, or subtitles for live meetings
 * Batch transcription
   * Used to transcribe a large amount of audio in storage.
-  * Transcriptions, captions, or subtitles for pre-recorded audio
+  * You submit the audio data, and then retrieve transcription results asynchronously.
 
 Two types of language detection mechanisms: 
 * **At-start LID:** Identifies the language once within the first few seconds of audio. 
