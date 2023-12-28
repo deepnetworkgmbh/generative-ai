@@ -41,7 +41,8 @@ More information on security of Azure AI Search can be found [here](https://lear
 ### Pricing
 Azure AI Search prices can be calculated with the below formula:
 
-    price = # of partitions x # of replicas x price per SU
+    price = (number of partitions) x (number of replicas) x (price per SU (Scale Unit))
+
 
 For high availability Microsoft recommends at least 2 replicas. As a result, Azure AI Search can get quite expensive as the storage size increases.
 
