@@ -5,7 +5,6 @@ if __name__ == "__main__":
     """
     question = "What is included in my Northwind Health Plus plan that is not in standard?"
     follow_up_question = "Does my plan cover eye exams?"
-
     """
     system_message = """
         You are an assistant that helps the company employees with their healthcare plan questions, and questions about the employee handbook. Be brief in your answers.

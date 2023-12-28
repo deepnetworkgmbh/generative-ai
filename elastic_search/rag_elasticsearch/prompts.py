@@ -21,14 +21,16 @@ GET_QUERY_PROMPT = PromptTemplate.from_template(
 # RAG Prompt to provide the context and question for LLM to answer
 # We also ask the LLM to cite the source of the passage it is answering from
 llm_context_prompt_template = """
-Use the  to answer the user's question.
+Below are the passages, chat history and the question.
 Answer the question ONLY with the facts listed in the passages below. If there isn't enough information below, say you don't know. Do not generate answers that don't use the sources below. If asking a clarifying question to the user would help, ask the question.
 Each passage has a SOURCE and PAGE. Always include the source name and page number for each fact you use in the response. Use square brackets to reference the source, for example [info1.txt/page 2]. Don't combine sources, list each source separately, for example [info1.txt/page 1][info2.pdf/page 8].
 ----
-{context}
+{passages}
 ----
+Chat History:
+{chat_history}
 Question: {question}
-"""  # noqa: E501
+"""
 
 LLM_CONTEXT_PROMPT = ChatPromptTemplate.from_template(llm_context_prompt_template)
 

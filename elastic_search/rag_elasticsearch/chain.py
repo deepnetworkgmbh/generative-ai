@@ -16,8 +16,7 @@ from .connection import es_connection_details
 from .prompts import GET_QUERY_PROMPT, DOCUMENT_PROMPT, LLM_CONTEXT_PROMPT
 
 embeddings = AzureOpenAIEmbeddings(
-    azure_endpoint="https://openai-dn.openai.azure.com",
-    azure_deployment="ada-embedding",
+    azure_deployment=os.getenv("AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT"),
     openai_api_version="2023-09-01-preview",
 )
 """
@@ -37,9 +36,8 @@ retriever = vectorstore.as_retriever()
 
 # Set up LLM to user
 llm = AzureChatOpenAI(
-    azure_endpoint="https://openai-dn.openai.azure.com",
     openai_api_version="2023-09-01-preview",
-    azure_deployment="test-deployment",
+    azure_deployment=os.getenv("AZURE_OPENAI_GPT_DEPLOYMENT"),
     temperature=0
     )
 
@@ -56,12 +54,13 @@ _inputs = RunnableParallel(
     | GET_QUERY_PROMPT
     | llm
     | StrOutputParser(),
-    question=lambda x: x["question"]
+    passed=RunnablePassthrough()
 )
 
 _context = {
-    "context": itemgetter("query") | retriever | _combine_documents,
-    "question": lambda x: x["question"],
+    "passages": itemgetter("query") | retriever | _combine_documents,
+    "question": lambda x: x["passed"]["question"],
+    "chat_history": lambda x: x["passed"]["chat_history"]
 }
 
 #set_debug(True)
