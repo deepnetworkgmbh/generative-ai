@@ -2,7 +2,6 @@ import json
 import os
 from urllib.parse import quote
 import requests
-from bs4 import BeautifulSoup
 from re import search, match
 
 from openai import AzureOpenAI, ChatCompletion
@@ -144,7 +143,7 @@ def ask_gpt(type, messages):
             model="test-deployment",
             messages=messages
         )
-        return response.choices[0].message.content
+        return response.choices[0].message
     elif type == 'openai':
         openai_client = OpenAI(
             api_key=os.environ['OPENAI_API_KEY']
@@ -153,13 +152,13 @@ def ask_gpt(type, messages):
             model="gpt-3.5-turbo-0301",
             messages=messages
         )
-        return response.choices[0].message.content
+        return response.choices[0].message
     elif type == 'ollama':
         response = requests.post(
             "http://0.0.0.0:11434/api/chat",
             json={"model": "llama2:13b", "messages": messages, "stream": False},
         )
-        return json.loads(response.content)['message']['content']
+        return json.loads(response.content)['message']
 
 
 # Given query string
@@ -184,9 +183,9 @@ messages=[
     {"role": "user", "content": message_content}
 ]
 
-azure_response = ask_gpt("azure", messages)
-ollama_response = ask_gpt("ollama", messages)
+azure_message = ask_gpt("azure", messages)
+ollama_message = ask_gpt("ollama", messages)
 
-print(f"Azure AI says:\n{azure_response}")
+print(f"Azure AI says:\n{azure_message.content}")
 print("--------------------------------------")
-print(f"Ollama says:\n{ollama_response}")
+print(f"Ollama says:\n{ollama_message['content']}")
