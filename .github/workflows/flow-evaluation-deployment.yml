@@ -28,32 +28,17 @@ jobs:
     steps:
     - name: Check out repo
       uses: actions/checkout@v2
-    - name: Delete Test Sources
+    - name: Test Output
       run: |
         echo "::set-output name=result::true"
-        echo "Result set to: ${{ needs.test-and-evaluation.outputs.result }}"
 
   deployment:
     runs-on: ubuntu-latest
     needs: test-and-evaluation
-    if: ${{ needs.test-and-evaluation.outputs.result == 'true' }}
     steps:
-    - name: Register promptflow model
-      run: az ml model create --file flow/promptflow/deployment/model.yaml  -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
-    - name: Setup endpoint
+    - name: Test Output
       run: |
-        az ml online-endpoint create --file flow/promptflow/deployment/endpoint.yaml  --name ${{env.ENDPOINT_NAME}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
-    - name: Check the status of the endpoint
-      run: az ml online-endpoint show -n ${{env.ENDPOINT_NAME}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
-    - name: Update deployment PRT_CONFIG variable
-      run: |
-        PRT_CONFIG_OVERRIDE=deployment.subscription_id=${{ env.SUBSCRIPTION }},deployment.resource_group=${{ env.GROUP }},deployment.workspace_name=${{ env.WORKSPACE }},deployment.endpoint_name=${{ env.ENDPOINT_NAME }},deployment.deployment_name=${{ env.DEPLOYMENT_NAME }}
-        sed -i "s/PRT_CONFIG_OVERRIDE:.*/PRT_CONFIG_OVERRIDE: $PRT_CONFIG_OVERRIDE/g" flow/promptflow/deployment/deployment.yaml
-    - name: Setup deployment
-      run: az ml online-deployment create --file flow/promptflow/deployment/deployment.yaml --endpoint-name ${{env.ENDPOINT_NAME}} --all-traffic -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
-    - name: Check the status of the deployment
-      run: az ml online-deployment get-logs --name test-1 --endpoint-name ${{env.ENDPOINT_NAME}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
-
+        echo ${{ needs.test-and-evaluation.outputs.result }}
 
 
 
