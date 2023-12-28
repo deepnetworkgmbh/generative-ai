@@ -9,7 +9,8 @@ If you are working with LLMs, fine tuning is mainly used when you need to change
 
 ## Prompt Engineering
 To improve the quality of the output you can:
-* Put the instructions in the beginning istead of the end (Does not matter with GPT-4)
+* Put the instructions in the beginning instead of the end (Does not matter with GPT-4)
+
 * Tell the model to answer with a set response in certain situations (System message)
 * Give prompt-completion examples in the prompt (Few-shot learning)
 * Put a few words at the end of the prompt to get output in desired format (Priming)
