@@ -35,7 +35,8 @@ Access control in Azure AI Search can be achieved in 3 levels. These are:
 * **Document Level Access Control:** This scenario involves limiting the returned search results per user/role. However this is not natively supported in **Azure AI Search**, but it can be achieved using [filtering](https://learn.microsoft.com/en-us/azure/search/search-security-trimming-for-azure-search).
 
 
-More information on Azure AI Search can be found [here](https://learn.microsoft.com/en-us/azure/search/search-security-overview#authorize-service-management).
+More information on security of Azure AI Search can be found [here](https://learn.microsoft.com/en-us/azure/search/search-security-overview#authorize-service-management).
+
 
 ### Pricing
 Azure AI Search prices can be calculated with the below formula:
