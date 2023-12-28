@@ -15,6 +15,7 @@ embeddings = AzureOpenAIEmbeddings(
     azure_deployment=os.getenv("AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT"),
     openai_api_version="2023-09-01-preview",
 )
+# It is also possible to use Hugging Face models for the embeddings. In our case, Azure embeddings gave better results.
 """
 embeddings = HuggingFaceEmbeddings(
     model_name="all-MiniLM-L6-v2", 
