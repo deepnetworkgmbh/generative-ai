@@ -51,6 +51,7 @@ Two types of transaltion:
 * Batch transcription
   * Used to transcribe a large amount of audio in storage.
   * You submit the audio data, and then retrieve transcription results asynchronously.
+  * The service transcribes the audio data and stores the results in a storage container.
 
 Two types of language detection mechanisms: 
 * **At-start LID:** Identifies the language once within the first few seconds of audio. 

@@ -19,7 +19,7 @@ env:
   SP_USER: ${{secrets.SP_USER}}
   SP_PASS: ${{secrets.SP_PASS}}
   SP_TENANT: ${{secrets.SP_TENANT}}
-  ENDPOINT_NAME: web-classification-endpoint
+  ENDPOINT_NAME: demo-endpoint
   DEPLOYMENT_NAME: deployment
 
 jobs:
@@ -153,6 +153,7 @@ jobs:
     - name: Azure login
       run: |
         az login --service-principal -u ${{env.SP_USER}} -p ${{env.SP_PASS}} --tenant ${{env.SP_TENANT}}
+        az account set -s ${{env.SUBSCRIPTION}}
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
@@ -163,7 +164,6 @@ jobs:
       run: az ml model create --file flow/promptflow/deployment/model.yaml  -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
     - name: Setup endpoint
       run: |
-        az account set -s ${{env.SUBSCRIPTION}}
         az ml online-endpoint create --file flow/promptflow/deployment/endpoint.yaml  --name ${{env.ENDPOINT_NAME}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
     - name: Check the status of the endpoint
       run: az ml online-endpoint show -n ${{env.ENDPOINT_NAME}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
