@@ -23,7 +23,8 @@ To improve the quality of the output you can:
 More information can be found [here](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/advanced-prompt-engineering?pivots=programming-language-chat-completions).
 
 ## Azure AI Search
-Azure AI Search is a service that provides indexing and querying capabilities. In the context of LLMs this service is very useful when using **RAG (Retrieval-Augmented Generation)**. 
+Azure AI Search is a service that provides indexing and querying capabilities. In the context of LLMs this service is very useful when using **RAG**. 
+
 
 ### Access Control
 Access control in Azure AI Search can be achieved in 3 levels. These are:
