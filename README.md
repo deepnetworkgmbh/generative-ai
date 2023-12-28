@@ -28,7 +28,8 @@ Azure AI Search is a service that provides indexing and querying capabilities. I
 
 ### Access Control
 Access control in Azure AI Search can be achieved in 3 levels. These are:
-* **Service Level Access Control:** You can use **API Keys** or **Azure RBAC**.
+* **Service Level Access Control:** It controls access to the whole Azure AI Search instance. You can use **API Keys** or **Azure RBAC**.
+
 * **Index Level Access Control:** This can only be achieved with **RBAC**, through **Powershell** or **Azure CLI**.
 * **Document Level Access Control:** This is not natively supported in **Azure AI Search** but it can be achieved using [filtering](https://learn.microsoft.com/en-us/azure/search/search-security-trimming-for-azure-search).
 
