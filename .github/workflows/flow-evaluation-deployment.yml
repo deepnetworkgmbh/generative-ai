@@ -31,6 +31,7 @@ jobs:
     - name: Delete Test Sources
       run: |
         echo "::set-output name=result::true"
+        echo "Result set to: ${{ needs.test-and-evaluation.outputs.result }}"
 
   deployment:
     runs-on: ubuntu-latest
