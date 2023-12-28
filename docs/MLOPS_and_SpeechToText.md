@@ -61,14 +61,14 @@ With at-start LID, a single language is detected and returned in less than 5 sec
 * **Continuous LID:** Can identify multiple languages for the duration of the audio. 
 Use continuous LID if the language in the audio could change. 
 Continuous LID doesn't support changing languages within the same sentence. 
-For example, if you're primarily speaking Spanish and insert some English words, it will not detect the language change per word
+For example, if you're primarily speaking Spanish and insert some English words, it will not detect the language change per word.
 
 ## Create Custom Model for Azure Speech Service ##
 Speech recognition utilizes a Universal Language Model as a base model that is trained with Microsoft-owned data and reflects commonly used spoken language.
 When you make a speech recognition request, the most recent base model for each supported language is used by default.
 A custom model can be used to augment the base model to improve recognition of domain-specific vocabulary specific to the application by providing text data to train the model.
-![Speech Text Custom Model - Microsoft](images/SpeechTextCustomModel.png)
-
+![Speech Text Custom Model - Microsoft](images/SpeechTextCustomModel1.png)
+![Speech Text Custom Model - Microsoft](images/SpeechTextCustomModel2.png)
 
 
 ## What is the Azure Translater Service ##

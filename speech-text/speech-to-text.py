@@ -16,8 +16,10 @@ stt_location= os.getenv("STT_LOCATION")
 
 # Translate Service
 key = os.getenv("Azure_TRANSLATE_KEY")
-endpoint =  os.getenv("Azure_TRANSLATE_ENDPOINT")
+endpoint = os.getenv("Azure_TRANSLATE_ENDPOINT")
 region = os.getenv("Azure_TRANSLATE_REGION")
+
+translate = True
 
 
 def language_determine(raw_user_input):
@@ -65,7 +67,8 @@ def azure_openai_ask(user_input):
         {"role": "system", "content": "You are an expert that answer user question in English"
                                       "Try to answer in only one sentence with few words."
                                       "Do not answer with only 1-2 words."
-                                      "Do not give so much details."},
+                                      "Do not give so much details."
+                                      "Answer question with same language as it is."},
         {"role": "user", "content": user_input}
     ]
 
@@ -129,20 +132,30 @@ def recognize_from_microphone():
         if user_input.reason == speechsdk.ResultReason.RecognizedSpeech:
             print("Question: ", user_input.text)
             print("Question Language: ", detected_language)
-            # user_input_language = language_determine(user_input.text) # 'speech_recognizer' determines the language
 
-            english_user_input = translater(detected_language[:2], "en", user_input.text)
-            print("English version of user input: ", english_user_input)
-            if english_user_input == "Exit.":
-                break
+            if translate:
+                response_to_user_input = azure_openai_ask(user_input.text)
+                print("Response to user input: ", response_to_user_input)
 
-            response_to_user_input = azure_openai_ask(english_user_input)
-            print("Response to user input: ", response_to_user_input)
+                text_to_speech(detected_language[:2], response_to_user_input)
 
-            translated_response_to_user_input = translater("en", detected_language[:2], response_to_user_input)
-            print("Translated to native language, user response: ", translated_response_to_user_input)
+            else:
+                # user_input_language = language_determine(user_input.text) # 'speech_recognizer' determines the language
 
-            text_to_speech(detected_language[:2], translated_response_to_user_input)
+                english_user_input = translater(detected_language[:2], "en", user_input.text)
+                print("English version of user input: ", english_user_input)
+                if english_user_input == "Exit.":
+                    break
+
+                response_to_user_input = azure_openai_ask(english_user_input)
+                print("Response to user input: ", response_to_user_input)
+
+                translated_response_to_user_input = translater("en", detected_language[:2], response_to_user_input)
+                print("Translation is used:")
+                print("Translated to native language, user response: ", translated_response_to_user_input)
+
+                text_to_speech(detected_language[:2], translated_response_to_user_input)
+
             print("..............................................................")
         elif user_input.reason == speechsdk.ResultReason.NoMatch:
             print("No speech could be recognized: {}".format(user_input.no_match_details))
