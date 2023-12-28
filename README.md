@@ -32,7 +32,8 @@ Access control in Azure AI Search can be achieved in 3 levels. These are:
 
 * **Index Level Access Control:** It controls access to the certain indices for the given users. This can only be achieved with **RBAC**. However, the configuration cannot be done on Azure Portal, and is only done through **Powershell** or **Azure CLI**.
 
-* **Document Level Access Control:** This is not natively supported in **Azure AI Search** but it can be achieved using [filtering](https://learn.microsoft.com/en-us/azure/search/search-security-trimming-for-azure-search).
+* **Document Level Access Control:** This scenario involves limiting the returned search results per user/role. However this is not natively supported in **Azure AI Search**, but it can be achieved using [filtering](https://learn.microsoft.com/en-us/azure/search/search-security-trimming-for-azure-search).
+
 
 More information on Azure AI Search can be found [here](https://learn.microsoft.com/en-us/azure/search/search-security-overview#authorize-service-management).
 
