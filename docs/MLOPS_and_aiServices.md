@@ -36,6 +36,14 @@ Manage the lifecycle of LLM-powered applications, including development, deploym
 ![LLMOps - Microsoft](images/llmops_vs_mlops_2.png)
 
 ## What is the Azure Speech Service ##
+The Speech service provides speech to text and text to speech capabilities with a Speech resource.          
+**Microsoft uses Speech for many scenarios, such as captioning in Teams, dictation in Office 365, and Read Aloud in the Edge browser.**
+* Speech to text
+* Diarization
+* Transcriptions, captions, or subtitles for live meetings
+* Speech translation
+* Language identification
+
 Two types of language detection mechanisms: 
 * **At-start LID:** Identifies the language once within the first few seconds of audio. 
 Use at-start LID if the language in the audio won't change. 
