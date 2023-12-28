@@ -1,4 +1,4 @@
-name: Test and Evaluate Prompts with Promptflow
+name: Test-Evaluate-Deploy Prompts with Promptflow
 
 on:
   workflow_dispatch:
