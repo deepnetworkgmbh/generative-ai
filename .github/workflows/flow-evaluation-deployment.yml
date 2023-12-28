@@ -23,7 +23,7 @@ env:
   DEPLOYMENT_NAME: deployment
 
 jobs:
-  test-and-evaluation:
+  evaluation:
     runs-on: ubuntu-latest 
     steps:
     - name: Check out repo
@@ -34,11 +34,11 @@ jobs:
 
   deployment:
     runs-on: ubuntu-latest
-    needs: test-and-evaluation
+    needs: evaluation
     steps:
     - name: Test Output
       run: |
-        echo ${{ needs.test-and-evaluation.outputs.result }}
+        echo ${{ needs.evaluation.outputs.result }}
 
 
 
