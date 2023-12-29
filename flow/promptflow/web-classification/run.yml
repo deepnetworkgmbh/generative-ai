@@ -1,0 +1,14 @@
+$schema: https://azuremlschemas.azureedge.net/promptflow/latest/Run.schema.json
+flow: .
+data: data.jsonl
+
+# define cloud resource
+runtime: llm-runtime
+
+connections:
+  classify_with_llm:
+    connection: cenk-openai-connection
+    deployment_name: test-deployment
+  summarize_text_content:
+    connection: cenk-openai-connection
+    deployment_name: test-deployment
