@@ -1,5 +1,5 @@
 # RAG Using Elasticsearch
-![RAG flow with Elasticsearch](elastic_search/images/Elasticsearch%20RAG%20flow.drawio.png)
+![RAG flow with Elasticsearch](images/Elasticsearch%20RAG%20flow.drawio.png)
 ## Environment Setup
 
 Set the following environment variables to access the Azure OpenAI models:
