@@ -6,18 +6,18 @@ from azure.core.exceptions import HttpResponseError
 import azure.cognitiveservices.speech as speechsdk
 
 # OpenAI
-AZURE_OPENAI_ENDPOINT='https://openai-dn.openai.azure.com/'
-AZURE_OPENAI_KEY='44d2c6a693354551bddeb90429201899'
+AZURE_OPENAI_ENDPOINT= os.getenv("AZURE_OPENAI_ENDPOINT")
+AZURE_OPENAI_KEY= os.getenv("AZURE_OPENAI_KEY")
 
 
 # Speech-to-Text
-stt_key='05e0d71cfca242cbaa7117d138f394ff'
-stt_location='germanywestcentral'
+stt_key= os.getenv("STT_KEY")
+stt_location= os.getenv("STT_LOCATION")
 
 # Translate Service
-key = "61e121063c40410fb33dd78f35e8f9ce"
-endpoint = "https://api.cognitive.microsofttranslator.com/"
-region = "westeurope"
+key = os.getenv("Azure_TRANSLATE_KEY")
+endpoint = os.getenv("Azure_TRANSLATE_ENDPOINT")
+region =  os.getenv("Azure_TRANSLATE_REGION")
 
 
 def language_determine(raw_user_input):
