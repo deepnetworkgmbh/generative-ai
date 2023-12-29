@@ -7,67 +7,6 @@ from re import search, match
 from openai import AzureOpenAI, ChatCompletion
 from openai import OpenAI
 
-def get_comments_link_for_product(query):
-    # Encode the query string in HTML encoding
-    encoded_query = quote(query)
-
-    # Form the URL
-    url = f"https://www.trendyol.com/sr?q={encoded_query}"
-
-    # Send a GET request to the URL
-    response = requests.get(url)
-
-    # Parse the HTML content
-    soup = BeautifulSoup(response.content, 'html.parser')
-
-    # Find the element with class "prdct-cntnr-wrppr"
-    if parent_element := soup.find(class_="prdct-cntnr-wrppr"):
-        # Find all elements with class "p-card-wrppr with-campaign-view" within the parent element
-        if child_elements := parent_element.find_all(class_="p-card-wrppr with-campaign-view"):
-            # Iterate through child elements to find the first one containing an element with "ratings-container" class
-            for child in child_elements:
-                if ratings_container := child.find(class_="ratings"):
-                    # Find the <a> element within the first matching child
-                    if link_element := child.find('a'):
-                        # Extract and print the link (href) of the <a> element
-                        link = link_element.get('href')
-                        link = link.replace("?", "/yorumlar?")
-                        link = f"https://www.trendyol.com{link}"
-                        print(link)
-                        return link
-            else:
-                print("No matching child element found.")
-        else:
-            print("No child elements found with specified class.")
-    else:
-        print("Parent element not found.")
-
-    return None
-
-
-def get_comment_texts(comments_link):
-    # Send a GET request to the URL
-    response = requests.get(comments_link)
-    print(response.content)
-
-    # Parse the HTML content
-    soup = BeautifulSoup(response.content, 'html.parser')
-    comment_texts = []
-
-    if parent_element := soup.find(class_="reviews"):
-        # Find all elements with class "p-card-wrppr with-campaign-view" within the parent element
-        if child_elements := parent_element.find_all(class_="comment-text"):
-            for child in child_elements:
-                if p_element := child.find('p'):
-                    print(p_element)
-                    comment_texts.append(p_element)
-        else:
-            print("No child elements found with specified class.")
-    else:
-        print("Parent element not found.")
-
-    return comment_texts
-
 
 def get_product_with_rating(query):
     # Encode the query string in HTML encoding
@@ -96,9 +35,6 @@ def get_product_with_rating(query):
         return None
 
 
-ayristir = lambda berisi, gerisi, yazi: search(f'{berisi}(.*){gerisi}', yazi).group(1)
-
-
 def get_comments(product_id, product_url, page):
     #print("Product ID:", product_id)
     try:
@@ -113,8 +49,11 @@ def get_comments(product_id, product_url, page):
 
     response = requests.get(comments_url, headers=kimlik)
     content_json = json.loads(response.content)
-    hydrate_script_section = json.loads(ayristir("STATE__ = ", ";", content_json['result']['hydrateScript']))
-    comments_section = hydrate_script_section['ratingAndReviewResponse']['ratingAndReview']['productReviews']
+
+    hydrate_script_section = search(f'STATE__ = (.*);', content_json['result']['hydrateScript']).group(1)
+    hydrate_script_section_json = json.loads(hydrate_script_section)
+
+    comments_section = hydrate_script_section_json['ratingAndReviewResponse']['ratingAndReview']['productReviews']
     total_pages = comments_section['totalPages']
     comments_content = comments_section['content']
     comments = [
@@ -161,9 +100,7 @@ def ask_gpt(type, messages):
         return json.loads(response.content)['message']
 
 
-# Given query string
-query = "iphone 14"
-
+query = input("Enter the product name and model you would like to search for: ")
 product = get_product_with_rating(query)
 comments = get_comments(product['id'], product['url'], page=0)
 pure_comments = [comment['yorum'] for comment in comments]
