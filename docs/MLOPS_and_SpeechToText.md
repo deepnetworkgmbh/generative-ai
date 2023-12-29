@@ -1,7 +1,7 @@
 ![MLOps Diagram](images/mlops_diagram2.png)
-## What is the MLOps ##
-Different teams (Data Scientists, ML Engineers etc.).       
-MLOps Stages are:    
+# MLOps #
+MLOps consists of several teams: Data Scientists, ML Engineers etc.       
+MLOps Stages are:
 * Train Data Collection
 * Development of ML model
 * Evaluation
@@ -10,12 +10,12 @@ MLOps Stages are:
 * Create endpoint 
 * Deploy model to endpoint
        
-MLOps is aiming to automate repetitive tasks such as:
+MLOps aims to automate repetitive tasks such as:
 * Testing
 * Deployments
 * Monitoring       
       
-## What are the differences between classical pipelines ##
+## Differences between classical pipelines ##
 * MLOps includes various teams such as data scientists or ML researchers etc. (Google, https://cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning)
 * MLOps focuses on model deployment, but classical pipelines focus on software deployment (Model validation, accuracy etc.)
 * MLOps includes data quality, classical pipelines are not so much
@@ -24,7 +24,7 @@ MLOps is aiming to automate repetitive tasks such as:
 ![MLOps Diagram 2 - Google](images/mlops_diagram3.png)
 ![MLOps Diagram 3 - Google](images/mlops_diagram4.png)
 
-## What is the LLMOps ##
+## LLMOps ##
 LLMOps is MLOps for LLMs.      
 Manage the lifecycle of LLM-powered applications, including development, deployment, and maintenance.    
       
@@ -34,41 +34,3 @@ Manage the lifecycle of LLM-powered applications, including development, deploym
 
 ![MLOps - Microsoft](images/llmops_vs_mlops1.png)
 ![LLMOps - Microsoft](images/llmops_vs_mlops_2.png)
-
-## What is the Azure Speech Service ##
-The Speech service provides speech to text and text to speech capabilities with a Speech resource.          
-**Microsoft uses Speech for many scenarios, such as captioning in Teams, dictation in Office 365, and Read Aloud in the Edge browser.**
-* Speech to text
-* Diarization
-* Transcriptions, captions, or subtitles for live meetings
-* Speech translation
-* Language identification
-
-Two types of transaltion:
-* Real-time speech to text
-  * With real-time speech to text, the audio is transcribed as speech is recognized from a microphone or file.
-  * Transcriptions, captions, or subtitles for live meetings
-* Batch transcription
-  * Used to transcribe a large amount of audio in storage.
-  * You submit the audio data, and then retrieve transcription results asynchronously.
-  * The service transcribes the audio data and stores the results in a storage container.
-
-Two types of language detection mechanisms: 
-* **At-start LID:** Identifies the language once within the first few seconds of audio. 
-Use at-start LID if the language in the audio won't change. 
-With at-start LID, a single language is detected and returned in less than 5 seconds.
-        
-* **Continuous LID:** Can identify multiple languages for the duration of the audio. 
-Use continuous LID if the language in the audio could change. 
-Continuous LID doesn't support changing languages within the same sentence. 
-For example, if you're primarily speaking Spanish and insert some English words, it will not detect the language change per word.
-
-## Create Custom Model for Azure Speech Service ##
-Speech recognition utilizes a Universal Language Model as a base model that is trained with Microsoft-owned data and reflects commonly used spoken language.
-When you make a speech recognition request, the most recent base model for each supported language is used by default.
-A custom model can be used to augment the base model to improve recognition of domain-specific vocabulary specific to the application by providing text data to train the model.
-![Speech Text Custom Model - Microsoft](images/SpeechTextCustomModel1.png)
-![Speech Text Custom Model - Microsoft](images/SpeechTextCustomModel2.png)
-
-
-## What is the Azure Translater Service ##
