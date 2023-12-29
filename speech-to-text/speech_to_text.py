@@ -6,20 +6,18 @@ from azure.core.exceptions import HttpResponseError
 import azure.cognitiveservices.speech as speechsdk
 
 # OpenAI
-AZURE_OPENAI_ENDPOINT= os.getenv("AZURE_OPENAI_ENDPOINT")
-AZURE_OPENAI_KEY= os.getenv("AZURE_OPENAI_KEY")
+AZURE_OPENAI_ENDPOINT='https://openai-dn.openai.azure.com/'
+AZURE_OPENAI_KEY='44d2c6a693354551bddeb90429201899'
 
 
 # Speech-to-Text
-stt_key= os.getenv("STT_KEY")
-stt_location= os.getenv("STT_LOCATION")
+stt_key='05e0d71cfca242cbaa7117d138f394ff'
+stt_location='germanywestcentral'
 
 # Translate Service
-key = os.getenv("Azure_TRANSLATE_KEY")
-endpoint = os.getenv("Azure_TRANSLATE_ENDPOINT")
-region = os.getenv("Azure_TRANSLATE_REGION")
-
-translate = True
+key = "61e121063c40410fb33dd78f35e8f9ce"
+endpoint = "https://api.cognitive.microsofttranslator.com/"
+region = "westeurope"
 
 
 def language_determine(raw_user_input):
@@ -113,6 +111,26 @@ def text_to_speech(target_language, text_to_speech):
                 print("Did you set the speech resource key and region values?")
 
 
+def direct_ask_to_openai(user_input, detected_language, speech):
+    response_to_user_input = azure_openai_ask(user_input.text)
+    print("Direct Ask, Response: ", response_to_user_input)
+
+    if speech:
+        text_to_speech(detected_language[:2], response_to_user_input)
+
+def translate_ask_to_openai(user_input, detected_language, speech):
+    english_user_input = translater(detected_language[:2], "en", user_input.text)
+    # print("English version of user input: ", english_user_input)
+
+    response_to_user_input = azure_openai_ask(english_user_input)
+    # print("Response to user input: ", response_to_user_input)
+
+    translated_response_to_user_input = translater("en", detected_language[:2], response_to_user_input)
+    print("Translate and Ask, Response: ", translated_response_to_user_input)
+
+    if speech:
+        text_to_speech(detected_language[:2], translated_response_to_user_input)
+
 def recognize_from_microphone():
     # This example requires environment variables named "SPEECH_KEY" and "SPEECH_REGION"
     speech_config = speechsdk.SpeechConfig(stt_key, stt_location)
@@ -132,30 +150,8 @@ def recognize_from_microphone():
         if user_input.reason == speechsdk.ResultReason.RecognizedSpeech:
             print("Question: ", user_input.text)
             print("Question Language: ", detected_language)
-
-            if translate:
-                response_to_user_input = azure_openai_ask(user_input.text)
-                print("Response to user input: ", response_to_user_input)
-
-                text_to_speech(detected_language[:2], response_to_user_input)
-
-            else:
-                # user_input_language = language_determine(user_input.text) # 'speech_recognizer' determines the language
-
-                english_user_input = translater(detected_language[:2], "en", user_input.text)
-                print("English version of user input: ", english_user_input)
-                if english_user_input == "Exit.":
-                    break
-
-                response_to_user_input = azure_openai_ask(english_user_input)
-                print("Response to user input: ", response_to_user_input)
-
-                translated_response_to_user_input = translater("en", detected_language[:2], response_to_user_input)
-                print("Translation is used:")
-                print("Translated to native language, user response: ", translated_response_to_user_input)
-
-                text_to_speech(detected_language[:2], translated_response_to_user_input)
-
+            direct_ask_to_openai(user_input, detected_language, False)
+            translate_ask_to_openai(user_input, detected_language, False)
             print("..............................................................")
         elif user_input.reason == speechsdk.ResultReason.NoMatch:
             print("No speech could be recognized: {}".format(user_input.no_match_details))
