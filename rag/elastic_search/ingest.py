@@ -6,7 +6,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores.elasticsearch import ElasticsearchStore
 from rag_elasticsearch.connection import es_connection_details
 
-loader = PyPDFDirectoryLoader(f"{os.getcwd()}/elasticsearch/pdf-data")
+loader = PyPDFDirectoryLoader(f"{os.getcwd()}/rag/elastic_search/pdf-data")
 
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
 all_splits = text_splitter.split_documents(loader.load())
