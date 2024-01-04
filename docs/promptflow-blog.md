@@ -1,23 +1,22 @@
 # CI/CD Pipeline for Azure ML Prompt Flow App
 Jan 2024
 
-Azure Machine Learning prompt flow is a development tool designed to streamline 
+Azure Machine Learning prompt flow (PF) is a development tool designed to streamline 
 the entire development cycle of AI applications powered by Large Language Models (LLMs).     
 
-With Azure Machine Learning prompt flow, you'll be able to:
+With prompt flow, you'll be able to:
 * Create executable flows that link LLMs, prompts, and Python tools through a visualized graph.
 * Create prompt variants and evaluate their performance through large-scale testing.
-* Deploy a real-time endpoint that unlocks the full power of LLMs for your application.
+* Deploy a real-time endpoint that allows to serve the flow as a service.
 
-However, during Prompt Flow Application development you need to do several repeated tasks such as Testing, Deployment etc.     
-We decided to create create CI/CD Pipeline for that process by using MLOps Principle.    
-After changing your model (LLM Prompts, Scripts etc.), your model/app will be tested automatically and deployed to the endpoint in Azure ML if tests are passed. 
-Project used GitHub Actions for CI/CD Pipeline.
+However, during Prompt Flow Application development you need to do several repeated tasks such as testing, and deployment.   
+We decided to encapsulate those tasks in a CI/CD pipeline using MLOps principles.        
+After modifying the prompt flow model (LLM prompts, scripts etc.), it is tested automatically. If the tests are successful, it is then deployed to the endpoint in Azure ML.      
+We have used GitHub Actions for the CI/CD Pipeline.      
 
-In this document, we created a CI/CD Pipeline for Azure Prompt Flow with GitHub Actions. 
-There are 2 Jobs in the Pipeline:      
-* Evaluation
-* Deployment
+There are 2 jobs in the Pipeline:          
+* Evaluation of the PF model
+* Deployment PF model to endpoint
         
 Steps which are done during **Evaluation** are:
 * Initial Setup (Installing Requirements and Azure Login)
@@ -38,16 +37,18 @@ Steps which are done during **Deployment** are:
             
 ## Pre-requisites
 * You need an Azure subscription. If you don’t have one, you can sign up for an account.
-* GitHub Repository (You can fork sampel repository from 'https://github.com/deepnetworkgmbh/generative-ai.git')
-* Please enable GitHub actions for your GitHub Repository (Go to 'settings/actions/general' and enable 'Allow all actions and reusable workflows')
-* Create Azure ML Workspace under your subscription ("https://learn.microsoft.com/en-us/azure/machine-learning/quickstart-create-resources?view=azureml-api-2")
-* Create Service Principal in your subscription and give 'Owner' role to it on subscription (It will be used in GitHub runner to connect your account). 
+* Create Resource Group in your subscription.
+* Create Azure AI resource in the resource group.
+* GitHub Repository (You can fork sample repository from 'https://github.com/deepnetworkgmbh/PromptfFlowApplication.git').
+* GitHub actions for the repository should be enabled (Go to 'settings/actions/general' and enable 'Allow all actions and reusable workflows').
+* Create an Azure ML workspace under your subscription ("https://learn.microsoft.com/en-us/azure/machine-learning/quickstart-create-resources?view=azureml-api-2").
+* Create a Service Principal in your subscription and assign 'Owner' role to it on the resource group (It will be used in GitHub runner to connect your account).        
 
 
 ## Infrastructure - CI/CD
-![Prompt Flow CI/CD](images/PromptFlowBlog1.png)
-Graph demonstrates steps of CI/CD Pipeline one-by-one.     
-Firstly, it creates Test Environment and Run Evaluation. If the results of evaluation is above threshold it continues with Deployment Phase.
+![Prompt Flow CI/CD](images/PromptFlowBlog1.jpg)
+The following figure demonstrates the steps of the CI/CD Pipeline.       
+Firstly, it creates test environment and runs evaluation steps. If the accuracy of the evaluation results is above the threshold, it performs the deployment phase. The steps are detailed in the following sections.      
          
 ## Test Phase
 In this phase, Prompt Flow model is tested and results are checked.
@@ -55,19 +56,19 @@ In this phase, Prompt Flow model is tested and results are checked.
 ### 1. **Initial Setup**                      
 There are several steps need to be done before the 'Test'.              
 These are:       
-* Install az ml extension (Required for 'ml' CLI commands)       
-* Azure login with Created Service Principal ([Created in Pre-Requirements Section](#pre-requisites))      
-* Set up Python (Python 3.11.4 is used)      
-* Install promptflow (Requirements in 'flow/promptflow/web-classification/requirements.txt' are used)
+* Install az ml extension (Required for 'ml' CLI commands) .      
+* Azure login with previously Service Principal ([Created in Pre-Requirements Section](#pre-requisites)).  
+* Set up Python (Python 3.11.4 is used).
+* Install promptflow (Requirements in 'flow/promptflow/web-classification/requirements.txt' are used).
 
 ### 2. **Create Compute Instance**               
 To run Prompt Flow Test we need to create compute instance (Virtual Machine) in Azure ML.                      
 * Set Compute and Runtime Names (For further usage), they should be unique in your workspace.
-* Create Managed Identity (To give required permissions to Compute Instance)   
+* Create Managed Identity (To give required permissions to Compute Instance).   
   * `az identity create -g ${{env.GROUP}} -n ${{env.MANAGED_IDENTITY_NAME}} --query "id"`
-* Assign "AzureML Data Scientist" role to MSI
+* Assign "AzureML Data Scientist" role to MSI.
   * `az role assignment create --assignee-object-id ${{env.PRINCIPAL_ID}} --assignee-principal-type ServicePrincipal --role "AzureML Data Scientist" --scope "/subscriptions/${{env.SUBSCRIPTION}}/resourcegroups/${{env.GROUP}}/providers/Microsoft.MachineLearningServices/workspaces/${{env.WORKSPACE}}"`
-* Create Azure ML Compute Instance (Used VM type is "Standard_DS1_v2", there are several options you can use) with created MSI
+* Create Azure ML Compute Instance (Used VM type is "Standard_DS1_v2", there are several options you can use) and assign the created MSI to the VM.    
   * `az ml compute create --name ${{env.COMPUTE_NAME}} --size Standard_DS1_v2 --identity-type UserAssigned --type ComputeInstance --resource-group ${{env.GROUP}} --workspace-name ${{env.WORKSPACE}} --user-assigned-identities ${{env.USER_MANAGED_ID}}`
 
 ### 3. **Create Test Environment**              
@@ -90,7 +91,7 @@ curl --request POST \
 }"
 ```
             
-* Runtime creation takes some time (About 5 minutes), so we are using ping mechanism to be sure runtime is ready ("GET" request is sent in each 100s):         
+* Runtime creation takes some time (About 5 minutes), so we are using ping mechanism to be sure runtime is ready ("GET" request is sent at each 100s):                
 ```         
 http_response="Unavailable"
 while : ; do
@@ -106,7 +107,7 @@ while : ; do
     | jq -r '.status')
   echo "Waiting runtime... 2"
   echo $http_response
-  sleep 100
+  sleep 500
 done
 ```          
 When Runtime is ready, Pipeline will continue with next step.       
@@ -125,18 +126,18 @@ Example output of the test is below:
 After running tests on the Prompt Flow Model, we evaluate results. 
 To do that, we created Evaluation Script ('flow/promptflow/llmops-helper/assert.py').     
 It takes the output of previous step ("4. Model Testing"), and calculate accuracy.     
-* If accuracy is higher than 60% (Can be adjusted), then set 'evaluation' job's result variable ('eval_result') True
-* Otherwise: set it False          
+* If accuracy is higher than 60% (Can be adjusted), then set 'evaluation' job's result variable ('eval_result') True.
+* Otherwise: set it False.          
 
 ### 6. **Remove Test Resources**      
 Finally, we remove Compute Instance which is created during Test Phase.
        
 ## Deployment Phase
-If **eval_result** variable is set 'True' in Test Phase, Pipeline will continue with Deployment Phase.        
+If **eval_result** variable is set to 'True' in the Test Phase, Pipeline will continue with Deployment Phase.           
 Otherwise, we do not deploy/publish model with endpoint to the users.   
-        
-As Jobs are working on different Virtual Machines in GitHub Actions environment, we need to do all prerequisites first.
-That step is same as [Initial Setup for Phase](#1-initial-setup) in Test Phase.        
+
+As Jobs work on different Virtual Machines in GitHub Actions environment, we first need to execute all prerequisite steps.     
+That steps are the same as [Initial Setup in the Test Phase](#1-initial-setup).           
 Afterwards, steps are:    
 
 ### 1. **Register Prompt Flow Model**        
@@ -147,8 +148,8 @@ az ml model create --file flow/promptflow/deployment/model.yaml  -g *** -w ***
 ```
        
 ### 2. **Setup Endpoint**
-We create endpoint to deploy saved model and answer user requests coming to app.     
-Again, we are using Azure CLI commands and endpoint yaml ('flow/promptflow/deployment/endpoint.yaml')         
+We create an endpoint to deploy the saved model and handle user requests that come into the application.      
+Again, we are using Azure CLI commands and endpoint yaml ('flow/promptflow/deployment/endpoint.yaml').         
 ```
 az ml online-endpoint create --file flow/promptflow/deployment/endpoint.yaml  --name ${{env.ENDPOINT_NAME}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
 ```
@@ -165,11 +166,15 @@ PRT_CONFIG_OVERRIDE=deployment.subscription_id=${{ env.SUBSCRIPTION }},deploymen
 ```          
 
 ### 5. **Setup Deployment and Check Deployment Status**
-Finally, its ready to deploy model which is created in "1. Register Prompt Flow Model" to the endpoint.   
-'flow/promptflow/deployment/deployment.yam' is used for deployment.      
+Finally, its ready to deploy model to the endpoint.       
+For this purpose, the 'flow/promptflow/deployment/deployment.yaml' file is used.      
 ```
-run: az ml online-deployment create --file flow/promptflow/deployment/deployment.yaml --endpoint-name ${{env.ENDPOINT_NAME}} --all-traffic -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
-```         
+az ml online-deployment create --file flow/promptflow/deployment/deployment.yaml --endpoint-name ${{env.ENDPOINT_NAME}} --all-traffic -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
+```    
+        
+# Conclusion
+Azure Prompt Flow is helpful service to develop application which interacts with LLM models.         
+The project explained the use of Pipeline to automate repetitive tasks while developing Prompt Flow Application.     
            
 # References
 https://learn.microsoft.com/en-us/azure/machine-learning/prompt-flow/overview-what-is-prompt-flow?view=azureml-api-2
