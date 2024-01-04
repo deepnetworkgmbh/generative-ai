@@ -125,11 +125,11 @@ jobs:
     - name: Show promptflow evaluation Results
       run: |
         pfazure run show-metrics --name ${{env.EVAL_RUN_NAME}} --subscription ${{env.SUBSCRIPTION}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
-        pfazure run show-metrics --name ${{env.EVAL_RUN_NAME}} --subscription ${{env.SUBSCRIPTION}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}} > /eval_result.json
+        pfazure run show-metrics --name ${{env.EVAL_RUN_NAME}} --subscription ${{env.SUBSCRIPTION}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}} > flow/promptflow/llmops-helper/eval_result.json
     - name: Get assert eval results
       id: EvalResult
       run: |
-        export ASSERT=$(python flow/promptflow/llmops-helper/assert.py result.json 0.6)
+        export ASSERT=$(python flow/promptflow/llmops-helper/assert.py eval_result.json 0.6)
         if ${ASSERT,,} ; then
           echo "eval_result=true" >> $GITHUB_OUTPUT
         else
