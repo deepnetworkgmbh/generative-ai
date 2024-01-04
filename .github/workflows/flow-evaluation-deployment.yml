@@ -35,14 +35,14 @@ jobs:
       deployModel: ${{ steps.EvalResult.outputs.eval_result }}
     steps:
     - name: Check out repo
-      uses: actions/checkout@v4
+      uses: actions/checkout@v2
     - name: Install az ml extension
       run: az extension add -n ml -y
     - name: Azure login
       run: |
         az login --service-principal -u ${{env.SP_USER}} -p ${{env.SP_PASS}} --tenant ${{env.SP_TENANT}}
     - name: Set up Python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v2
       with:
         python-version: '3.11.4'
     - name: Install promptflow
@@ -115,7 +115,7 @@ jobs:
             | jq -r '.status')
           echo "Waiting runtime... 2"
           echo $http_response
-          sleep 500
+          sleep 100
         done
     - name: Run promptflow
       run: |
@@ -145,14 +145,15 @@ jobs:
       run: |
         az ml compute delete --yes --name ${{env.COMPUTE_NAME}} --resource-group ${{env.GROUP}} --workspace-name ${{env.WORKSPACE}}
 
+
   deployment:
     runs-on: ubuntu-latest
     needs:
       - evaluation
-    if: github.ref == 'refs/heads/main' && needs.evaluation.outputs.deployModel == 'true'
+    if: needs.evaluation.outputs.deployModel == 'true'
     steps:
     - name: Check out repo
-      uses: actions/checkout@v4
+      uses: actions/checkout@v2
     - name: Install az ml extension
       run: az extension add -n ml -y
     - name: Azure login
@@ -160,24 +161,13 @@ jobs:
         az login --service-principal -u ${{env.SP_USER}} -p ${{env.SP_PASS}} --tenant ${{env.SP_TENANT}}
         az account set -s ${{env.SUBSCRIPTION}}
     - name: Set up Python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v2
       with:
         python-version: '3.11.4'
     - name: Install promptflow
       run: pip install -r flow/promptflow/web-classification/requirements.txt
     - name: Register promptflow model
       run: az ml model create --file flow/promptflow/deployment/model.yaml  -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
-    - name: Set Endpoint Name
-      run: |
-        echo "${{ github.run_id }}"
-        unique_identifier=${{ github.run_id }}
-        unique_identifier_first_10="${unique_identifier:0:10}"
-
-        new_endpoint_name="${{env.ENDPOINT_NAME}}$unique_identifier_first_10"
-        echo $new_endpoint_name
-
-        echo "ENDPOINT_NAME=$new_endpoint_name" >> "$GITHUB_ENV"
-
     - name: Setup endpoint
       run: |
         az ml online-endpoint create --file flow/promptflow/deployment/endpoint.yaml  --name ${{env.ENDPOINT_NAME}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
