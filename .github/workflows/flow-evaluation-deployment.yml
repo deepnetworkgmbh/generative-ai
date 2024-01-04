@@ -19,7 +19,7 @@ env:
   SP_USER: ${{secrets.SP_USER}}
   SP_PASS: ${{secrets.SP_PASS}}
   SP_TENANT: ${{secrets.SP_TENANT}}
-  ENDPOINT_NAME: demo-endpoint
+  ENDPOINT_NAME: pf-endpoint
   DEPLOYMENT_NAME: deployment
 
 jobs:
