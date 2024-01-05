@@ -1,3 +1,2 @@
 $schema: https://azuremlschemas.azureedge.net/latest/managedOnlineEndpoint.schema.json
-name: web-classification-endpoint
 auth_mode: key
