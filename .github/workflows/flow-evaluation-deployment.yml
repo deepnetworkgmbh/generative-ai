@@ -3,7 +3,7 @@ name: Test-Evaluate-Deploy Prompts with Promptflow
 on:
   workflow_dispatch:
   push:
-    branches: [ main ]
+    branches: [ feature/promptflow_blog ]
 
 env: 
   GROUP: ${{secrets.GROUP}}
