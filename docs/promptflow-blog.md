@@ -91,7 +91,7 @@ curl --request POST \
 }"
 ```
             
-* Runtime creation takes some time (About 5 minutes), so we are using ping mechanism to be sure runtime is ready ("GET" request is sent at each 100s):                
+* Runtime creation takes some time (About 5 minutes), so we are using ping mechanism to be sure runtime is ready ("GET" request is sent at each 500 ms):                
 ```         
 http_response="Unavailable"
 while : ; do
