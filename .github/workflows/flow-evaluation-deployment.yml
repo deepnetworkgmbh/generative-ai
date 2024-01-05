@@ -3,7 +3,10 @@ name: Test-Evaluate-Deploy Prompts with Promptflow
 on:
   workflow_dispatch:
   push:
-    branches: [ main ]
+    branches:
+      - '*'
+    paths:
+      - 'flow/**'
 
 env: 
   GROUP: ${{secrets.GROUP}}
@@ -144,7 +147,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - evaluation
-    if: needs.evaluation.outputs.deployModel == 'true'
+    if: github.ref == 'refs/heads/main' && needs.evaluation.outputs.deployModel == 'true'
     steps:
     - name: Check out repo
       uses: actions/checkout@v2
