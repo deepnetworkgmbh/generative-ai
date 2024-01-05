@@ -1,3 +1,4 @@
+import json
 import os
 from openai import AzureOpenAI
 from azure.ai.translation.text import TextTranslationClient, TranslatorCredential
@@ -21,40 +22,45 @@ region = "westeurope"
 
 
 def food_name_getter(user_request):
-    messages=[
-        {"role": "system", "content": "You are an assistant that gets food name from the statement."
-                                      "Give only the food/meal name."
-                                      "Do not give other information."
-                                      "Do not give instructions or ingredients."
-         }
-    ]
 
-    few_shot_learning_examples = [
-        {"user": "How can I make Margarita pizza?", "assistant": "Margarita pizza."},
-        {"user": "How can I make Old Fashion Vegetable Soup?", "assistant": "Old Fashion Vegetable Soup"},
-        {"user": "How can I make Onion Pie?", "assistant": "Onion Pie"},
-        {"user": "How can I make Super Protein Salad?", "assistant": "Super Protein Salad"},
-        {"user": "How can I make Popeye's Muscle Salad?", "assistant": "Popeye's Muscle Salad"},
-    ]
+    parameters_schema = {
+        "type": "object",
+        "properties": {
+            "name": {
+                "type": "string",
+                "description": 'The name of the meal. If no name is provided, return "not_stated".',
+            },
+        },
+        "required": ["name"],
+    }
 
-    for eachFewShotExm in few_shot_learning_examples:
-        messages.append({"role": "user", "content": eachFewShotExm["user"]})
-        messages.append({"role": "assistant", "content": eachFewShotExm["assistant"]})
+    function_schema = {
+        "name": "get_meal_name",
+        "description": "Get/Scrape meal name from the statement.",
+        "parameters": parameters_schema,
+    }
 
-    messages.append({"role": "user", "content": user_request})
+    messages= [{"role": "system", "content": "You are an assistant that gets food name from the statement."
+                                             "Give only the food/meal name."
+                                             "Do not give other information."
+                                             "Do not give instructions or ingredients."
+                }, {"role": "user", "content": user_request}]
 
     client = AzureOpenAI(
-        azure_endpoint='https://openai-dn.openai.azure.com/',
-        api_key='44d2c6a693354551bddeb90429201899',
+        azure_endpoint='https://openai-dn-fr.openai.azure.com/',
+        api_key='533bb10c9d82416e8731e493104eed3e',
         api_version="2023-09-01-preview"
     )
 
     response = client.chat.completions.create(
         model='test-deployment',
         messages=messages,
+        functions=[function_schema],
+        function_call={"name": function_schema["name"]},
     )
 
-    return response.choices[0].message.content
+    args = json.loads(response.choices[0].message.function_call.arguments)
+    return args
 
 def ask_to_user(user_request):
 
@@ -79,7 +85,8 @@ def ask_to_user(user_request):
 def recognize_from_microphone():
     # This example requires environment variables named "SPEECH_KEY" and "SPEECH_REGION"
     speech_config = speechsdk.SpeechConfig(stt_key, stt_location)
-    auto_detect_source_language_config = speechsdk.languageconfig.AutoDetectSourceLanguageConfig(languages=["en-US"])
+    speech_config.set_property(speechsdk.PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, "10")
+    auto_detect_source_language_config = speechsdk.languageconfig.AutoDetectSourceLanguageConfig(languages=["en-US", "de-DE"])
     audio_config = speechsdk.audio.AudioConfig(use_default_microphone=True)
     speech_recognizer = speechsdk.SpeechRecognizer(
         speech_config=speech_config,
@@ -89,23 +96,29 @@ def recognize_from_microphone():
     while True:
         print("Please speak...")
         user_input = speech_recognizer.recognize_once()
-
+        auto_detect_source_language_result = speechsdk.AutoDetectSourceLanguageResult(user_input)
+        detected_language = auto_detect_source_language_result.language
 
         if user_input.reason == speechsdk.ResultReason.RecognizedSpeech:
             print("User Request: ", user_input.text)
-            food_name=food_name_getter(user_input.text)
-            print("food Name: ", food_name)
+            print("User Request Language: ", detected_language)
 
-            ask_to_user(food_name)
+            returned_args = food_name_getter(user_input.text)
+            print(returned_args)
 
-            print("Please say 'yes' or 'no'...")
-            yes_or_no = speech_recognizer.recognize_once()
-            print(yes_or_no.text)
 
-            if yes_or_no.text == "Yes.":
-                print("Success")
-            else:
-                continue
+            # print("food Name: ", food_name)
+            #
+            # ask_to_user(food_name)
+            #
+            # print("Please say 'yes' or 'no'...")
+            # yes_or_no = speech_recognizer.recognize_once()
+            # print(yes_or_no.text)
+            #
+            # if yes_or_no.text == "Yes.":
+            #     print("Success")
+            # else:
+            #     continue
 
             print("..............................................................")
         elif user_input.reason == speechsdk.ResultReason.NoMatch:
