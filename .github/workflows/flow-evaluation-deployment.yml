@@ -162,6 +162,17 @@ jobs:
       run: pip install -r flow/promptflow/web-classification/requirements.txt
     - name: Register promptflow model
       run: az ml model create --file flow/promptflow/deployment/model.yaml  -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
+    - name: Set Endpoint Name
+      run: |
+        echo "${{ github.run_id }}"
+        unique_identifier=${{ github.run_id }}
+        unique_identifier_first_10="${unique_identifier:0:10}"
+
+        new_endpoint_name="${{env.ENDPOINT_NAME}}$unique_identifier_first_10"
+        echo $new_endpoint_name
+
+        echo "ENDPOINT_NAME=$new_endpoint_name" >> "$GITHUB_ENV"
+
     - name: Setup endpoint
       run: |
         az ml online-endpoint create --file flow/promptflow/deployment/endpoint.yaml  --name ${{env.ENDPOINT_NAME}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}}

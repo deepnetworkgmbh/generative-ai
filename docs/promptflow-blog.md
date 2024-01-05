@@ -177,10 +177,10 @@ Azure Prompt Flow is helpful service to develop application which interacts with
 The project explained the use of Pipeline to automate repetitive tasks while developing Prompt Flow Application.     
            
 # References
-https://learn.microsoft.com/en-us/azure/machine-learning/prompt-flow/overview-what-is-prompt-flow?view=azureml-api-2
-https://www.databricks.com/glossary/mlops
-https://cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning
-https://www.youtube.com/watch?v=j0YJ3BZjrFs
-https://github.com/MG-Microsoft/LLMOps-PF.git
+* https://learn.microsoft.com/en-us/azure/machine-learning/prompt-flow/overview-what-is-prompt-flow?view=azureml-api-2
+* https://www.databricks.com/glossary/mlops
+* https://cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning
+* https://www.youtube.com/watch?v=j0YJ3BZjrFs
+* https://github.com/MG-Microsoft/LLMOps-PF.git
 
 
