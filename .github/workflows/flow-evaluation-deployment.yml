@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - '*'
+      - 'feature/pf_pipeline'
 
 env: 
   GROUP: ${{secrets.GROUP}}
