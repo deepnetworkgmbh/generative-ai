@@ -2,8 +2,6 @@ import json
 from sentence_transformers import SentenceTransformer, util
 
 __model = SentenceTransformer('distilbert-base-nli-stsb-mean-tokens')
-__product_ids, __product_names, __product_embeddings = embed_db("./recipe-generator/product_names_en.json")
-__removal_list, __removal_list_embeddings = embed_removal_list("./recipe-generator/removal-list.json")
 
 def embed_db(file):
     product_names = []
@@ -14,21 +12,23 @@ def embed_db(file):
             product_names.append(product["name"])
             product_ids.append(product["id"])
 
-    return product_ids, product_names, model.encode(product_names)
+    return product_ids, product_names, __model.encode(product_names)
 
 def embed_removal_list(file):
     with open(file, 'r') as file:
         removal_list = json.load(file)
-        return removal_list, model.encode(removal_list)
+        return __model.encode(removal_list)
 
 def search_in_products(query_product_name):
     return __search_in_embeddings(query_product_name, __product_embeddings, __product_names, __product_ids)
 
 def search_in_removal_list(query_product_name):
-    return __search_in_embeddings(query_product_name, __removal_list_embeddings, __removal_list)
+    if __search_in_embeddings(query_product_name, __removal_list_embeddings) is None:
+        return False
+    return True
 
 def __search_in_embeddings(query_product_name, list_embeddings, *lists_to_append):
-    query_embedding = model.encode(query_product_name.lower())
+    query_embedding = __model.encode(query_product_name.lower())
     cos_sim = util.cos_sim(list_embeddings, query_embedding)
     results = []
     for i in range(len(cos_sim)):
@@ -40,3 +40,6 @@ def __search_in_embeddings(query_product_name, list_embeddings, *lists_to_append
     if results[0][0].item() < 0.7:
         return None
     return results[0]
+
+__product_ids, __product_names, __product_embeddings = embed_db("./recipe-generator/product_names_en.json")
+__removal_list_embeddings = embed_removal_list("./recipe-generator/removal-list.json")
