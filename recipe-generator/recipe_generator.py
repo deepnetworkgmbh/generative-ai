@@ -3,6 +3,8 @@ import json
 import argparse
 from openai import AzureOpenAI
 
+DEFAULT_NUMBER_OF_SERVINGS = 4
+
 JSON_SCHEMA = {
     "name": "[RECIPE_NAME]",
     "servings": "[NUMBER_OF_SERVINGS]",
@@ -20,7 +22,7 @@ SYSTEM_MESSAGE = """
     You will consider the number of servings when deciding on the quantities of ingredients.
     First generate the ingredient list; then if the list has any non-metric units such as teaspoon, tablespoon or cup, you must convert them to metric units such as gram or liter.
     You must give the ingredient name and unit in singular form such as egg, tomato, gram or liter.
-    Use gram as the measurement "unit" for fruits and vegetables.
+    Always use gram as the measurement "unit" for fruits and vegetables.
     Do not use fractions as quantities, instead use decimals.
     Do not give descriptors on how to prepare the ingredient in the name field.
     You must give the list of ingredients using the following JSON schema.
@@ -43,7 +45,7 @@ FEW_SHOTS = [
             {"name": "Butter", "quantity": "460", "unit": "gram"},
             {"name": "Granulated sugar", "quantity": "250", "unit": "gram"},
             {"name": "Baking powder", "quantity": "12", "unit": "gram"},
-            {"name": "Egg", "quantity": "3", "unit": "count"},
+            {"name": "Egg", "quantity": "3", "unit": "pieces"},
             {"name": "Vanilla extract", "quantity": "10", "unit": "milliliter"},
             {"name": "Salt", "quantity": "1.5", "unit": "grams"},
             {"name": "Whole milk", "quantity": "280", "unit": "milliliter"},
@@ -69,7 +71,7 @@ def generate_completion(client, prompt):
             {"role": "user", "content": prompt},
         ],
         response_format={ "type": "json_object" },
-        temperature=0.4,
+        top_p=0.2,
     )
 
 def generate_recipe(dish_name, servings):
@@ -82,10 +84,10 @@ def generate_recipe(dish_name, servings):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("dish_name", help="name of the dish you want the ingredients for")
-    parser.add_argument("servings", help="number of servings you want", type=int)
+    parser.add_argument("-s", "--servings", help="number of servings you want", type=int)
     args = parser.parse_args()
     dish_name = args.dish_name
-    servings = args.servings
+    servings = DEFAULT_NUMBER_OF_SERVINGS if args.servings is None else args.servings
 
-    response = generate_recipe(client, dish_name, servings)
-    write_to_file(dish_name, response.choices[0].message.content)
+    completion = generate_recipe(dish_name, servings)
+    write_to_file(dish_name, completion)
