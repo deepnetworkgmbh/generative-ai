@@ -25,6 +25,7 @@ SYSTEM_MESSAGE = """
     Always use gram as the measurement "unit" for fruits and vegetables.
     Do not use fractions as quantities, instead use decimals.
     Do not give descriptors on how to prepare the ingredient in the name field.
+    Always give ingredient names in English even if the dish name is in another language.
     You must give the list of ingredients using the following JSON schema.
     JSON schema:
     {json_schema}
@@ -55,10 +56,6 @@ FEW_SHOTS = [
     }""" }
 ]
 
-def write_to_file(dish_name, completion):
-    with open(f"./recipe-generator/recipes/{dish_name}-ingredients.json".lower().replace(" ","-"), 'w') as file:
-        file.write(completion)
-
 def format_prompt(dish_name, servings):
     return PROMPT_TEMPLATE.format(dish_name=dish_name, servings=servings)
 
@@ -80,14 +77,3 @@ def generate_recipe(dish_name, servings):
     )
     prompt = format_prompt(dish_name, servings)
     return generate_completion(client, prompt).choices[0].message.content
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("dish_name", help="name of the dish you want the ingredients for")
-    parser.add_argument("-s", "--servings", help="number of servings you want", type=int)
-    args = parser.parse_args()
-    dish_name = args.dish_name
-    servings = DEFAULT_NUMBER_OF_SERVINGS if args.servings is None else args.servings
-
-    completion = generate_recipe(dish_name, servings)
-    write_to_file(dish_name, completion)

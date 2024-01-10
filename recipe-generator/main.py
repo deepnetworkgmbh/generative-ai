@@ -1,16 +1,8 @@
 import json
 import argparse
 
-from ingredient_finder import search_in_products, search_in_removal_list
+from search import search_in_products, search_in_removal_list, search_in_recipe_db
 from recipe_generator import generate_recipe, DEFAULT_NUMBER_OF_SERVINGS
-
-def check_recipe_db(dish_name):
-    with open(f"./recipe-generator/new-recipe-db.json", 'r') as file:
-        db = json.load(file)
-        for recipe in db:
-            if recipe["name"] == dish_name:
-                return recipe
-    return None
 
 def remove_listed_items(recipe):
     recipe["ingredients"] = [ingredient for ingredient in recipe["ingredients"] if not search_in_removal_list(ingredient["name"])]
@@ -19,16 +11,23 @@ def remove_listed_items(recipe):
 def add_product_ids(recipe):
     for ingredient in recipe["ingredients"]:
         if product := search_in_products(ingredient["name"]):
-            ingredient["product_name"] = product[1]
-            ingredient["id"] = product[2]
+            ingredient["product_name"] = product[0]
+            ingredient["id"] = product[1]
+    return recipe
+
+def adjust_ingredient_quantity(recipe, servings):
+    servings_in_recipe = int(recipe["servings"])
+    adjust_ratio = servings/servings_in_recipe
+    for ingredient in recipe["ingredients"]:
+        ingredient["quantity"] = str(float(ingredient["quantity"])*adjust_ratio)
     return recipe
 
 def main(dish_name, servings):
     recipe = {}
-    if db_entry := check_recipe_db(dish_name):
-        recipe = db_entry
+    if db_entry := search_in_recipe_db(dish_name):
+        recipe = adjust_ingredient_quantity(db_entry, servings)
     else:
-        recipe = generate_recipe(dish_name, servings) 
+        recipe = json.loads(generate_recipe(dish_name, servings))
     recipe = remove_listed_items(recipe)
     recipe_with_product_ids = add_product_ids(recipe)
     print(recipe_with_product_ids)
