@@ -1,7 +1,7 @@
 import json
 from sentence_transformers import SentenceTransformer
 
-PRODUCT_DB_PATH = "./recipe-generator/product_names_en.json"
+PRODUCT_DB_PATH = "./recipe-generator/product_names.json"
 RECIPE_DB_PATH = "./recipe-generator/new-recipe-db.json"
 REMOVAL_LIST_PATH = "./recipe-generator/removal-list.json"
 
