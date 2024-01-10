@@ -106,3 +106,4 @@ def recognize_from_text():
     print("..............................................................")
 
     return scraped_values
+
