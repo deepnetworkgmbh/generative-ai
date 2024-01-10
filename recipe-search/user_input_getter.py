@@ -65,7 +65,7 @@ def recognize_from_microphone():
     while True:
         scraped_values = {}
 
-        print("Tell your dish request (Dish name): ")
+        print("Tell the dish name): ")
         user_input_for_dish = speech_recognizer.recognize_once()
         auto_detect_source_language_result_for_dish = speechsdk.AutoDetectSourceLanguageResult(user_input_for_dish)
         detected_language_for_dish = auto_detect_source_language_result_for_dish.language
@@ -97,7 +97,7 @@ def recognize_from_text():
     scraped_values = {}
 
     # Get Dish ---
-    user_input_for_dish = input("Tell your dish request (Dish name):\n")
+    user_input_for_dish = input("Tell the dish name:\n")
     scraped_values['dish_name'] = input_handler(user_input_for_dish, "NOT_DEFINED", "dish")
 
     # Get Count ---
