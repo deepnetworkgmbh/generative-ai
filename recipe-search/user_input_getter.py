@@ -81,8 +81,9 @@ def recognize_from_microphone():
 
 def setup_speech_recognizer():
     speech_config = speechsdk.SpeechConfig(stt_key, stt_location)
-    speech_config.set_property(speechsdk.PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, "10")
-    auto_detect_source_language_config = speechsdk.languageconfig.AutoDetectSourceLanguageConfig(languages=["de-DE", "tr-TR"])
+    speech_config.set_property(speechsdk.PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, "5")
+    speech_config.set_property_by_name('SPEECH-SDK-COMMON-MAX-DURATION', str(1))
+    auto_detect_source_language_config = speechsdk.languageconfig.AutoDetectSourceLanguageConfig(languages=["en-US", "de-DE", "tr-TR"])
     audio_config = speechsdk.audio.AudioConfig(use_default_microphone=True)
     speech_recognizer = speechsdk.SpeechRecognizer(
         speech_config=speech_config,
@@ -99,7 +100,7 @@ def get_input_from_user(speech_recognizer, message, user_input_type):
         detected_language = speechsdk.AutoDetectSourceLanguageResult(user_input).language
 
         if user_input.reason == speechsdk.ResultReason.RecognizedSpeech:
-            cleaned_input = input_cleaner(user_input.text, detected_language, user_input_type)
+            cleaned_input = input_cleaner(eliminate_punctuations(user_input.text), detected_language, user_input_type)
             if cleaned_input:
                 return cleaned_input
             else:
@@ -124,7 +125,7 @@ def recognize_from_text():
     # Get Dish ---
     while True:
         user_input_for_dish = input("Tell the dish name:\n")
-        scraped_values['dish_name'] = input_cleaner(user_input_for_dish, not_defined_language, UserInputType.DISH)
+        scraped_values['dish_name'] = input_cleaner(eliminate_punctuations(user_input_for_dish), not_defined_language, UserInputType.DISH)
         print(scraped_values['dish_name'])
         if scraped_values['dish_name'] is not None:
             break
@@ -132,10 +133,20 @@ def recognize_from_text():
     # Get Count ---
     while True:
         user_input_for_count = input("Tell your count request (Number of people):\n")
-        scraped_values['serving_count'] = input_cleaner(user_input_for_count, not_defined_language, UserInputType.SERVINGS)
+        scraped_values['serving_count'] = input_cleaner(eliminate_punctuations(user_input_for_count), not_defined_language, UserInputType.SERVINGS)
         if scraped_values['serving_count'] is not None:
             break
     print("..............................................................")
 
     return scraped_values
 
+
+def eliminate_punctuations(user_input):
+    eliminated_sentence = user_input
+    characters_to_replace = [',', '.', ':', ';', '"', '\'', "?", "!"]
+
+    # Replace specified characters with a space
+    for char in characters_to_replace:
+        eliminated_sentence = eliminated_sentence.replace(char, ' ')
+
+    return eliminated_sentence
