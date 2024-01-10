@@ -1,97 +1,121 @@
 import json
 import os
+from enum import Enum
 
 import azure.cognitiveservices.speech as speechsdk
-from openai_ask import openai_ask_dish_init
-from openai_ask import openai_ask_language
-from openai_ask import openai_ask_general_check
-from openai_ask import openai_ask_count_init
+from openai_ask import clean_dish_name
+from openai_ask import ask_language
+from openai_ask import does_input_type_match
+from openai_ask import clean_servings_size
 
 # Speech-to-Text
 stt_key=os.environ.get('SPT_API_KEY')
 stt_location=os.environ.get('SPT_REGION')
+not_defined_language = "NOT_DEFINED"
 
 
-def input_handler(user_inp, language_inp, dish_or_count):
+class UserInputType(Enum):
+    DISH = 1
+    SERVINGS = 2
+
+
+def clean_dish_input(user_input, language):
+    cleaned_dish_name = clean_dish_name(user_input, language)
+    cleaned_dish_name_json = json.loads(cleaned_dish_name.choices[0].message.content)
+
+    if not cleaned_dish_name_json['is_valid']:
+        print("(First Check) Input does not contain a valid dish name. ")
+        return None
+
+    print("(First Check) Cleaned dish name: " + str(cleaned_dish_name_json['dish_name']))
+
+    if not does_input_type_match(cleaned_dish_name_json['dish_name'], "dish name", language):
+        print("(Second Check): Input is not a real dish name.")
+        return None
+
+    return cleaned_dish_name_json['dish_name']
+
+
+def clean_servings_input(user_input, language):
+    cleaned_servings_size = clean_servings_size(user_input, language)
+    cleaned_servings_size_json = json.loads(cleaned_servings_size.choices[0].message.content)
+
+    if not cleaned_servings_size_json['is_valid']:
+        print("(First Check) Input does not contain a valid servings size. ")
+        return None
+
+    print("(First Check) Cleaned servings size " + str(cleaned_servings_size_json['number_of_people']))
+
+    if not does_input_type_match(cleaned_servings_size_json['number_of_people'], "integer", language):
+        print("(Second Check): Input is not a real servings size.")
+        return None
+
+    return cleaned_servings_size_json['number_of_people']
+
+
+# Return None if input is not valid, or the cleaned text/number.
+def input_cleaner(user_inp, language_inp, user_input_type:UserInputType):
     # Getting language of user prompt
     language = language_inp
-    if language_inp == "NOT_DEFINED":
-        language = openai_ask_language(user_inp)
-    print("Used Language is: " + language)
+    if language_inp is None or language_inp == not_defined_language:
+        language = ask_language(user_inp)
+    print("Language is: " + language)
 
-    # Scraping dish/count value
-    if dish_or_count == "dish":
-        openai_answer_for_dish_init = openai_ask_dish_init(user_inp, language)
-        openai_answer_for_dish_init_json = json.loads(openai_answer_for_dish_init.choices[0].message.content)
-        print("Input value: " + str(openai_answer_for_dish_init_json['dish_name']))
-        print("(First Check) If given value is dish or not: " + str(openai_answer_for_dish_init_json['is_dish']))
-
-        if openai_answer_for_dish_init_json['is_dish']:
-            openai_answer_for_dish_general = openai_ask_general_check(openai_answer_for_dish_init_json['dish_name'], "dish name", language)
-            openai_answer_general_for_dish_json = json.loads(openai_answer_for_dish_general.choices[0].message.content)
-            print("(Second Check) If given value is dish or not: " + openai_answer_general_for_dish_json['is_that_type'])
-            return openai_answer_for_dish_init_json['dish_name']
-        else:
-            return None
-    elif dish_or_count == "count":
-        openai_answer_for_count_init = openai_ask_count_init(user_inp, language)
-        openai_answer_for_count_init_json = json.loads(openai_answer_for_count_init.choices[0].message.content)
-        print("Input value: " + str(openai_answer_for_count_init_json['number_of_people']))
-        print("(First Check) If given value is serving count or not: " + str(openai_answer_for_count_init_json['is_count']))
-
-        if openai_answer_for_count_init_json['is_count']:
-            print(openai_answer_for_count_init_json['number_of_people'])
-            print(language)
-            openai_answer_for_count_general = openai_ask_general_check(openai_answer_for_count_init_json['number_of_people'], "integer", language)
-            openai_answer_general_for_count_json = json.loads(openai_answer_for_count_general.choices[0].message.content)
-            print("(Second Check) If given value is serving count or not: " + openai_answer_general_for_count_json['is_that_type'])
-            return openai_answer_for_count_init_json['number_of_people']
-        else:
-            return None
+    if user_input_type == UserInputType.DISH:
+        return clean_dish_input(user_inp, language)
+    elif user_input_type == UserInputType.SERVINGS:
+        return clean_servings_input(user_inp, language)
     else:
         print("Error case")
         return None
 
 
 def recognize_from_microphone():
+    speech_recognizer = setup_speech_recognizer()
+    scraped_values = {
+        'dish_name':     get_input_from_user(speech_recognizer, "Tell the dish name: ", UserInputType.DISH),
+        'serving_count': get_input_from_user(speech_recognizer, "Tell your serving size (Number of people): ", UserInputType.SERVINGS)
+    }
+    return scraped_values
+
+
+def setup_speech_recognizer():
     speech_config = speechsdk.SpeechConfig(stt_key, stt_location)
     speech_config.set_property(speechsdk.PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, "10")
-    auto_detect_source_language_config = speechsdk.languageconfig.AutoDetectSourceLanguageConfig(languages=["en-UK", "de-DE", "tr-TR"])
+    auto_detect_source_language_config = speechsdk.languageconfig.AutoDetectSourceLanguageConfig(languages=["de-DE", "tr-TR"])
     audio_config = speechsdk.audio.AudioConfig(use_default_microphone=True)
     speech_recognizer = speechsdk.SpeechRecognizer(
         speech_config=speech_config,
         auto_detect_source_language_config=auto_detect_source_language_config,
         audio_config=audio_config)
+    return speech_recognizer
 
+
+def get_input_from_user(speech_recognizer, message, user_input_type):
     while True:
-        scraped_values = {}
+        print(message)
+        user_input = speech_recognizer.recognize_once()
+        print("User entered: ", user_input.text)
+        detected_language = speechsdk.AutoDetectSourceLanguageResult(user_input).language
 
-        print("Tell the dish name): ")
-        user_input_for_dish = speech_recognizer.recognize_once()
-        auto_detect_source_language_result_for_dish = speechsdk.AutoDetectSourceLanguageResult(user_input_for_dish)
-        detected_language_for_dish = auto_detect_source_language_result_for_dish.language
-
-        # Get Dish ---
-        if user_input_for_dish.reason == speechsdk.ResultReason.RecognizedSpeech:
-            scraped_values['dish_name'] =  input_handler(user_input_for_dish, detected_language_for_dish, "dish")
+        if user_input.reason == speechsdk.ResultReason.RecognizedSpeech:
+            cleaned_input = input_cleaner(user_input.text, detected_language, user_input_type)
+            if cleaned_input:
+                return cleaned_input
+            else:
+                continue
+        elif user_input.reason == speechsdk.ResultReason.Canceled:
+            print("Speech input cancelled. Exiting.")
+            cancellation_details = user_input.cancellation_details
+            print("Speech Recognition canceled: {}".format(cancellation_details.reason))
+            if cancellation_details.reason == speechsdk.CancellationReason.Error:
+                print("Error details: {}".format(cancellation_details.error_details))
+                print("Did you set the speech resource key and region values?")
+            return None
         else:
-            print("Speech error.")
-            print("Did you set the speech resource key and region values?")
+            print("Speech is not recognized. Please try again.")
+            continue
 
-        # ---------------------------------------------------------------------------------------------------------
-        # Get Count ---
-        print("Tell your serving count request (Number of people): ")
-        user_input_for_count = speech_recognizer.recognize_once()
-        auto_detect_source_language_result_for_count = speechsdk.AutoDetectSourceLanguageResult(user_input_for_count)
-        detected_language_for_count = auto_detect_source_language_result_for_count.language
-
-        if user_input_for_count.reason == speechsdk.ResultReason.RecognizedSpeech:
-            scraped_values['serving_count'] =  input_handler(user_input_for_count, detected_language_for_count, "count")
-        else:
-            print("Speech error.")
-            print("Did you set the speech resource key and region values?")
-        print("..............................................................")
-        return scraped_values
 
 def recognize_from_text():
     # while True:
@@ -99,11 +123,11 @@ def recognize_from_text():
 
     # Get Dish ---
     user_input_for_dish = input("Tell the dish name:\n")
-    scraped_values['dish_name'] = input_handler(user_input_for_dish, "NOT_DEFINED", "dish")
+    scraped_values['dish_name'] = input_cleaner(user_input_for_dish, not_defined_language, UserInputType.DISH)
 
     # Get Count ---
     user_input_for_count = input("Tell your count request (Number of people):\n")
-    scraped_values['serving_count'] = input_handler(user_input_for_count, "NOT_DEFINED", "count")
+    scraped_values['serving_count'] = input_cleaner(user_input_for_count, not_defined_language, UserInputType.SERVINGS)
     print("..............................................................")
 
     return scraped_values
