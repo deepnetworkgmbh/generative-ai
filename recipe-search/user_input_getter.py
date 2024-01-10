@@ -122,12 +122,19 @@ def recognize_from_text():
     scraped_values = {}
 
     # Get Dish ---
-    user_input_for_dish = input("Tell the dish name:\n")
-    scraped_values['dish_name'] = input_cleaner(user_input_for_dish, not_defined_language, UserInputType.DISH)
+    while True:
+        user_input_for_dish = input("Tell the dish name:\n")
+        scraped_values['dish_name'] = input_cleaner(user_input_for_dish, not_defined_language, UserInputType.DISH)
+        print(scraped_values['dish_name'])
+        if scraped_values['dish_name'] is not None:
+            break
 
     # Get Count ---
-    user_input_for_count = input("Tell your count request (Number of people):\n")
-    scraped_values['serving_count'] = input_cleaner(user_input_for_count, not_defined_language, UserInputType.SERVINGS)
+    while True:
+        user_input_for_count = input("Tell your count request (Number of people):\n")
+        scraped_values['serving_count'] = input_cleaner(user_input_for_count, not_defined_language, UserInputType.SERVINGS)
+        if scraped_values['serving_count'] is not None:
+            break
     print("..............................................................")
 
     return scraped_values
