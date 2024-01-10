@@ -1,79 +1,42 @@
-import os
 import json
 import argparse
-from openai import AzureOpenAI
 
-DEFAULT_NUMBER_OF_SERVINGS = 4
+from search import search_in_products, search_in_removal_list, search_in_recipe_db
+from recipe_llm_helper import generate_recipe
+from recipe_constants import DEFAULT_NUMBER_OF_SERVINGS
 
-JSON_SCHEMA = {
-    "name": "[RECIPE_NAME]",
-    "servings": "[NUMBER_OF_SERVINGS]",
-    "ingredients": [
-        {
-            "name": "[INGREDIENT_NAME]",
-            "quantity": "[NUMERIC_QUANTITY]",
-            "unit": "[UNIT_OF_MEASUREMENT]"
-        }
-    ]
-}
+def remove_listed_items(recipe):
+    recipe["ingredients"] = [ingredient for ingredient in recipe["ingredients"] if not search_in_removal_list(ingredient["name"])]
+    return recipe
 
-SYSTEM_MESSAGE = """
-    You are a cooking assistant that will help generate a list of ingredients for any dish user asks for.
-    You will consider the number of servings when deciding on the quantities of ingredients.
-    First generate the ingredient list; then if the list has any non-metric units such as teaspoon, tablespoon or cup, you must convert them to metric units such as gram or liter.
-    You must give the ingredient name and unit in singular form such as egg, tomato, gram or liter.
-    Always use gram as the measurement "unit" for fruits and vegetables.
-    Do not use fractions as quantities, instead use decimals.
-    Do not give descriptors on how to prepare the ingredient in the name field.
-    Always give ingredient names in English even if the dish name is in another language.
-    You must give the list of ingredients using the following JSON schema.
-    JSON schema:
-    {json_schema}
-""".format(json_schema=JSON_SCHEMA)
+def add_product_ids(recipe):
+    for ingredient in recipe["ingredients"]:
+        if product := search_in_products(ingredient["name"]):
+            ingredient["product_name"] = product[0]
+            ingredient["id"] = product[1]
+    return recipe
 
+def adjust_ingredient_quantity(recipe, servings):
+    servings_in_recipe = int(recipe["servings"])
+    adjust_ratio = servings/servings_in_recipe
+    for ingredient in recipe["ingredients"]:
+        ingredient["quantity"] = str(float(ingredient["quantity"])*adjust_ratio)
+    return recipe
 
-PROMPT_TEMPLATE = """
-    Give me the list of ingredients for {dish_name} for {servings} servings.
-"""
+def get_recipe(dish_name, servings=DEFAULT_NUMBER_OF_SERVINGS):
+    if db_entry := search_in_recipe_db(dish_name):
+        recipe = adjust_ingredient_quantity(db_entry, servings)
+    else:
+        recipe = json.loads(generate_recipe(dish_name, servings))
+    recipe = remove_listed_items(recipe)
+    recipe_with_product_ids = add_product_ids(recipe)
+    return recipe_with_product_ids
 
-FEW_SHOTS = [
-    {"role": "user", "content": "Give me the list of ingredients for Vanilla cake for 8 servings."},
-    {"role": "assistant", "content": """{
-        "name": "Vanilla Cake",
-        "servings": "8",
-        "ingredients": [
-            {"name": "All purpose flour", "quantity": "315", "unit": "gram"},
-            {"name": "Butter", "quantity": "460", "unit": "gram"},
-            {"name": "Granulated sugar", "quantity": "250", "unit": "gram"},
-            {"name": "Baking powder", "quantity": "12", "unit": "gram"},
-            {"name": "Egg", "quantity": "3", "unit": "pieces"},
-            {"name": "Vanilla extract", "quantity": "10", "unit": "milliliter"},
-            {"name": "Salt", "quantity": "1.5", "unit": "grams"},
-            {"name": "Whole milk", "quantity": "280", "unit": "milliliter"},
-            {"name": "Yogurt", "quantity": "60", "unit": "milliliter"},
-            {"name": "Powdered sugar", "quantity": "500", "unit": "gram"}
-        ]
-    }""" }
-]
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("dish_name", help="name of the dish you want the ingredients for")
+    parser.add_argument("-s", "--servings", help="number of servings you want", type=int)
+    args = parser.parse_args()
+    servings = DEFAULT_NUMBER_OF_SERVINGS if args.servings is None else args.servings
 
-def format_prompt(dish_name, servings):
-    return PROMPT_TEMPLATE.format(dish_name=dish_name, servings=servings)
-
-def generate_completion(client, prompt):
-    return client.chat.completions.create(
-        model=os.getenv("AZURE_OPENAI_GPT_DEPLOYMENT"),
-        messages=[
-            {"role": "system", "content": SYSTEM_MESSAGE},
-            *FEW_SHOTS,
-            {"role": "user", "content": prompt},
-        ],
-        response_format={ "type": "json_object" },
-        top_p=0.2,
-    )
-
-def generate_recipe(dish_name, servings):
-    client = AzureOpenAI(
-        api_version="2023-09-01-preview"
-    )
-    prompt = format_prompt(dish_name, servings)
-    return generate_completion(client, prompt).choices[0].message.content
+    print( get_recipe(args.dish_name, servings) )

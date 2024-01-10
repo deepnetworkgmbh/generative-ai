@@ -1,5 +1,6 @@
 import json
-from recipe_generator import generate_recipe, DEFAULT_NUMBER_OF_SERVINGS
+from recipe_generator import generate_recipe
+from recipe_constants import DEFAULT_NUMBER_OF_SERVINGS
 from search import RECIPE_DB_PATH
 
 OLD_RECIPE_DB_PATH = "./recipe-generator/db-recipes.json"

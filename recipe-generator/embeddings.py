@@ -1,9 +1,9 @@
 import json
 from sentence_transformers import SentenceTransformer
 
-PRODUCT_DB_PATH = "./recipe-generator/product_names.json"
-RECIPE_DB_PATH = "./recipe-generator/new-recipe-db.json"
-REMOVAL_LIST_PATH = "./recipe-generator/removal-list.json"
+PRODUCT_DB_PATH = "./recipe-generator/data/product_names.json"
+RECIPE_DB_PATH = "./recipe-generator/data/new-recipe-db.json"
+REMOVAL_LIST_PATH = "./recipe-generator/data/removal-list.json"
 
 model = SentenceTransformer('all-mpnet-base-v2')
 
