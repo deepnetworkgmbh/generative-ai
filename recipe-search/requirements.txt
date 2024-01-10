@@ -1,2 +1,2 @@
 azure-cognitiveservices-speech
-openai=1.6.1
+openai==1.6.1
