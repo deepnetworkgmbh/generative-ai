@@ -1,4 +1,5 @@
 import json
+import os
 
 import azure.cognitiveservices.speech as speechsdk
 from openai_ask import openai_ask_dish_init
@@ -7,8 +8,8 @@ from openai_ask import openai_ask_general_check
 from openai_ask import openai_ask_count_init
 
 # Speech-to-Text
-stt_key='05e0d71cfca242cbaa7117d138f394ff'
-stt_location='germanywestcentral'
+stt_key=os.environ.get('SPT_API_KEY')
+stt_location=os.environ.get('SPT_REGION')
 
 
 def input_handler(user_inp, language_inp, dish_or_count):

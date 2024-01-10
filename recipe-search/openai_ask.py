@@ -1,9 +1,10 @@
-import json
+import os
+
 from openai import AzureOpenAI
 
 client = AzureOpenAI(
     azure_endpoint='https://openai-dn-fr.openai.azure.com/',
-    api_key='533bb10c9d82416e8731e493104eed3e',
+    api_key=os.environ.get('OPENAI_API_KEY'),
     api_version="2023-09-01-preview"
 )
 
