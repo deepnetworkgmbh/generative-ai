@@ -81,8 +81,7 @@ def recognize_from_microphone():
 
 def setup_speech_recognizer():
     speech_config = speechsdk.SpeechConfig(stt_key, stt_location)
-    speech_config.set_property(speechsdk.PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, "5")
-    speech_config.set_property_by_name('SPEECH-SDK-COMMON-MAX-DURATION', str(1))
+    speech_config.set_property(speechsdk.PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, "3")
     auto_detect_source_language_config = speechsdk.languageconfig.AutoDetectSourceLanguageConfig(languages=["en-US", "de-DE", "tr-TR"])
     audio_config = speechsdk.audio.AudioConfig(use_default_microphone=True)
     speech_recognizer = speechsdk.SpeechRecognizer(
