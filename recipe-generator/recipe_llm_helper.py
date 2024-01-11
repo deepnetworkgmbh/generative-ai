@@ -1,6 +1,3 @@
-import os
-import json
-import argparse
 from openai import AzureOpenAI
 
 JSON_SCHEMA = {
@@ -29,7 +26,6 @@ SYSTEM_MESSAGE = """
     {json_schema}
 """.format(json_schema=JSON_SCHEMA)
 
-
 PROMPT_TEMPLATE = """
     Give me the list of ingredients for {dish_name} for {servings} servings.
 """
@@ -51,27 +47,31 @@ FEW_SHOTS = [
             {"name": "Yogurt", "quantity": "60", "unit": "milliliter"},
             {"name": "Powdered sugar", "quantity": "500", "unit": "gram"}
         ]
-    }""" }
+    }"""}
 ]
+
 
 def format_prompt(dish_name, servings):
     return PROMPT_TEMPLATE.format(dish_name=dish_name, servings=servings)
 
-def generate_completion(client, prompt):
-    return client.chat.completions.create(
-        model=os.getenv("AZURE_OPENAI_GPT_DEPLOYMENT"),
-        messages=[
-            {"role": "system", "content": SYSTEM_MESSAGE},
-            *FEW_SHOTS,
-            {"role": "user", "content": prompt},
-        ],
-        response_format={ "type": "json_object" },
-        top_p=0.2,
-    )
 
-def generate_recipe(dish_name, servings):
-    client = AzureOpenAI(
-        api_version="2023-09-01-preview"
-    )
-    prompt = format_prompt(dish_name, servings)
-    return generate_completion(client, prompt).choices[0].message.content
+class RecipeLlmHelper:
+    def __init__(self, azure_openai_client:AzureOpenAI, azure_openai_model:str):
+        self.azure_openai_model = azure_openai_model
+        self.azure_openai_client = azure_openai_client
+
+    def generate_recipe(self, dish_name, servings):
+        prompt = format_prompt(dish_name, servings)
+        return self.generate_completion(prompt).choices[0].message.content
+
+    def generate_completion(self, prompt):
+        return self.azure_openai_client.chat.completions.create(
+            model=self.azure_openai_model,
+            messages=[
+                {"role": "system", "content": SYSTEM_MESSAGE},
+                *FEW_SHOTS,
+                {"role": "user", "content": prompt},
+            ],
+            response_format={"type": "json_object"},
+            top_p=0.2,
+        )
