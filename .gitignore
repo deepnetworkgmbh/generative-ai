@@ -5,3 +5,6 @@ venv
 
 .DS_Store
 __pycache__
+
+output.json
+new-recipe-db.json

@@ -1,34 +1,13 @@
 import json
-import os
 
 from openai import AzureOpenAI
 
 client = AzureOpenAI(
-    azure_endpoint='https://openai-dn-fr.openai.azure.com/',
-    api_key=os.environ.get('OPENAI_API_KEY'),
     api_version="2023-09-01-preview"
 )
 
 
 def clean_dish_name(user_request, language):
-    # 1. Ask ---
-    # parameters_schema = {
-    #     "type": "object",
-    #     "properties": {
-    #         "meal_name": {
-    #             "type": "string",
-    #             "description": 'The name of the meal. If no name is provided or the name you find is not a valid meal name, return "not_stated".',
-    #         },
-    #     },
-    #     "required": ["meal_name"],
-    # }
-    #
-    # function_schema = {
-    #     "name": "set_meal_name",
-    #     "description": "Get/Scrape meal name from the statement.",
-    #     "parameters": parameters_schema,
-    # }
-
     messages = [{"role": "system", "content": "You are an assistant that gets dish name from the statement."
                                                    "Return json object which consists of 2 fields."
                                                    "These fields are 'is_valid' and 'dish_name'"
@@ -51,7 +30,6 @@ def clean_dish_name(user_request, language):
 
 
 def clean_servings_size(user_request, language):
-    # 1. Ask ---
     messages = [{"role": "system", "content": "You are an assistant that gets number of people from the statement."
                                                    "Return json object which consists of 2 fields."
                                                    "These fields are 'is_valid' and 'number_of_people'"
@@ -93,13 +71,13 @@ def does_input_type_match(input, type,
     # 2. Ask - Double Check ---
     messages_check = [{"role": "system",
                        "content": f"You are an assistant that check if the given input is actually a {type} or not in {language}."
-                                  "Return json object which consists of 1 field called 'is_that_type'."
-                                  f"Set 'is_that_type' field 'True' in string format if it is {type} in {language}."
-                                  f"Set 'is_that_type' field 'False' in string format if it is not {type} in {language}."
+                                  "Return json object which consists of 1 field called 'is_correct_type'."
+                                  f"Set 'is_correct_type' field 'True' in string format if it is {type} in {language}."
+                                  f"Set 'is_correct_type' field 'False' in string format if it is not {type} in {language}."
                                   f"Language of the input is {language}, so please consider that language during type check."
                                   "You must give the list of ingredients using the following JSON schema."
                                   "JSON schema:\n"
-                                  "{'is_that_type': '[IS_THAT_TYPE]'}"
+                                  "{'is_correct_type': '[IS_CORRECT_TYPE]'}"
                        }, {"role": "user", "content": str(input)}]
 
     response_check = client.chat.completions.create(
@@ -110,7 +88,7 @@ def does_input_type_match(input, type,
 
     try:
         response_content_json = json.loads(response_check.choices[0].message.content)
-        return response_content_json['is_that_type']
+        return response_content_json['is_correct_type']
     except ValueError as e:
         return False
 
