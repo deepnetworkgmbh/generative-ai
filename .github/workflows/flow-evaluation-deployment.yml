@@ -3,7 +3,9 @@ name: Test-Evaluate-Deploy Prompts with Promptflow
 on:
   workflow_dispatch:
   push:
-    branches: [ feature/inverseReceipe ]
+    branches: [ main ]
+    paths:
+      - 'flow/**'
 
 env: 
   GROUP: ${{secrets.GROUP}}
