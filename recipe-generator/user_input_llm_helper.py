@@ -1,18 +1,13 @@
 import json
-import os
 
 from openai import AzureOpenAI
 
 
-class AzureOpenAIHelper:
+class UserInputLlmHelper:
 
-    def __init__(self, azure_openai_model):
+    def __init__(self, azure_openai_client:AzureOpenAI, azure_openai_model:str):
         self.azure_openai_model = azure_openai_model
-        self.client = AzureOpenAI(
-            api_version="2023-09-01-preview",
-            api_key=os.getenv("AZURE_OPENAI_KEY"),
-            azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
-        )
+        self.azure_openai_client = azure_openai_client
 
     def clean_dish_name(self, user_request, language):
         messages = [{"role": "system", "content": "You are an assistant that gets dish name from the statement."
@@ -20,20 +15,20 @@ class AzureOpenAIHelper:
                                                        "These fields are 'is_valid' and 'dish_name'"
                                                        "Do not give other information in json."
                                                        "Do not give instructions or ingredients in json object."
-                                                       "If you can find meal name, set 'is_valid' True, and 'dish_name' name of the dish"
-                                                       "If you can not find dish name, set 'is_valid' False, and 'dish_name' not_stated"
-                                                       "Dish name can not be just a product such as apple, orange etc. If so, set 'is_valid' False, and 'dish_name' not_stated"
-                                                       f"Language of the dish is {language}, so please consider that language during dish search."
+                                                       "If you can find meal name, set 'is_valid' to True, and 'dish_name' name of the dish."
+                                                       "Otherwise set set 'is_valid' to False, and 'dish_name' to \"not_stated\"."
+                                                       "Dish name can not be just a product such as apple, orange etc. If so, set 'is_valid' False, and 'dish_name' not_stated."
+                                                       f"Language of the dish is {language}, so please consider that language during evaluation."
                                                        "You must give the list of ingredients using the following JSON schema."
+                                                       "Do not put the resulting Json into ```json ``` code block."
                                                        "JSON schema:\n"
-                                                       "{\"dish_name\": '[DISH_NAME]', \"is_valid\": [IS_VALID]}"
+                                                       "{\"dish_name\": \"[DISH_NAME]\", \"is_valid\": [IS_VALID]}"
                           }, {"role": "user", "content": user_request}]
 
-        return self.client.chat.completions.create(
+        return self.azure_openai_client.chat.completions.create(
             model="test-deployment",
             messages=messages
         )
-
 
     def clean_servings_size(self, user_request, language):
         messages = [{"role": "system", "content": "You are an assistant that gets number of people from the statement."
@@ -47,15 +42,15 @@ class AzureOpenAIHelper:
                                                        "If given value is not integer such as '3.5' or '4/5' etc.; set 'is_valid' False and 'number_of_people' not_stated"
                                                        f"User input can be given any language such as 'five men', 'vier mensch' or 'bes kisi'. Consider {language} while responding."
                                                        "You must give the list of ingredients using the following JSON schema."
+                                                       "Do not put the resulting Json into ```json ``` code block."
                                                        "JSON schema:\n"
                                                        "{\"number_of_people\": '[NUMBER_OF_PEOPLE]', \"is_valid\": [IS_VALID]}"
                           }, {"role": "user", "content": user_request}]
 
-        return self.client.chat.completions.create(
+        return self.azure_openai_client.chat.completions.create(
             model=self.azure_openai_model,
             messages=messages
         )
-
 
     def ask_language(self, user_request):
         messages_check = [
@@ -66,12 +61,11 @@ class AzureOpenAIHelper:
                                           "Do not return full sentence such as 'Cannot determine language from the given input...' when could not determine language."
              }, {"role": "user", "content": user_request}]
 
-        response_check = self.client.chat.completions.create(
+        response_check = self.azure_openai_client.chat.completions.create(
             model=self.azure_openai_model,
             messages=messages_check,
         )
         return response_check.choices[0].message.content
-
 
     def does_input_type_match(self, input, type,
                               language):  # input, type --> if 'input' is really a 'type' -> type in system message, 'input' in user message
@@ -83,11 +77,12 @@ class AzureOpenAIHelper:
                                       f"Set 'is_correct_type' field False in string format if it is not {type} in {language}."
                                       f"Language of the input is {language}, so please consider that language during type check."
                                       "You must give the list of ingredients using the following JSON schema."
+                                      "Do not put the resulting Json into ```json ``` code block."
                                       "JSON schema:\n"
                                       "{\"is_correct_type\": [IS_CORRECT_TYPE]}"
                            }, {"role": "user", "content": str(input)}]
 
-        response_check = self.client.chat.completions.create(
+        response_check = self.azure_openai_client.chat.completions.create(
             model=self.azure_openai_model,
             messages=messages_check
         )
