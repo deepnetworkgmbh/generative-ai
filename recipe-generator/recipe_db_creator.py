@@ -1,14 +1,14 @@
 import json
 from recipe_generator import generate_recipe
 from recipe_constants import DEFAULT_NUMBER_OF_SERVINGS
-from search import RECIPE_DB_PATH
+from recipe_constants import RECIPE_DB_PATH
 
-OLD_RECIPE_DB_PATH = "./recipe-generator/db-recipes.json"
+EXISTING_RECIPE_DB_PATH = "./recipe-generator/data/existing-recipes-db.json"
 NUMBER_OF_RECIPES = 10
 
 recipe_names = []
 
-with open(OLD_RECIPE_DB_PATH, 'r') as file:
+with open(EXISTING_RECIPE_DB_PATH, 'r') as file:
     db = json.load(file)
     for recipe in db.values():
         recipe_names.append(recipe["name"])
