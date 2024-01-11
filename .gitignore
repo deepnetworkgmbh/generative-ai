@@ -7,3 +7,4 @@ venv
 __pycache__
 
 output.json
+new-recipe-db.json
