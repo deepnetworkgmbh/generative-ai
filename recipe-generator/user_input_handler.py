@@ -2,7 +2,7 @@ import json
 import os
 from enum import Enum
 import azure.cognitiveservices.speech as speechsdk
-from openai_ask import AzureOpenAIHelper
+from user_input_llm_helper import AzureOpenAIHelper
 
 
 class UserInputType(Enum):

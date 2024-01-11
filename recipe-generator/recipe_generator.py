@@ -6,6 +6,8 @@ from embeddings import Embeddings
 from recipe_llm_helper import generate_recipe
 from recipe_constants import DEFAULT_NUMBER_OF_SERVINGS
 
+from user_input_getter import UserInputGetter
+
 
 class RecipeGenerator:
     def __init__(self, search: Search):
@@ -40,13 +42,18 @@ def _adjust_ingredient_quantity(recipe, servings):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("dish_name", help="name of the dish you want the ingredients for")
-    parser.add_argument("-s", "--servings", help="number of servings you want", type=int)
-    args = parser.parse_args()
-    servings = DEFAULT_NUMBER_OF_SERVINGS if args.servings is None else args.servings
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument("dish_name", help="name of the dish you want the ingredients for")
+    # parser.add_argument("-s", "--servings", help="number of servings you want", type=int)
+    # args = parser.parse_args()
+    # servings = DEFAULT_NUMBER_OF_SERVINGS if args.servings is None else args.servings
 
     embeddings = Embeddings()
     search = Search(embeddings)
     recipe_gen = RecipeGenerator(search)
-    print( recipe_gen.get_recipe(args.dish_name, servings) )
+
+    # Get user request; Dish Name and Serving Count
+    user_input_getter = UserInputGetter('test-deployment')
+    dish_name, serving_count = user_input_getter.get_user_request()
+
+    print( recipe_gen.get_recipe(dish_name, serving_count) )
