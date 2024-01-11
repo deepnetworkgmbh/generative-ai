@@ -2,12 +2,16 @@ name: Test-Evaluate-Deploy Prompts with Promptflow
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'flow/**'
   push:
     branches: [ main ]
     paths:
       - 'flow/**'
 
-env: 
+env:
   GROUP: ${{secrets.GROUP}}
   WORKSPACE: ${{secrets.WORKSPACE}}
   SUBSCRIPTION: ${{secrets.SUBSCRIPTION}}
@@ -21,7 +25,7 @@ env:
   SP_USER: ${{secrets.SP_USER}}
   SP_PASS: ${{secrets.SP_PASS}}
   SP_TENANT: ${{secrets.SP_TENANT}}
-  ENDPOINT_NAME: pf-endpoint
+  ENDPOINT_NAME: demo-endpoint
   DEPLOYMENT_NAME: deployment
 
 jobs:
@@ -30,155 +34,163 @@ jobs:
     outputs:
       deployModel: ${{ steps.EvalResult.outputs.eval_result }}
     steps:
-    - name: Check out repo
-      uses: actions/checkout@v2
-    - name: Install az ml extension
-      run: az extension add -n ml -y
-    - name: Azure login
-      run: |
-        az login --service-principal -u ${{env.SP_USER}} -p ${{env.SP_PASS}} --tenant ${{env.SP_TENANT}}
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.11.4'
-    - name: Install promptflow
-      run: pip install -r flow/promptflow/web-classification/requirements.txt
-    - name: Set Compute and Runtime Names
-      run: |
-        echo "${{ github.run_id }}"
-        unique_identifier=${{ github.run_id }}
-        echo "$unique_identifier"
-        unique_identifier_first_10="${unique_identifier:0:10}"
-        echo "$unique_identifier_first_10"
-        
-        new_compute_name="${{env.COMPUTE_NAME_PRE}}$unique_identifier_first_10"
-        new_runtime_name="${{env.RUNTIME_NAME_PRE}}$unique_identifier_first_10"
-        echo $new_compute_name
-        echo $new_runtime_name
-        
-        echo "COMPUTE_NAME=$new_compute_name" >> "$GITHUB_ENV"
-        echo "RUNTIME_NAME=$new_runtime_name" >> "$GITHUB_ENV"
-        
-        sed "s#runtime: llm-runtime#runtime: $new_runtime_name#" flow/promptflow/web-classification/run.yml > flow/promptflow/web-classification/run_temp.yml && mv flow/promptflow/web-classification/run_temp.yml flow/promptflow/web-classification/run.yml
-        sed "s#runtime: llm-runtime#runtime: $new_runtime_name#" flow/promptflow/web-classification/run_evaluation.yml > flow/promptflow/web-classification/run_evaluation_temp.yml && mv flow/promptflow/web-classification/run_evaluation_temp.yml flow/promptflow/web-classification/run_evaluation.yml
-        
-        rm -rf flow/promptflow/web-classification/run_temp.yml
-        rm -rf flow/promptflow/web-classification/run_evaluation_temp.yml
-        
-        cat flow/promptflow/web-classification/run.yml
-        cat flow/promptflow/web-classification/run_evaluation.yml
+      - name: Check out repo
+        uses: actions/checkout@v4
+      - name: Install az ml extension
+        run: az extension add -n ml -y
+      - name: Azure login
+        run: |
+          az login --service-principal -u ${{env.SP_USER}} -p ${{env.SP_PASS}} --tenant ${{env.SP_TENANT}}
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11.4'
+      - name: Install promptflow
+        run: pip install -r flow/promptflow/web-classification/requirements.txt
+      - name: Set Compute and Runtime Names
+        run: |
+          echo "${{ github.run_id }}"
+          unique_identifier=${{ github.run_id }}
+          echo "$unique_identifier"
+          unique_identifier_first_10="${unique_identifier:0:10}"
+          echo "$unique_identifier_first_10"
+          
+          new_compute_name="${{env.COMPUTE_NAME_PRE}}$unique_identifier_first_10"
+          new_runtime_name="${{env.RUNTIME_NAME_PRE}}$unique_identifier_first_10"
+          echo $new_compute_name
+          echo $new_runtime_name
+          
+          echo "COMPUTE_NAME=$new_compute_name" >> "$GITHUB_ENV"
+          echo "RUNTIME_NAME=$new_runtime_name" >> "$GITHUB_ENV"
+          
+          sed "s#runtime: llm-runtime#runtime: $new_runtime_name#" flow/promptflow/web-classification/run.yml > flow/promptflow/web-classification/run_temp.yml && mv flow/promptflow/web-classification/run_temp.yml flow/promptflow/web-classification/run.yml
+          sed "s#runtime: llm-runtime#runtime: $new_runtime_name#" flow/promptflow/web-classification/run_evaluation.yml > flow/promptflow/web-classification/run_evaluation_temp.yml && mv flow/promptflow/web-classification/run_evaluation_temp.yml flow/promptflow/web-classification/run_evaluation.yml
+          
+          rm -rf flow/promptflow/web-classification/run_temp.yml
+          rm -rf flow/promptflow/web-classification/run_evaluation_temp.yml
+          
+          cat flow/promptflow/web-classification/run.yml
+          cat flow/promptflow/web-classification/run_evaluation.yml
 
-    - name: Create Managed Identity
-      run: |
-        az account set -s ${{env.SUBSCRIPTION}}
-        az identity create -g ${{env.GROUP}} -n ${{env.MANAGED_IDENTITY_NAME}} --query "id"
-        um_details=$(az identity show -g ${{env.GROUP}} -n ${{env.MANAGED_IDENTITY_NAME}} --query "[id, clientId, principalId]")
-        user_managed_id="$(echo $um_details | jq -r '.[0]')" 
-        principalId="$(echo $um_details | jq -r '.[2]')"
-        echo "USER_MANAGED_ID=$user_managed_id" >> "$GITHUB_ENV"
-        echo "PRINCIPAL_ID=$principalId" >> "$GITHUB_ENV"
-    - name: Assign "AzureML Data Scientist" role to MSI
-      run: |
-        az role assignment create --assignee-object-id ${{env.PRINCIPAL_ID}} --assignee-principal-type ServicePrincipal --role "AzureML Data Scientist" --scope "/subscriptions/${{env.SUBSCRIPTION}}/resourcegroups/${{env.GROUP}}/providers/Microsoft.MachineLearningServices/workspaces/${{env.WORKSPACE}}"
-    - name: Create Azure ML Compute Instance
-      run: |
-        echo "Creating compute instance: ${{env.COMPUTE_NAME}}"
-        az ml compute create --name ${{env.COMPUTE_NAME}} --size Standard_DS1_v2 --identity-type UserAssigned --type ComputeInstance --resource-group ${{env.GROUP}} --workspace-name ${{env.WORKSPACE}} --user-assigned-identities ${{env.USER_MANAGED_ID}}
-    - name: Create Test Runtime
-      run: |
-        access_token=$(az account get-access-token | jq -r ".accessToken")
-        runtime_url_post=$(echo "https://ml.azure.com/api/${{env.LOCATION}}/flow/api/subscriptions/${{env.SUBSCRIPTION}}/resourceGroups/${{env.GROUP}}/providers/Microsoft.MachineLearningServices/workspaces/${{env.WORKSPACE}}/FlowRuntimes/${{env.RUNTIME_NAME}}?asyncCall=true")
-        curl --request POST \
-          --url "$runtime_url_post" \
-          --header "Authorization: Bearer $access_token" \
-          --header 'Content-Type: application/json' \
-          --data "{
-          \"runtimeType\": \"ComputeInstance\",
-          \"computeInstanceName\": \"${{env.COMPUTE_NAME}}\",
-        }"
-        
-        http_response="Unavailable"
-        while : ; do
-          echo "Waiting runtime... 1"
-          if [ "$http_response" = "null" ]; then
-              echo "Exiting from the while loop..."
-              break
-          fi
-          runtime_url_get=$(echo "https://ml.azure.com/api/${{env.LOCATION}}/flow/api/subscriptions/${{env.SUBSCRIPTION}}/resourceGroups/${{env.GROUP}}/providers/Microsoft.MachineLearningServices/workspaces/${{env.WORKSPACE}}/FlowRuntimes/${{env.RUNTIME_NAME}}")
-          http_response=$(curl --request GET \
-            --url "$runtime_url_get" \
+      - name: Create Managed Identity
+        run: |
+          az account set -s ${{env.SUBSCRIPTION}}
+          az identity create -g ${{env.GROUP}} -n ${{env.MANAGED_IDENTITY_NAME}} --query "id"
+          um_details=$(az identity show -g ${{env.GROUP}} -n ${{env.MANAGED_IDENTITY_NAME}} --query "[id, clientId, principalId]")
+          user_managed_id="$(echo $um_details | jq -r '.[0]')" 
+          principalId="$(echo $um_details | jq -r '.[2]')"
+          echo "USER_MANAGED_ID=$user_managed_id" >> "$GITHUB_ENV"
+          echo "PRINCIPAL_ID=$principalId" >> "$GITHUB_ENV"
+      - name: Assign "AzureML Data Scientist" role to MSI
+        run: |
+          az role assignment create --assignee-object-id ${{env.PRINCIPAL_ID}} --assignee-principal-type ServicePrincipal --role "AzureML Data Scientist" --scope "/subscriptions/${{env.SUBSCRIPTION}}/resourcegroups/${{env.GROUP}}/providers/Microsoft.MachineLearningServices/workspaces/${{env.WORKSPACE}}"
+      - name: Create Azure ML Compute Instance
+        run: |
+          echo "Creating compute instance: ${{env.COMPUTE_NAME}}"
+          az ml compute create --name ${{env.COMPUTE_NAME}} --size Standard_DS1_v2 --identity-type UserAssigned --type ComputeInstance --resource-group ${{env.GROUP}} --workspace-name ${{env.WORKSPACE}} --user-assigned-identities ${{env.USER_MANAGED_ID}}
+      - name: Create Test Runtime
+        run: |
+          access_token=$(az account get-access-token | jq -r ".accessToken")
+          runtime_url_post=$(echo "https://ml.azure.com/api/${{env.LOCATION}}/flow/api/subscriptions/${{env.SUBSCRIPTION}}/resourceGroups/${{env.GROUP}}/providers/Microsoft.MachineLearningServices/workspaces/${{env.WORKSPACE}}/FlowRuntimes/${{env.RUNTIME_NAME}}?asyncCall=true")
+          curl --request POST \
+            --url "$runtime_url_post" \
             --header "Authorization: Bearer $access_token" \
-            | jq -r '.status')
-          echo "Waiting runtime... 2"
-          echo $http_response
-          sleep 100
-        done
-    - name: Run promptflow
-      run: |
-        pfazure run create -f flow/promptflow/web-classification/run.yml --subscription ${{env.SUBSCRIPTION}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}} --stream
-        pfazure run create -f flow/promptflow/web-classification/run.yml --subscription ${{env.SUBSCRIPTION}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}} --stream > flow/promptflow/llmops-helper/run_info.txt
-        echo "RUN_NAME=$(python flow/promptflow/llmops-helper/parse_run_output.py run_info.txt)" >> "$GITHUB_ENV"
-    - name: Show promptflow results
-      run: pfazure run show-details --name ${{env.RUN_NAME}} --subscription ${{env.SUBSCRIPTION}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
-    - name: Run promptflow evaluations
-      run: |
-        pfazure run create -f flow/promptflow/web-classification/run_evaluation.yml --run ${{env.RUN_NAME}} --subscription ${{env.SUBSCRIPTION}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}} --stream > flow/promptflow/llmops-helper/eval_info.txt
-        echo "EVAL_RUN_NAME=$(python flow/promptflow/llmops-helper/parse_run_output.py eval_info.txt)" >> "$GITHUB_ENV"
-    - name: Show promptflow evaluation Results
-      run: |
-        pfazure run show-metrics --name ${{env.EVAL_RUN_NAME}} --subscription ${{env.SUBSCRIPTION}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
-        pfazure run show-metrics --name ${{env.EVAL_RUN_NAME}} --subscription ${{env.SUBSCRIPTION}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}} > flow/promptflow/llmops-helper/eval_result.json
-    - name: Get assert eval results
-      id: EvalResult
-      run: |
-        export ASSERT=$(python flow/promptflow/llmops-helper/assert.py eval_result.json 0.6)
-        if ${ASSERT,,} ; then
-          echo "eval_result=true" >> $GITHUB_OUTPUT
-        else
-          echo "eval_result=false" >> $GITHUB_OUTPUT
-        fi
-    - name: Delete Test Sources
-      run: |
-        az ml compute delete --yes --name ${{env.COMPUTE_NAME}} --resource-group ${{env.GROUP}} --workspace-name ${{env.WORKSPACE}}
-
+            --header 'Content-Type: application/json' \
+            --data "{
+            \"runtimeType\": \"ComputeInstance\",
+            \"computeInstanceName\": \"${{env.COMPUTE_NAME}}\",
+          }"
+          
+          http_response="Unavailable"
+          while : ; do
+            echo "Waiting runtime... 1"
+            if [ "$http_response" = "null" ]; then
+                echo "Exiting from the while loop..."
+                break
+            fi
+            runtime_url_get=$(echo "https://ml.azure.com/api/${{env.LOCATION}}/flow/api/subscriptions/${{env.SUBSCRIPTION}}/resourceGroups/${{env.GROUP}}/providers/Microsoft.MachineLearningServices/workspaces/${{env.WORKSPACE}}/FlowRuntimes/${{env.RUNTIME_NAME}}")
+            http_response=$(curl --request GET \
+              --url "$runtime_url_get" \
+              --header "Authorization: Bearer $access_token" \
+              | jq -r '.status')
+            echo "Waiting runtime... 2"
+            echo $http_response
+            sleep 500
+          done
+      - name: Run promptflow
+        run: |
+          pfazure run create -f flow/promptflow/web-classification/run.yml --subscription ${{env.SUBSCRIPTION}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}} --stream
+          pfazure run create -f flow/promptflow/web-classification/run.yml --subscription ${{env.SUBSCRIPTION}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}} --stream > flow/promptflow/llmops-helper/run_info.txt
+          echo "RUN_NAME=$(python flow/promptflow/llmops-helper/parse_run_output.py run_info.txt)" >> "$GITHUB_ENV"
+      - name: Show promptflow results
+        run: pfazure run show-details --name ${{env.RUN_NAME}} --subscription ${{env.SUBSCRIPTION}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
+      - name: Run promptflow evaluations
+        run: |
+          pfazure run create -f flow/promptflow/web-classification/run_evaluation.yml --run ${{env.RUN_NAME}} --subscription ${{env.SUBSCRIPTION}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}} --stream > flow/promptflow/llmops-helper/eval_info.txt
+          echo "EVAL_RUN_NAME=$(python flow/promptflow/llmops-helper/parse_run_output.py eval_info.txt)" >> "$GITHUB_ENV"
+      - name: Show promptflow evaluation Results
+        run: |
+          pfazure run show-metrics --name ${{env.EVAL_RUN_NAME}} --subscription ${{env.SUBSCRIPTION}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
+          pfazure run show-metrics --name ${{env.EVAL_RUN_NAME}} --subscription ${{env.SUBSCRIPTION}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}} > flow/promptflow/llmops-helper/eval_result.json
+      - name: Get assert eval results
+        id: EvalResult
+        run: |
+          export ASSERT=$(python flow/promptflow/llmops-helper/assert.py result.json 0.6)
+          if ${ASSERT,,} ; then
+            echo "eval_result=true" >> $GITHUB_OUTPUT
+          else
+            echo "eval_result=false" >> $GITHUB_OUTPUT
+          fi
+      - name: Delete Test Sources
+        run: |
+          az ml compute delete --yes --name ${{env.COMPUTE_NAME}} --resource-group ${{env.GROUP}} --workspace-name ${{env.WORKSPACE}}
 
   deployment:
     runs-on: ubuntu-latest
     needs:
       - evaluation
-    if: needs.evaluation.outputs.deployModel == 'true'
+    if: github.ref == 'refs/heads/main' && needs.evaluation.outputs.deployModel == 'true'
     steps:
-    - name: Check out repo
-      uses: actions/checkout@v2
-    - name: Install az ml extension
-      run: az extension add -n ml -y
-    - name: Azure login
-      run: |
-        az login --service-principal -u ${{env.SP_USER}} -p ${{env.SP_PASS}} --tenant ${{env.SP_TENANT}}
-        az account set -s ${{env.SUBSCRIPTION}}
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.11.4'
-    - name: Install promptflow
-      run: pip install -r flow/promptflow/web-classification/requirements.txt
-    - name: Register promptflow model
-      run: az ml model create --file flow/promptflow/deployment/model.yaml  -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
-    - name: Setup endpoint
-      run: |
-        az ml online-endpoint create --file flow/promptflow/deployment/endpoint.yaml  --name ${{env.ENDPOINT_NAME}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
-    - name: Check the status of the endpoint
-      run: az ml online-endpoint show -n ${{env.ENDPOINT_NAME}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
-    - name: Update deployment PRT_CONFIG variable
-      run: |
-        PRT_CONFIG_OVERRIDE=deployment.subscription_id=${{ env.SUBSCRIPTION }},deployment.resource_group=${{ env.GROUP }},deployment.workspace_name=${{ env.WORKSPACE }},deployment.endpoint_name=${{ env.ENDPOINT_NAME }},deployment.deployment_name=${{ env.DEPLOYMENT_NAME }}
-        sed -i "s/PRT_CONFIG_OVERRIDE:.*/PRT_CONFIG_OVERRIDE: $PRT_CONFIG_OVERRIDE/g" flow/promptflow/deployment/deployment.yaml
-    - name: Setup deployment
-      run: az ml online-deployment create --file flow/promptflow/deployment/deployment.yaml --endpoint-name ${{env.ENDPOINT_NAME}} --all-traffic -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
-    - name: Check the status of the deployment
-      run: az ml online-deployment get-logs --name test-1 --endpoint-name ${{env.ENDPOINT_NAME}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
+      - name: Check out repo
+        uses: actions/checkout@v4
+      - name: Install az ml extension
+        run: az extension add -n ml -y
+      - name: Azure login
+        run: |
+          az login --service-principal -u ${{env.SP_USER}} -p ${{env.SP_PASS}} --tenant ${{env.SP_TENANT}}
+          az account set -s ${{env.SUBSCRIPTION}}
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11.4'
+      - name: Install promptflow
+        run: pip install -r flow/promptflow/web-classification/requirements.txt
+      - name: Register promptflow model
+        run: az ml model create --file flow/promptflow/deployment/model.yaml  -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
+      - name: Set Endpoint Name
+        run: |
+          echo "${{ github.run_id }}"
+          unique_identifier=${{ github.run_id }}
+          unique_identifier_first_10="${unique_identifier:0:10}"
+          
+          new_endpoint_name="${{env.ENDPOINT_NAME}}$unique_identifier_first_10"
+          echo $new_endpoint_name
+          
+          echo "ENDPOINT_NAME=$new_endpoint_name" >> "$GITHUB_ENV"
 
-
+      - name: Setup endpoint
+        run: |
+          az ml online-endpoint create --file flow/promptflow/deployment/endpoint.yaml  --name ${{env.ENDPOINT_NAME}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
+      - name: Check the status of the endpoint
+        run: az ml online-endpoint show -n ${{env.ENDPOINT_NAME}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
+      - name: Update deployment PRT_CONFIG variable
+        run: |
+          PRT_CONFIG_OVERRIDE=deployment.subscription_id=${{ env.SUBSCRIPTION }},deployment.resource_group=${{ env.GROUP }},deployment.workspace_name=${{ env.WORKSPACE }},deployment.endpoint_name=${{ env.ENDPOINT_NAME }},deployment.deployment_name=${{ env.DEPLOYMENT_NAME }}
+          sed -i "s/PRT_CONFIG_OVERRIDE:.*/PRT_CONFIG_OVERRIDE: $PRT_CONFIG_OVERRIDE/g" flow/promptflow/deployment/deployment.yaml
+      - name: Setup deployment
+        run: az ml online-deployment create --file flow/promptflow/deployment/deployment.yaml --endpoint-name ${{env.ENDPOINT_NAME}} --all-traffic -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
+      - name: Check the status of the deployment
+        run: az ml online-deployment get-logs --name test-1 --endpoint-name ${{env.ENDPOINT_NAME}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
 
 
 
