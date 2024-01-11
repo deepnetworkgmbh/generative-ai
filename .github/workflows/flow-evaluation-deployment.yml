@@ -11,6 +11,7 @@ on:
     paths:
       - 'flow/**'
 
+
 env:
   GROUP: ${{secrets.GROUP}}
   WORKSPACE: ${{secrets.WORKSPACE}}
