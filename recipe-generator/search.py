@@ -15,6 +15,11 @@ class Search:
             return False
         return True
 
+    def search_in_ingredients_at_home(self, query_product_name):
+        if self._search_in_embeddings(query_product_name, self.embeddings.ingredients_at_home_embeddings) is None:
+            return False
+        return True
+
     def search_in_recipe_db(self, query_product_name):
         if index:= self._search_in_embeddings(query_product_name, self.embeddings.recipe_embeddings):
             return self.embeddings.recipes[index]

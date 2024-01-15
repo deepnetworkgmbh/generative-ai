@@ -8,6 +8,7 @@ from recipe_generator import RecipeGenerator
 from embeddings import Embeddings
 from search import Search
 from recipe_llm_helper import RecipeLlmHelper
+from recipe_constants import *
 
 IMPORTANT_INFORMATION = """
 - Dietary restrictions or preferences, eg. being vegeterian, having alergies
@@ -68,10 +69,17 @@ def get_dish_name_from_chat(client, history):
 def print_missing_ingredients(recipe):
     print("Missing ingredients:")
     for ingredient in recipe["ingredients"]:
-        print(f"- {ingredient['name']}")
+        print(f"- {ingredient['name']} -- {ingredient['quantity']} {ingredient['unit']}")
 
-def find_reverse_recipe(user_input_handler, recipe_gen, client, ingredient_file):
-    ingredients = get_ingredients(ingredient_file)
+def print_ingredients_at_home():
+    print("Ingredients at home:")
+    with open(INGREDIENTS_AT_HOME) as file:
+        ingredients = json.load(file)
+        for ingredient in ingredients:
+            print(f"- {ingredient}")
+
+def find_reverse_recipe(user_input_handler, recipe_gen, client):
+    ingredients = get_ingredients(INGREDIENTS_AT_HOME)
     system_message = SYSTEM_MESSAGE.format(ingredients=ingredients, important_information=IMPORTANT_INFORMATION)
     messages = [{"role": "system", "content": system_message}]
     print('You can type "yes" to choose a dish or "exit" to stop the program.')
@@ -87,6 +95,8 @@ def find_reverse_recipe(user_input_handler, recipe_gen, client, ingredient_file)
                 servings = input("For how many servings?\n")
                 servings = user_input_handler.clean_servings_input(eliminate_punctuations(servings), user_input_handler.not_defined_language)
                 recipe = recipe_gen.get_recipe(dish_name, servings)
+                recipe["ingredients"] = [ingredient for ingredient in recipe["ingredients"] if
+                                 not recipe_gen.search.search_in_ingredients_at_home(ingredient["name"])]
                 print_missing_ingredients(recipe)
             break
         elif prompt == "exit":
@@ -100,6 +110,7 @@ if __name__ == "__main__":
     )
     azure_openai_model_name = os.getenv('AZURE_OPENAI_GPT_DEPLOYMENT')
     embeddings = Embeddings()
+    embeddings.embed_ingredients_at_home()
     search = Search(embeddings)
 
     recipe_llm_helper = RecipeLlmHelper(client, azure_openai_model_name)
@@ -108,4 +119,5 @@ if __name__ == "__main__":
     user_input_llm_helper = UserInputLlmHelper(client, azure_openai_model_name)
     user_input_handler = UserInputHandler(user_input_llm_helper, None)
 
-    find_reverse_recipe(user_input_handler, recipe_gen, client, "./recipe-generator/data/ingredients_at_home.json")
+    print_ingredients_at_home()
+    find_reverse_recipe(user_input_handler, recipe_gen, client)
