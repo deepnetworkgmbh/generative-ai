@@ -34,7 +34,7 @@ class UserInputLlmHelper:
         ]
 
         return self.azure_openai_client.chat.completions.create(
-            model="test-deployment",
+            model=self.azure_openai_model,
             messages=messages,
             response_format={"type": "json_object"}
         )
@@ -100,8 +100,8 @@ class UserInputLlmHelper:
                 "role": "system",
                 "content": f"You are an assistant that check if the given input is actually a {type} or not in {language}."
                            "Return json object which consists of 1 field called 'is_correct_type'."
-                           f"Set 'is_correct_type' field true in string format if it is {type} in {language}."
-                           f"Set 'is_correct_type' field false in string format if it is not {type} in {language}."
+                           f"Set 'is_correct_type' field true in boolean format if it is {type} in {language}."
+                           f"Set 'is_correct_type' field false in boolean format if it is not {type} in {language}."
                            f"Language of the input is {language}, so please consider that language during type check."
                            "You must give the list of ingredients using the following JSON schema."
                            "Do not put the resulting Json into ```json ``` code block."
