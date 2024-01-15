@@ -3,7 +3,7 @@ import time
 import unittest
 from openai import AzureOpenAI
 from recipe_llm_helper import RecipeLlmHelper, format_prompt
-
+import tester_constants
 
 class TestRecipeLlmHelper(unittest.TestCase):
 
@@ -28,22 +28,11 @@ class TestRecipeLlmHelper(unittest.TestCase):
             response = self.recipe_llm_helper.generate_completion(prompt)
             token_count += response.usage.total_tokens
         end_time = time.time()
+        print("GENERATE RECIPE Test - Mixed")
         print(f"(Mix Batch Data) Elaspsed Time (seconds): {end_time - start_time}")
         print(f"Total token: {token_count}")
-        print(f"Average token: {float(token_count) / 100.0}")
-
-    # def test_generate_recipe_full_response(self):
-    #     start_time = time.time()
-    #     token_count = 0.0
-    #     for input in self.test_generate_recipe_data_mix:
-    #         response = self.recipe_llm_helper.generate_recipe(input[0], input[1])
-    #         token_count += response.usage.total_tokens
-    #     end_time = time.time()
-    #     print(f"(Mix Batch Data) Elaspsed Time (seconds): {end_time - start_time}")
-    #     print(f"Total token: {token_count}")
-    #     print(f"Average token: {float(token_count) / 100.0}")
-
-
+        print(f"Average token: {((token_count) / float(tester_constants.GENERATE_RECIPE) * 100.0)}")
+        print(f"Cost: {response.usage.completion_tokens * 0.000001 + response.usage.prompt_tokens * 0.000002}")
 
 if __name__ == "__main__":
     unittest.main()

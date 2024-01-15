@@ -1,8 +1,10 @@
+import json
 import os
 import time
 import unittest
 from openai import AzureOpenAI
 from user_input_llm_helper import UserInputLlmHelper
+import tester_constants
 
 
 
@@ -57,93 +59,117 @@ class TestUserInputLlmHelper(unittest.TestCase):
                 sentence = line.split(" - ")
                 self.test_type_match_data.append([sentence[0], sentence[1], sentence[2]])
 
-    def test_dish_time_count_english_batch(self):
+    def test_dish_time_token_english_batch(self):
         start_time = time.time()
         token_count = 0
         for input_sentence in self.test_dish_data_english:
             response = self.user_input_llm_helper.clean_dish_name(input_sentence, 'English')
             token_count += response.usage.total_tokens
         end_time = time.time()
+        print("DISH Test - English")
         print(f"(English Batch Data) Elaspsed Time (seconds): {end_time - start_time}")
         print(f"Total token: {token_count}")
-        print(f"Average token: {float(token_count) / 50.0}")
+        print(f"Average token: {float(token_count) / float(tester_constants.DISH_DATA_ENGLISH)}")
+        print(f"Cost: {response.usage.completion_tokens * 0.000001 + response.usage.prompt_tokens * 0.000002}")
 
-    def test_dish_time_count_german_batch(self):
+    def test_dish_time_token_german_batch(self):
         start_time = time.time()
         token_count = 0
         for input_sentence in self.test_dish_data_german:
             response = self.user_input_llm_helper.clean_dish_name(input_sentence, 'German')
             token_count += response.usage.total_tokens
         end_time = time.time()
+        print("DISH Test - German")
         print(f"(German Batch Data) Elaspsed Time (seconds): {end_time - start_time}")
         print(f"Total token: {token_count}")
-        print(f"Average token: {float(token_count) / 50.0}")
+        print(f"Average token: {float(token_count) / float(tester_constants.DISH_DATA_GERMAN)}")
+        print(f"Cost: {response.usage.completion_tokens * 0.000001 + response.usage.prompt_tokens * 0.000002}")
 
-    def test_dish_time_count_turkish_batch(self):
+    def test_dish_time_token_turkish_batch(self):
         start_time = time.time()
         token_count = 0
         for input_sentence in self.test_dish_data_turkish:
             response = self.user_input_llm_helper.clean_dish_name(input_sentence, 'Turkish')
             token_count += response.usage.total_tokens
         end_time = time.time()
+        print("DISH Test - Turkish")
         print(f"(Turkish Batch Data) Elaspsed Time (seconds): {end_time - start_time}")
         print(f"Total token: {token_count}")
-        print(f"Average token: {float(token_count) / 50.0}")
+        print(f"Average token: {float(token_count) / float(tester_constants.DISH_DATA_TURKISH)}")
+        print(f"Cost: {response.usage.completion_tokens * 0.000001 + response.usage.prompt_tokens * 0.000002}")
 
-    def test_count_time_count_english_batch(self):
+    def test_count_time_token_english_batch(self):
         start_time = time.time()
         token_count = 0
         for input_sentence in self.test_count_data_english:
             response = self.user_input_llm_helper.clean_servings_size(input_sentence, 'English')
             token_count += response.usage.total_tokens
         end_time = time.time()
+        print("SERVING SIZE Test - English")
         print(f"(English Batch Data) Elaspsed Time (seconds): {end_time - start_time}")
         print(f"Total token: {token_count}")
-        print(f"Average token: {float(token_count) / 50.0}")
+        print(f"Average token: {float(token_count) / float(tester_constants.COUNT_DATA_ENGLISH)}")
+        print(f"Cost: {response.usage.completion_tokens * 0.000001 + response.usage.prompt_tokens * 0.000002}")
 
-    def test_count_time_count_german_batch(self):
+    def test_count_time_token_german_batch(self):
         start_time = time.time()
         token_count = 0
         for input_sentence in self.test_dish_data_german:
             response = self.user_input_llm_helper.clean_servings_size(input_sentence, 'German')
             token_count += response.usage.total_tokens
         end_time = time.time()
+        print("SERVING SIZE Test - German")
         print(f"(German Batch Data) Elaspsed Time (seconds): {end_time - start_time}")
         print(f"Total token: {token_count}")
-        print(f"Average token: {float(token_count) / 50.0}")
+        print(f"Average token: {float(token_count) / float(tester_constants.COUNT_DATA_GERMAN)}")
+        print(f"Cost: {response.usage.completion_tokens * 0.000001 + response.usage.prompt_tokens * 0.000002}")
 
-    def test_count_time_count_turkish_batch(self):
+    def test_count_time_token_turkish_batch(self):
         start_time = time.time()
         token_count = 0
         for input_sentence in self.test_count_data_turkish:
             response = self.user_input_llm_helper.clean_dish_name(input_sentence, 'Turkish')
             token_count += response.usage.total_tokens
         end_time = time.time()
+        print("SERVING SIZE Test - Turkish")
         print(f"(Turkish Batch Data) Elaspsed Time (seconds): {end_time - start_time}")
         print(f"Total token: {token_count}")
-        print(f"Average token: {float(token_count) / 50.0}")
+        print(f"Average token: {float(token_count) / float(tester_constants.COUNT_DATA_TURKISH)}")
+        print(f"Cost: {response.usage.completion_tokens * 0.000001 + response.usage.prompt_tokens * 0.000002}")
 
     def test_language(self):
         start_time = time.time()
+        token_count = 0
         success_count = 0.0
-        for input_sentence_language in self.test_language_data_mix:
-            response = self.user_input_llm_helper.ask_language(input_sentence_language[0])
-            if response.strip().lower() == input_sentence_language[1].strip().lower():
+        for input in self.test_language_data_mix:
+            response = self.user_input_llm_helper.ask_language_full_response(input[0])
+            token_count += response.usage.total_tokens
+            if response.choices[0].message.content.strip().lower() == input[1].strip().lower():
                 success_count += 1.0
         end_time = time.time()
+        print("LANGUAGE Test - Mix")
         print(f"(Mix Batch Data) Elaspsed Time (seconds): {end_time - start_time}")
-        print(f"Success rate: {success_count}")
+        print(f"Total token: {token_count}")
+        print(f"Average token: {float(token_count) / float(tester_constants.LANGUAGE_DATA)}")
+        print(f"Success rate: {((success_count / float(tester_constants.LANGUAGE_DATA))) * 100.0}")
+        print(f"Cost: {response.usage.completion_tokens * 0.000001 + response.usage.prompt_tokens * 0.000002}")
 
     def test_type_match(self):
         start_time = time.time()
+        token_count = 0
         success_count = 0.0
         for input in self.test_type_match_data:
-            response = self.user_input_llm_helper.does_input_type_match(input[0], input[2], input[1])
-            if response:
+            response = self.user_input_llm_helper.does_input_type_match_full_response(input[0], input[2], input[1])
+            token_count += response.usage.total_tokens
+            if json.loads(response.choices[0].message.content)['is_correct_type']:
                 success_count += 1.0
         end_time = time.time()
+        print("TYPE MATCH Test - Mix")
         print(f"(Mix Batch Data) Elaspsed Time (seconds): {end_time - start_time}")
-        print(f"Success rate: {success_count * 2.0}")
+        print(f"Total token: {token_count}")
+        print(f"Average token: {float(token_count) / float(tester_constants.TYPE_MATCH)}")
+        print(f"Success rate: {((success_count / float(tester_constants.TYPE_MATCH)) * 100.0)}")
+        print(f"Cost: {response.usage.completion_tokens * 0.000001 + response.usage.prompt_tokens * 0.000002}")
 
 if __name__ == "__main__":
     unittest.main()
