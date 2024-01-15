@@ -2,8 +2,7 @@ import os
 import time
 import unittest
 from openai import AzureOpenAI
-from recipe_llm_helper import RecipeLlmHelper
-
+from recipe_llm_helper import RecipeLlmHelper, format_prompt
 
 
 class TestRecipeLlmHelper(unittest.TestCase):
@@ -23,21 +22,26 @@ class TestRecipeLlmHelper(unittest.TestCase):
 
     def test_generate_recipe(self):
         start_time = time.time()
-        for input in self.test_generate_recipe_data_mix:
-            self.recipe_llm_helper.generate_recipe(input[0], input[1])
-        end_time = time.time()
-        print(f"(Mix Batch Data) Elaspsed Time (seconds): {end_time - start_time}")
-
-    def test_generate_recipe_full_response(self):
-        start_time = time.time()
         token_count = 0.0
         for input in self.test_generate_recipe_data_mix:
-            response = self.recipe_llm_helper.generate_recipe(input[0], input[1])
+            prompt = format_prompt(input[0], input[1])
+            response = self.recipe_llm_helper.generate_completion(prompt)
             token_count += response.usage.total_tokens
         end_time = time.time()
         print(f"(Mix Batch Data) Elaspsed Time (seconds): {end_time - start_time}")
         print(f"Total token: {token_count}")
         print(f"Average token: {float(token_count) / 100.0}")
+
+    # def test_generate_recipe_full_response(self):
+    #     start_time = time.time()
+    #     token_count = 0.0
+    #     for input in self.test_generate_recipe_data_mix:
+    #         response = self.recipe_llm_helper.generate_recipe(input[0], input[1])
+    #         token_count += response.usage.total_tokens
+    #     end_time = time.time()
+    #     print(f"(Mix Batch Data) Elaspsed Time (seconds): {end_time - start_time}")
+    #     print(f"Total token: {token_count}")
+    #     print(f"Average token: {float(token_count) / 100.0}")
 
 
 
