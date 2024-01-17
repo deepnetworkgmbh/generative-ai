@@ -70,7 +70,7 @@ class TestUserInputLlmHelper(unittest.TestCase):
         print(f"(English Batch Data) Elaspsed Time (seconds): {end_time - start_time}")
         print(f"Total token: {token_count}")
         print(f"Average token: {float(token_count) / float(tester_constants.DISH_DATA_ENGLISH)}")
-        print(f"Cost: {response.usage.completion_tokens * 0.000001 + response.usage.prompt_tokens * 0.000002}")
+        print(f"Cost: {response.usage.prompt_tokens * 0.000001 + response.usage.completion_tokens * 0.000002}")
 
     def test_dish_time_token_german_batch(self):
         start_time = time.time()
@@ -83,7 +83,7 @@ class TestUserInputLlmHelper(unittest.TestCase):
         print(f"(German Batch Data) Elaspsed Time (seconds): {end_time - start_time}")
         print(f"Total token: {token_count}")
         print(f"Average token: {float(token_count) / float(tester_constants.DISH_DATA_GERMAN)}")
-        print(f"Cost: {response.usage.completion_tokens * 0.000001 + response.usage.prompt_tokens * 0.000002}")
+        print(f"Cost: {response.usage.prompt_tokens * 0.000001 + response.usage.completion_tokens * 0.000002}")
 
     def test_dish_time_token_turkish_batch(self):
         start_time = time.time()
@@ -96,7 +96,7 @@ class TestUserInputLlmHelper(unittest.TestCase):
         print(f"(Turkish Batch Data) Elaspsed Time (seconds): {end_time - start_time}")
         print(f"Total token: {token_count}")
         print(f"Average token: {float(token_count) / float(tester_constants.DISH_DATA_TURKISH)}")
-        print(f"Cost: {response.usage.completion_tokens * 0.000001 + response.usage.prompt_tokens * 0.000002}")
+        print(f"Cost: {response.usage.prompt_tokens * 0.000001 + response.usage.completion_tokens * 0.000002}")
 
     def test_count_time_token_english_batch(self):
         start_time = time.time()
@@ -109,7 +109,7 @@ class TestUserInputLlmHelper(unittest.TestCase):
         print(f"(English Batch Data) Elaspsed Time (seconds): {end_time - start_time}")
         print(f"Total token: {token_count}")
         print(f"Average token: {float(token_count) / float(tester_constants.COUNT_DATA_ENGLISH)}")
-        print(f"Cost: {response.usage.completion_tokens * 0.000001 + response.usage.prompt_tokens * 0.000002}")
+        print(f"Cost: {response.usage.prompt_tokens * 0.000001 + response.usage.completion_tokens * 0.000002}")
 
     def test_count_time_token_german_batch(self):
         start_time = time.time()
@@ -122,7 +122,7 @@ class TestUserInputLlmHelper(unittest.TestCase):
         print(f"(German Batch Data) Elaspsed Time (seconds): {end_time - start_time}")
         print(f"Total token: {token_count}")
         print(f"Average token: {float(token_count) / float(tester_constants.COUNT_DATA_GERMAN)}")
-        print(f"Cost: {response.usage.completion_tokens * 0.000001 + response.usage.prompt_tokens * 0.000002}")
+        print(f"Cost: {response.usage.prompt_tokens * 0.000001 + response.usage.completion_tokens * 0.000002}")
 
     def test_count_time_token_turkish_batch(self):
         start_time = time.time()
@@ -135,7 +135,7 @@ class TestUserInputLlmHelper(unittest.TestCase):
         print(f"(Turkish Batch Data) Elaspsed Time (seconds): {end_time - start_time}")
         print(f"Total token: {token_count}")
         print(f"Average token: {float(token_count) / float(tester_constants.COUNT_DATA_TURKISH)}")
-        print(f"Cost: {response.usage.completion_tokens * 0.000001 + response.usage.prompt_tokens * 0.000002}")
+        print(f"Cost: {response.usage.prompt_tokens * 0.000001 + response.usage.completion_tokens * 0.000002}")
 
     def test_language(self):
         start_time = time.time()
@@ -152,7 +152,7 @@ class TestUserInputLlmHelper(unittest.TestCase):
         print(f"Total token: {token_count}")
         print(f"Average token: {float(token_count) / float(tester_constants.LANGUAGE_DATA)}")
         print(f"Success rate: {((success_count / float(tester_constants.LANGUAGE_DATA))) * 100.0}")
-        print(f"Cost: {response.usage.completion_tokens * 0.000001 + response.usage.prompt_tokens * 0.000002}")
+        print(f"Cost: {response.usage.prompt_tokens * 0.000001 + response.usage.completion_tokens * 0.000002}")
 
     def test_type_match(self):
         start_time = time.time()
@@ -169,7 +169,7 @@ class TestUserInputLlmHelper(unittest.TestCase):
         print(f"Total token: {token_count}")
         print(f"Average token: {float(token_count) / float(tester_constants.TYPE_MATCH)}")
         print(f"Success rate: {((success_count / float(tester_constants.TYPE_MATCH)) * 100.0)}")
-        print(f"Cost: {response.usage.completion_tokens * 0.000001 + response.usage.prompt_tokens * 0.000002}")
+        print(f"Cost: {response.usage.prompt_tokens * 0.000001 + response.usage.completion_tokens * 0.000002}")
 
 if __name__ == "__main__":
     unittest.main()
