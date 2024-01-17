@@ -1,14 +1,18 @@
 import json
 import os
+from pathlib import Path
+
 from openai import AzureOpenAI
 
 from user_input_llm_helper import UserInputLlmHelper
-from user_input_handler import UserInputHandler, UserInputType, eliminate_punctuations
+from user_input_handler import UserInputHandler, UserInputType
 from recipe_generator import RecipeGenerator
 from embeddings import Embeddings
 from search import Search
 from recipe_llm_helper import RecipeLlmHelper
 from recipe_constants import *
+from azure_speech_helper import create_speech_recognizer
+import logging_helper
 
 IMPORTANT_INFORMATION = """
 - Dietary restrictions or preferences, eg. being vegeterian, having alergies
@@ -40,14 +44,17 @@ Chat History:
 {chat_history}
 """
 
-def get_ingredients(file):
-    with open(file, 'r') as f:
-        return json.load(f)
+
+def get_ingredients_at_home():
+    with open(INGREDIENTS_AT_HOME) as file:
+        return json.load(file)
+
 
 def add_to_messages(history, completion, prompt):
     history.append({"role": "assistant", "content": completion})
     history.append({"role": "user", "content": prompt})
     return history
+
 
 def chat_with_gpt(client, messages):
     return client.chat.completions.create(
@@ -57,6 +64,7 @@ def chat_with_gpt(client, messages):
         frequency_penalty=0.3
     ).choices[0].message.content
 
+
 def get_dish_name_from_chat(client, history):
     return client.chat.completions.create(
         model=os.getenv("AZURE_OPENAI_GPT_DEPLOYMENT"),
@@ -64,20 +72,20 @@ def get_dish_name_from_chat(client, history):
         temperature=0,
     ).choices[0].message.content
 
+
 def print_missing_ingredients(recipe):
     print("Missing ingredients:")
     for ingredient in recipe["ingredients"]:
         print(f"- {ingredient['name']} -- {ingredient['quantity']} {ingredient['unit']}")
 
+
 def print_ingredients_at_home():
     print("Ingredients at home:")
-    with open(INGREDIENTS_AT_HOME) as file:
-        ingredients = json.load(file)
-        for ingredient in ingredients:
-            print(f"- {ingredient}")
+    for ingredient in get_ingredients_at_home():
+        print(f"- {ingredient}")
 
-def find_reverse_recipe(user_input_handler, recipe_gen, client):
-    ingredients = get_ingredients(INGREDIENTS_AT_HOME)
+
+def find_recipe_using_ingredients(ingredients, user_input_handler, recipe_gen, client):
     system_message = SYSTEM_MESSAGE.format(ingredients=ingredients, important_information=IMPORTANT_INFORMATION)
     messages = [{"role": "system", "content": system_message}]
     print('You can type "yes" to choose a dish or "exit" to stop the program.')
@@ -89,20 +97,27 @@ def find_reverse_recipe(user_input_handler, recipe_gen, client):
             dish_name = get_dish_name_from_chat(client, messages[1:])
             if dish_name == "no_dish_chosen":
                 print("No dish was chosen")
+                return None
             else:
                 servings = input("For how many servings?\n")
-                servings = user_input_handler.clean_servings_input(eliminate_punctuations(servings), user_input_handler.not_defined_language)
+                servings = user_input_handler.clean_input(servings, UserInputType.SERVING_SIZE, None)
                 recipe = recipe_gen.get_recipe(dish_name, servings)
-                recipe["ingredients"] = [ingredient for ingredient in recipe["ingredients"] if
-                                 not recipe_gen.search.search_in_ingredients_at_home(ingredient["name"])]
-                print_missing_ingredients(recipe)
-            break
+                return recipe
         elif prompt == "exit":
-            break
+            return None
         else:
             messages = add_to_messages(messages, completion, f"My answer to your question: {prompt}")
 
+
+def remove_ingredients_at_home(recipe):
+    recipe["ingredients"] = [ingredient for ingredient in recipe["ingredients"] if
+                             not recipe_gen.search.search_in_ingredients_at_home(ingredient["name"])]
+    return recipe
+
+
 if __name__ == "__main__":
+    logging_helper.setup_logging(f'{Path(__file__).stem}.log')
+
     client = AzureOpenAI(
         api_version="2023-09-01-preview"
     )
@@ -114,8 +129,12 @@ if __name__ == "__main__":
     recipe_llm_helper = RecipeLlmHelper(client, azure_openai_model_name)
     recipe_gen = RecipeGenerator(search, recipe_llm_helper)
 
+    speech_recognizer = create_speech_recognizer()
     user_input_llm_helper = UserInputLlmHelper(client, azure_openai_model_name)
-    user_input_handler = UserInputHandler(user_input_llm_helper, None)
+    user_input_handler = UserInputHandler(user_input_llm_helper, speech_recognizer)
 
     print_ingredients_at_home()
-    find_reverse_recipe(user_input_handler, recipe_gen, client)
+    ingredients = get_ingredients_at_home()
+    recipe = find_recipe_using_ingredients(ingredients, user_input_handler, recipe_gen, client)
+    recipe = remove_ingredients_at_home(recipe)
+    print_missing_ingredients(recipe)

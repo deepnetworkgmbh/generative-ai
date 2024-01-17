@@ -1,20 +1,24 @@
 import json
+import logging
 import os
 from enum import Enum
+from pathlib import Path
+
 import azure.cognitiveservices.speech as speechsdk
 from openai.lib.azure import AzureOpenAI
 
 from azure_speech_helper import create_speech_recognizer
 
 from user_input_llm_helper import UserInputLlmHelper
+import logging_helper
 
 
 class UserInputType(Enum):
-    DISH = 1
-    SERVINGS = 2
+    DISH_NAME = 1
+    SERVING_SIZE = 2
 
 
-def eliminate_punctuations(user_input):
+def _eliminate_punctuations(user_input):
     eliminated_sentence = user_input
     characters_to_replace = [',', '.', ':', ';', '"', '\'', "?", "!"]
 
@@ -29,127 +33,132 @@ class UserInputHandler:
     def __init__(self, user_input_llm_helper: UserInputLlmHelper, speech_recognizer: speechsdk.SpeechRecognizer):
         self.llm_helper = user_input_llm_helper
         self.speech_recognizer = speech_recognizer
-        self.not_defined_language = "NOT_DEFINED"
 
-    def clean_dish_input(self, user_input, language):
+    def _clean_dish_input(self, user_input: str, language: str):
         cleaned_dish_name = self.llm_helper.clean_dish_name(user_input, language)
         cleaned_dish_name_json = json.loads(cleaned_dish_name.choices[0].message.content)
         if not cleaned_dish_name_json['is_valid']:
-            print("(First Check) Input does not contain a valid dish name. ")
+            logging.debug("(First Check) Input does not contain a valid dish name. ")
             return None
 
-        print("(First Check) Cleaned dish name: " + str(cleaned_dish_name_json['dish_name']))
+        logging.debug("(First Check) Cleaned dish name: " + str(cleaned_dish_name_json['dish_name']))
 
         if not self.llm_helper.does_input_type_match(cleaned_dish_name_json['dish_name'], "dish name", language):
-            print("(Second Check): Input is not a real dish name.")
+            logging.debug("(Second Check): Input is not a real dish name.")
             return None
 
         return cleaned_dish_name_json['dish_name']
 
-    def clean_servings_input(self, user_input, language):
+    def _clean_servings_input(self, user_input: str, language: str):
         cleaned_servings_size = self.llm_helper.clean_servings_size(user_input, language)
         cleaned_servings_size_json = json.loads(cleaned_servings_size.choices[0].message.content)
 
         if not cleaned_servings_size_json['is_valid']:
-            print("(First Check) Input does not contain a valid servings size. ")
+            logging.debug("(First Check) Input does not contain a valid servings size. ")
             return None
 
-        print("(First Check) Cleaned servings size " + str(cleaned_servings_size_json['number_of_people']))
+        logging.debug("(First Check) Cleaned servings size " + str(cleaned_servings_size_json['number_of_people']))
 
-        if not self.llm_helper.does_input_type_match(cleaned_servings_size_json['number_of_people'], "integer", language):
-            print("(Second Check): Input is not a real servings size.")
+        if not self.llm_helper.does_input_type_match(cleaned_servings_size_json['number_of_people'], "integer",
+                                                     language):
+            logging.debug("(Second Check): Input is not a real servings size.")
             return None
 
         return cleaned_servings_size_json['number_of_people']
 
     # Return None if input is not valid, or the cleaned text/number.
-    def clean_input(self, user_inp, language_inp, user_input_type:UserInputType):
+    def clean_input(self, user_input: str, input_type: UserInputType, input_language):
+        user_input = _eliminate_punctuations(user_input)
         # Getting language of user prompt
-        language = language_inp
-        if language_inp is None or language_inp == self.not_defined_language:
-            language = self.llm_helper.ask_language(user_inp)
-        print("Language is: " + language)
+        language = input_language
+        if input_language is None:
+            language = self.llm_helper.ask_language(user_input)
+        logging.debug("Language is: " + language)
 
-        if user_input_type == UserInputType.DISH:
-            return self.clean_dish_input(user_inp, language)
-        elif user_input_type == UserInputType.SERVINGS:
-            return self.clean_servings_input(user_inp, language)
+        if input_type == UserInputType.DISH_NAME:
+            return self._clean_dish_input(user_input, language)
+        elif input_type == UserInputType.SERVING_SIZE:
+            return self._clean_servings_input(user_input, language)
         else:
-            print("Error case")
+            logging.debug("Error case")
             return None
 
-    def recognize_from_microphone(self):
+    def get_dish_name_and_serving_size_using_speech(self):
         scraped_values = {
-            'dish_name':     self.get_input_from_user(self.speech_recognizer, "Tell the dish name: ", UserInputType.DISH),
-            'serving_count': self.get_input_from_user(self.speech_recognizer, "Tell your serving size (Number of people): ", UserInputType.SERVINGS)
+            'dish_name': self.get_speech_input_from_user(self.speech_recognizer, "Tell the dish name: ",
+                                                         UserInputType.DISH_NAME),
+            'serving_size': self.get_speech_input_from_user(self.speech_recognizer,
+                                                            "Tell your serving size (Number of people): ",
+                                                            UserInputType.SERVING_SIZE)
         }
         return scraped_values
 
-    def get_input_from_user(self, speech_recognizer, message, user_input_type):
+    def get_speech_input_from_user(self, speech_recognizer, message, user_input_type: UserInputType):
         while True:
             print(message)
             user_input = speech_recognizer.recognize_once()
-            print("User entered: ", user_input.text)
+            logging.debug("User entered: ", user_input.text)
             detected_language = speechsdk.AutoDetectSourceLanguageResult(user_input).language
 
             if user_input.reason == speechsdk.ResultReason.RecognizedSpeech:
-                cleaned_input = self.clean_input(eliminate_punctuations(user_input.text), detected_language, user_input_type)
+                cleaned_input = self.clean_input(user_input.text, user_input_type, None )
                 if cleaned_input:
                     return cleaned_input
                 else:
+                    print(f"Please specify a valid {user_input_type.name}.")
                     continue
             elif user_input.reason == speechsdk.ResultReason.Canceled:
-                print("Speech input cancelled. Exiting.")
+                logging.info("Speech input cancelled. Exiting.")
                 cancellation_details = user_input.cancellation_details
-                print("Speech Recognition canceled: {}".format(cancellation_details.reason))
+                logging.debug("Speech Recognition canceled: {}".format(cancellation_details.reason))
                 if cancellation_details.reason == speechsdk.CancellationReason.Error:
-                    print("Error details: {}".format(cancellation_details.error_details))
-                    print("Did you set the speech resource key and region values?")
+                    logging.warning("Error details: {}".format(cancellation_details.error_details))
+                    logging.warning("Did you set the speech resource key and region values?")
                 return None
             else:
                 print("Speech is not recognized. Please try again.")
                 continue
 
-    def recognize_from_text(self):
+    def get_text_input_from_user(self, message, user_input_type: UserInputType):
+        while True:
+            user_input = input(message)
+            cleaned_input = self.clean_input(user_input, user_input_type, None)
+            logging.debug("Cleaned Input: %s", cleaned_input)
+            if cleaned_input:
+                return cleaned_input
+            else:
+                print(f"Please enter a valid {user_input_type.name}")
+                continue
+
+    def get_dish_name_and_serving_size_using_text(self):
         # while True:
-        scraped_values = {}
-
-        # Get Dish ---
-        while True:
-            user_input_for_dish = input("Tell the dish name:\n")
-            scraped_values['dish_name'] = self.clean_input(eliminate_punctuations(user_input_for_dish), self.not_defined_language, UserInputType.DISH)
-            print(scraped_values['dish_name'])
-            if scraped_values['dish_name'] is not None:
-                break
-
-        # Get Count ---
-        while True:
-            user_input_for_count = input("Tell your serving size (Number of people):\n")
-            scraped_values['serving_count'] = self.clean_input(eliminate_punctuations(user_input_for_count), self.not_defined_language, UserInputType.SERVINGS)
-            if scraped_values['serving_count'] is not None:
-                break
-        print("..............................................................")
-
+        scraped_values = {
+            'dish_name': self.get_text_input_from_user("Tell the dish name: ", UserInputType.DISH_NAME),
+            'serving_size': self.get_text_input_from_user("Tell your serving size (Number of people): ",
+                                                          UserInputType.SERVING_SIZE)
+        }
         return scraped_values
 
-    def get_user_request(self):
+    def get_dish_name_and_serving_size(self):
         user_input = input("Select input type: \n 1) Text \n 2) Speech \n")
 
         if user_input == "1":
-            output_data = self.recognize_from_text()
+            output_data = self.get_dish_name_and_serving_size_using_text()
         elif user_input == "2":
-            output_data = self.recognize_from_microphone()
+            output_data = self.get_dish_name_and_serving_size_using_speech()
         else:
-            print("Error Input")
+            logging.debug("Error Input")
             output_data = None
 
         if output_data:
-            return output_data['dish_name'], output_data['serving_count']
+            return output_data['dish_name'], output_data['serving_size']
         else:
             return None, None
 
 
 if __name__ == "__main__":
+    logging_helper.setup_logging(f'{Path(__file__).stem}.log')
+
     azure_openai_model_name = os.getenv('AZURE_OPENAI_GPT_DEPLOYMENT')
     azure_openai = AzureOpenAI(api_version="2023-09-01-preview")
 
@@ -157,7 +166,7 @@ if __name__ == "__main__":
     user_input_llm_helper = UserInputLlmHelper(azure_openai, azure_openai_model_name)
 
     user_input_handler = UserInputHandler(user_input_llm_helper, speech_recognizer)
-    dish_name, serving_count = user_input_handler.get_user_request()
+    dish_name, serving_size = user_input_handler.get_dish_name_and_serving_size()
     if dish_name:
         print(f"DISH: {dish_name}")
-        print(f"SERVINGS SIZE: {serving_count}")
+        print(f"SERVINGS SIZE: {serving_size}")
