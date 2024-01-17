@@ -1,10 +1,13 @@
 import os
+from pprint import pprint
+from pathlib import Path
 
 from openai.lib.azure import AzureOpenAI
 
 from user_input_handler import UserInputHandler
 from user_input_llm_helper import UserInputLlmHelper
 from recipe_llm_helper import RecipeLlmHelper
+import logging_helper
 
 from search import Search
 from embeddings import Embeddings
@@ -12,6 +15,8 @@ from recipe_generator import RecipeGenerator
 from azure_speech_helper import create_speech_recognizer
 
 if __name__ == "__main__":
+    logging_helper.setup_logging(f'{Path(__file__).stem}.log')
+
     azure_openai_model_name = os.getenv('AZURE_OPENAI_GPT_DEPLOYMENT')
     azure_openai = AzureOpenAI(api_version="2023-09-01-preview")
 
@@ -25,5 +30,7 @@ if __name__ == "__main__":
     recipe_llm_helper = RecipeLlmHelper(azure_openai, azure_openai_model_name)
     recipe_gen = RecipeGenerator(search, recipe_llm_helper)
 
-    dish_name, serving_count = user_input_handler.get_user_request()
-    print(recipe_gen.get_recipe(dish_name, serving_count))
+    dish_name, serving_size = user_input_handler.get_dish_name_and_serving_size()
+    recipe = recipe_gen.get_recipe(dish_name, serving_size)
+    print("Recipe is: ")
+    pprint(recipe)

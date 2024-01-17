@@ -37,3 +37,8 @@ We kept existing db and the script to showcase the possibility of converting any
 The script takes a list of recipe names from an already existing recipe database and generates recipes for them.
 There is a *NUMBER_OF_RECIPES* variable in the script that determines how many recipes to generate. We kept it low for
 minimizing the cost.
+
+## Reverse Recipe
+The `reverse_recipe.py` script provides a different way to interact with our recipe generation application. It allows users to find a dish they can make with mostly using ingredients they have at their home.
+
+The LLM asks questions to the user to understand their preferences and offer them a dish option based on those preferences and the ingredients they curently have. When the user is satisfied with a dish option that the LLM has come up with, a full recipe for this dish is generated using the `RecipeGenerator` class. Then only the missing ingredients are shown to the user.

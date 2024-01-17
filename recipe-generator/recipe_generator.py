@@ -1,6 +1,8 @@
 import json
 import argparse
 import os
+from pprint import pprint
+from pathlib import Path
 
 from openai.lib.azure import AzureOpenAI
 
@@ -8,6 +10,7 @@ from search import Search
 from embeddings import Embeddings
 from recipe_llm_helper import RecipeLlmHelper
 from recipe_constants import DEFAULT_NUMBER_OF_SERVINGS
+import logging_helper
 
 
 class RecipeGenerator:
@@ -15,29 +18,29 @@ class RecipeGenerator:
         self.search = search
         self.recipe_llm_helper = recipe_llm_helper
 
-    def remove_listed_items(self, recipe):
+    def remove_listed_items(self, recipe: dict) -> dict:
         recipe["ingredients"] = [ingredient for ingredient in recipe["ingredients"] if
                                  not self.search.search_in_removal_list(ingredient["name"])]
         return recipe
 
-    def add_product_ids(self, recipe):
+    def add_product_ids(self, recipe: dict) -> dict:
         for ingredient in recipe["ingredients"]:
             if product := self.search.search_in_products(ingredient["name"]):
                 ingredient["product_name"] = product[0]
                 ingredient["id"] = product[1]
         return recipe
 
-    def get_recipe(self, dish_name, servings=DEFAULT_NUMBER_OF_SERVINGS):
+    def get_recipe(self, dish_name: str, serving_size: int = DEFAULT_NUMBER_OF_SERVINGS) -> dict:
         if db_entry := self.search.search_in_recipe_db(dish_name):
-            recipe = _adjust_ingredient_quantity(db_entry, servings)
+            recipe = _adjust_ingredient_quantity(db_entry, serving_size)
         else:
-            recipe = json.loads(self.recipe_llm_helper.generate_recipe(dish_name, servings))
+            recipe = json.loads(self.recipe_llm_helper.generate_recipe(dish_name, serving_size))
         recipe = self.remove_listed_items(recipe)
-        recipe_with_product_ids = self.add_product_ids(recipe)
-        return recipe_with_product_ids
+        recipe = self.add_product_ids(recipe)
+        return recipe
 
 
-def _adjust_ingredient_quantity(recipe, servings):
+def _adjust_ingredient_quantity(recipe: dict, servings: int) -> dict:
     servings_in_recipe = int(recipe["servings"])
     adjust_ratio = servings / servings_in_recipe
     for ingredient in recipe["ingredients"]:
@@ -47,6 +50,8 @@ def _adjust_ingredient_quantity(recipe, servings):
 
 
 if __name__ == "__main__":
+    logging_helper.setup_logging(f'{Path(__file__).stem}.log')
+
     parser = argparse.ArgumentParser()
     parser.add_argument("dish_name", help="name of the dish you want the ingredients for")
     parser.add_argument("-s", "--servings", help="number of servings you want", type=int)
@@ -60,4 +65,7 @@ if __name__ == "__main__":
 
     recipe_llm_helper = RecipeLlmHelper(azure_openai, azure_openai_model_name)
     recipe_gen = RecipeGenerator(search, recipe_llm_helper)
-    print(recipe_gen.get_recipe(args.dish_name, servings))
+    recipe = recipe_gen.get_recipe(args.dish_name, servings)
+
+    print("Recipe is:")
+    pprint(recipe)
