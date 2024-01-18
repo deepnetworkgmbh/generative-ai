@@ -1,0 +1,6 @@
+There are 10 students in the classroom. - English - integer
+Wie macht man eine Apfelkuchen? - German - dish name
+Nasıl bir chicken curry pişiririm? - Turkish - dish name
+Es gibt 20 cars on the street. - German - integer
+Siebzehn bicycles are parked outside. - German - integer
+On dokuz öğrenci sınavı geçti. - Turkish - integer

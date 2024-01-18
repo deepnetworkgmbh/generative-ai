@@ -3,7 +3,7 @@ import os
 import time
 import unittest
 from openai import AzureOpenAI
-from ..user_input_llm_helper import UserInputLlmHelper
+from recipe_generator.user_input_llm_helper import UserInputLlmHelper
 import test_helpers
 
 
@@ -24,36 +24,36 @@ class TestUserInputLlmHelper(unittest.TestCase):
         self.dish_name_and_number_in_sentences_mixed_lang = []
         self.dish_name_or_number_in_sentences_mixed_lang = []
 
-        with open('./test_data/dish_name_in_sentences_english.txt', 'r') as file:
+        with open('test_data/dish_name_in_sentences_english.txt', 'r') as file:
             for line in file:
                 self.dish_name_in_sentences_english.append(line.strip())
 
-        with open('./test_data/dish_name_in_sentences_german.txt', 'r') as file:
+        with open('test_data/dish_name_in_sentences_german.txt', 'r') as file:
             for line in file:
                 self.dish_name_in_sentences_german.append(line.strip())
 
-        with open('./test_data/dish_name_in_sentences_turkish.txt', 'r') as file:
+        with open('test_data/dish_name_in_sentences_turkish.txt', 'r') as file:
             for line in file:
                 self.dish_name_in_sentences_turkish.append(line.strip())
 
-        with open('./test_data/number_in_sentences_english.txt', 'r') as file:
+        with open('test_data/number_in_sentences_english.txt', 'r') as file:
             for line in file:
                 self.number_in_sentences_english.append(line.strip())
 
-        with open('./test_data/number_in_sentences_german.txt', 'r') as file:
+        with open('test_data/number_in_sentences_german.txt', 'r') as file:
             for line in file:
                 self.number_in_sentences_german.append(line.strip())
 
-        with open('./test_data/number_in_sentences_turkish.txt', 'r') as file:
+        with open('test_data/number_in_sentences_turkish.txt', 'r') as file:
             for line in file:
                 self.number_in_sentences_turkish.append(line.strip())
 
-        with open('./test_data/dish_name_and_number_in_sentences_mixed_lang.txt', 'r') as file:
+        with open('test_data/dish_name_and_number_in_sentences_mixed_lang.txt', 'r') as file:
             for line in file:
                 sentence = line.split(" - ")
                 self.dish_name_and_number_in_sentences_mixed_lang.append([sentence[0], sentence[1]])
 
-        with open('./test_data/dish_name_or_number_in_sentences_mixed_lang.txt', 'r') as file:
+        with open('test_data/dish_name_or_number_in_sentences_mixed_lang.txt', 'r') as file:
             for line in file:
                 sentence = line.split(" - ")
                 self.dish_name_or_number_in_sentences_mixed_lang.append([sentence[0], sentence[1], sentence[2]])
@@ -116,7 +116,7 @@ class TestUserInputLlmHelper(unittest.TestCase):
         )
 
     def test_does_input_type_match(self):
-        results, total_time = run_does_input_type_match(self.user_input_llm_helper, self.dish_name_or_number_in_sentences_mixed_lang)
+        results, total_time = run_check_input_type_match(self.user_input_llm_helper, self.dish_name_or_number_in_sentences_mixed_lang)
         test_helpers.calculate_and_print_metrics(
             "Does Input Type Match: dish_name_or_number_in_sentences_mixed_lang:",
             results,
@@ -163,11 +163,11 @@ def run_determine_language(user_input_llm_helper, data):
     return results, (end_time - start_time)
 
 
-def run_does_input_type_match(user_input_llm_helper, data):
+def run_check_input_type_match(user_input_llm_helper, data):
     start_time = time.time()
     results = []
     for input in data:
-        response = user_input_llm_helper.does_input_type_match(input[0], input[2], input[1])
+        response = user_input_llm_helper.check_input_type_match(input[0], input[2], input[1])
         results.append({
             "completion_tokens": response.usage.completion_tokens,
             "prompt_tokens": response.usage.prompt_tokens

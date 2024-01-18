@@ -1,0 +1,6 @@
+Sınıfta 10 öğrenci var.
+İki kişi otobüs durağında bekliyor.
+Beş arkadaş partiye geliyor.
+Park yerinde 20 araba var.
+Yedi çalışan toplantıya katıldı.
+On iki öğrenci sınavı geçti.

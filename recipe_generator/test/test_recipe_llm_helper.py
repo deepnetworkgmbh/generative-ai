@@ -15,7 +15,7 @@ class TestRecipeLlmHelper(unittest.TestCase):
         self.recipe_llm_helper = RecipeLlmHelper(self.azure_openai_client, self.azure_openai_model_name)
         self.dish_name_and_numbers_mixed_lang = []
 
-        with open('recipe-generator/test/test_data/dish_name_and_numbers_mixed_lang.txt', 'r') as file:
+        with open('test_data/dish_name_and_numbers_mixed_lang.txt', 'r') as file:
             for line in file:
                 sentence = line.split(" - ")
                 self.dish_name_and_numbers_mixed_lang.append([sentence[0].strip(), sentence[1].strip()])

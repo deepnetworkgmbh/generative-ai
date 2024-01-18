@@ -3,7 +3,7 @@ from recipe_generator import generate_recipe
 from recipe_constants import DEFAULT_NUMBER_OF_SERVINGS
 from recipe_constants import RECIPE_DB_PATH
 
-EXISTING_RECIPE_DB_PATH = "./recipe-generator/data/existing-recipes-db.json"
+EXISTING_RECIPE_DB_PATH = "./recipe_generator/data/existing-recipes-db.json"
 NUMBER_OF_RECIPES = 10
 
 recipe_names = []
