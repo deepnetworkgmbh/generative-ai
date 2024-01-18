@@ -8,3 +8,5 @@ __pycache__
 
 output.json
 new-recipe-db.json
+
+*.log

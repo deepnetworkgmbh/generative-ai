@@ -34,7 +34,8 @@ class RecipeGenerator:
         if db_entry := self.search.search_in_recipe_db(dish_name):
             recipe = _adjust_ingredient_quantity(db_entry, serving_size)
         else:
-            recipe = json.loads(self.recipe_llm_helper.generate_recipe(dish_name, serving_size))
+            response = json.loads(self.recipe_llm_helper.generate_recipe(dish_name, servings))
+            recipe = response.choices[0].message.content
         recipe = self.remove_listed_items(recipe)
         recipe = self.add_product_ids(recipe)
         return recipe
