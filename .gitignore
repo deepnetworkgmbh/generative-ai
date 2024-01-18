@@ -10,3 +10,4 @@ output.json
 new-recipe-db.json
 
 *.log
+test*.json
