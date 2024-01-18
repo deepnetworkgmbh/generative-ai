@@ -67,17 +67,19 @@ class TestUserInputLlmHelper(unittest.TestCase):
             json.dump(cls.test_metrics, file, indent=2)
 
     def test_clean_dish_name_english(self):
-        results, total_time = run_clean_dish_name(self.user_input_llm_helper, self.dish_name_in_sentences_english, "English")
+        results, total_time = run_clean_dish_name(self.user_input_llm_helper, self.dish_name_in_sentences_english,
+                                                  "English")
         self.test_metrics.append(
             test_helpers.calculate_metrics(
-            "Clean Dish Name: dish_name_in_sentences_english:",
-            results,
-            total_time
+                "Clean Dish Name: dish_name_in_sentences_english:",
+                results,
+                total_time
             )
         )
 
     def test_clean_dish_name_german(self):
-        results, total_time = run_clean_dish_name(self.user_input_llm_helper, self.dish_name_in_sentences_german, "German")
+        results, total_time = run_clean_dish_name(self.user_input_llm_helper, self.dish_name_in_sentences_german,
+                                                  "German")
         self.test_metrics.append(
             test_helpers.calculate_metrics(
                 "Clean Dish Name: dish_name_in_sentences_german:",
@@ -87,8 +89,8 @@ class TestUserInputLlmHelper(unittest.TestCase):
         )
 
     def test_clean_dish_name_turkish(self):
-        results, total_time = run_clean_dish_name(self.user_input_llm_helper, self.dish_name_in_sentences_turkish, "Turkish")
-        end_time = time.time()
+        results, total_time = run_clean_dish_name(self.user_input_llm_helper, self.dish_name_in_sentences_turkish,
+                                                  "Turkish")
         self.test_metrics.append(
             test_helpers.calculate_metrics(
                 "Clean Dish Name: dish_name_in_sentences_turkish:",
@@ -98,7 +100,8 @@ class TestUserInputLlmHelper(unittest.TestCase):
         )
 
     def test_clean_servings_english(self):
-        results, total_time = run_clean_servings(self.user_input_llm_helper, self.number_in_sentences_english, "English")
+        results, total_time = run_clean_servings(self.user_input_llm_helper, self.number_in_sentences_english,
+                                                 "English")
         self.test_metrics.append(
             test_helpers.calculate_metrics(
                 "Clean Servings: number_in_sentences_english:",
@@ -108,7 +111,8 @@ class TestUserInputLlmHelper(unittest.TestCase):
         )
 
     def test_clean_servings_german(self):
-        results, total_time = run_clean_servings(self.user_input_llm_helper, self.dish_name_in_sentences_german, "German")
+        results, total_time = run_clean_servings(self.user_input_llm_helper, self.dish_name_in_sentences_german,
+                                                 "German")
         self.test_metrics.append(
             test_helpers.calculate_metrics(
                 "Clean Servings: dish_name_in_sentences_german:",
@@ -118,7 +122,8 @@ class TestUserInputLlmHelper(unittest.TestCase):
         )
 
     def test_clean_servings_turkish(self):
-        results, total_time = run_clean_servings(self.user_input_llm_helper, self.number_in_sentences_turkish, "Turkish")
+        results, total_time = run_clean_servings(self.user_input_llm_helper, self.number_in_sentences_turkish,
+                                                 "Turkish")
         self.test_metrics.append(
             test_helpers.calculate_metrics(
                 "Clean Servings: number_in_sentences_turkish:",
@@ -128,7 +133,8 @@ class TestUserInputLlmHelper(unittest.TestCase):
         )
 
     def test_determine_language_mixed_lang(self):
-        results, total_time = run_determine_language(self.user_input_llm_helper, self.dish_name_and_number_in_sentences_mixed_lang)
+        results, total_time = run_determine_language(self.user_input_llm_helper,
+                                                     self.dish_name_and_number_in_sentences_mixed_lang)
         self.test_metrics.append(
             test_helpers.calculate_metrics(
                 "Determine Language: dish_name_and_number_in_sentences_mixed_lang:",
@@ -138,7 +144,8 @@ class TestUserInputLlmHelper(unittest.TestCase):
         )
 
     def test_does_input_type_match(self):
-        results, total_time = run_check_input_type_match(self.user_input_llm_helper, self.dish_name_or_number_in_sentences_mixed_lang)
+        results, total_time = run_check_input_type_match(self.user_input_llm_helper,
+                                                         self.dish_name_or_number_in_sentences_mixed_lang)
         self.test_metrics.append(
             test_helpers.calculate_metrics(
                 "Does Input Type Match: dish_name_or_number_in_sentences_mixed_lang:",
@@ -146,6 +153,7 @@ class TestUserInputLlmHelper(unittest.TestCase):
                 total_time
             )
         )
+
 
 def run_clean_dish_name(user_input_llm_helper, data, language):
     start_time = time.time()

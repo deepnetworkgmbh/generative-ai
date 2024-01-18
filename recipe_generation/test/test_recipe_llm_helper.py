@@ -30,7 +30,6 @@ class TestRecipeLlmHelper(unittest.TestCase):
         with open(f'{Path(__file__).stem}_results.json', 'w') as file:
             json.dump(cls.test_metrics, file, indent=2)
 
-    # TODO: not clear what is being tested. no assertions.
     def test_generate_recipe(self):
         start_time = time.time()
         results = []

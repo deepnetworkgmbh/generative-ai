@@ -14,7 +14,7 @@ from user_input_handler import UserInputHandler, UserInputType
 from user_input_llm_helper import UserInputLlmHelper
 
 IMPORTANT_INFORMATION = """
-- Dietary restrictions or preferences, eg. being vegeterian, having alergies
+- Dietary restrictions or preferences, eg. being vegetarian, having allergies
 - Style of cooking, eg. baked, fried
 - Preferred cuisines, eg. Italian, French
 """

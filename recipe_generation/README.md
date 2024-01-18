@@ -1,6 +1,6 @@
 # Recipe Generator
 The goal of this module is to generate the ingredients for a recipe using user input.
-It associates each ingredient of the recipe with a product in a product database. Therefore the result can be integrated
+It associates each ingredient of the recipe with a product in a product database. Therefore, the result can be integrated
 into other services, such as putting the resulting ingredients list can be added to the user's basket.
 
 The flow-chart of the system is presented in the following diagram:

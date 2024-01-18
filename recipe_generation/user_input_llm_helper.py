@@ -1,4 +1,5 @@
 import json
+import logging
 
 from openai import AzureOpenAI
 
@@ -99,6 +100,7 @@ class UserInputLlmHelper:
             response_content_json = json.loads(response.choices[0].message.content)
             return response_content_json['is_correct_type']
         except ValueError as e:
+            logging.debug(e)
             return False
 
     def check_input_type_match(self, input, type, language):

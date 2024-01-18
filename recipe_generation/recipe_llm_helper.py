@@ -56,7 +56,7 @@ def format_prompt(dish_name, servings):
 
 
 class RecipeLlmHelper:
-    def __init__(self, azure_openai_client:AzureOpenAI, azure_openai_model:str):
+    def __init__(self, azure_openai_client: AzureOpenAI, azure_openai_model: str):
         self.azure_openai_model = azure_openai_model
         self.azure_openai_client = azure_openai_client
 
