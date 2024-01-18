@@ -1,4 +1,5 @@
 import json
+import logging
 
 from openai import AzureOpenAI
 
@@ -34,12 +35,12 @@ class UserInputLlmHelper:
         ]
 
         return self.azure_openai_client.chat.completions.create(
-            model="test-deployment",
+            model=self.azure_openai_model,
             messages=messages,
             response_format={"type": "json_object"}
         )
 
-    def clean_servings_size(self, user_request, language):
+    def clean_servings(self, user_request, language):
         messages = [
             {
                 "role": "system",
@@ -60,7 +61,7 @@ class UserInputLlmHelper:
             },
             {
                 "role": "user",
-                "content": f"Get the serving size from the following paragraph: {user_request}"
+                "content": f"Get the servings from the following paragraph: {user_request}"
             }
         ]
 
@@ -70,8 +71,8 @@ class UserInputLlmHelper:
             response_format={"type": "json_object"}
         )
 
-    def ask_language(self, user_request):
-        messages_check = [
+    def determine_language(self, user_request):
+        messages = [
             {
                 "role": "system",
                 "content": "You are an assistant that determine the language used in user request."
@@ -86,22 +87,30 @@ class UserInputLlmHelper:
             }
         ]
 
-        response_check = self.azure_openai_client.chat.completions.create(
+        response = self.azure_openai_client.chat.completions.create(
             model=self.azure_openai_model,
-            messages=messages_check
+            messages=messages
         )
-        return response_check.choices[0].message.content
+        return response
 
-    def does_input_type_match(self, input, type,
-                              language):  # input, type --> if 'input' is really a 'type' -> type in system message, 'input' in user message
-        # 2. Ask - Double Check ---
-        messages_check = [
+    def does_input_type_match(self, input, type, language):
+        response = self.check_input_type_match(input, type, language)
+
+        try:
+            response_content_json = json.loads(response.choices[0].message.content)
+            return response_content_json['is_correct_type']
+        except ValueError as e:
+            logging.debug(e)
+            return False
+
+    def check_input_type_match(self, input, type, language):
+        messages = [
             {
                 "role": "system",
                 "content": f"You are an assistant that check if the given input is actually a {type} or not in {language}."
                            "Return json object which consists of 1 field called 'is_correct_type'."
-                           f"Set 'is_correct_type' field true in string format if it is {type} in {language}."
-                           f"Set 'is_correct_type' field false in string format if it is not {type} in {language}."
+                           f"Set 'is_correct_type' field true in boolean format if it is {type} in {language}."
+                           f"Set 'is_correct_type' field false in boolean format if it is not {type} in {language}."
                            f"Language of the input is {language}, so please consider that language during type check."
                            "You must give the list of ingredients using the following JSON schema."
                            "Do not put the resulting Json into ```json ``` code block."
@@ -114,14 +123,8 @@ class UserInputLlmHelper:
             }
         ]
 
-        response_check = self.azure_openai_client.chat.completions.create(
+        return self.azure_openai_client.chat.completions.create(
             model=self.azure_openai_model,
-            messages=messages_check,
+            messages=messages,
             response_format={"type": "json_object"}
         )
-
-        try:
-            response_content_json = json.loads(response_check.choices[0].message.content)
-            return response_content_json['is_correct_type']
-        except ValueError as e:
-            return False

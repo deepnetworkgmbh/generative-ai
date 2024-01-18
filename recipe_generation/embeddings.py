@@ -1,6 +1,9 @@
 import json
+
 from sentence_transformers import SentenceTransformer
+
 from recipe_constants import *
+
 
 class Embeddings:
     product_names = []

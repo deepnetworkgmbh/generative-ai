@@ -7,15 +7,14 @@ from pathlib import Path
 import azure.cognitiveservices.speech as speechsdk
 from openai.lib.azure import AzureOpenAI
 
-from azure_speech_helper import create_speech_recognizer
-
-from user_input_llm_helper import UserInputLlmHelper
 import logging_helper
+from azure_speech_helper import create_speech_recognizer
+from user_input_llm_helper import UserInputLlmHelper
 
 
 class UserInputType(Enum):
     DISH_NAME = 1
-    SERVING_SIZE = 2
+    SERVINGS = 2
 
 
 def _eliminate_punctuations(user_input):
@@ -50,21 +49,21 @@ class UserInputHandler:
         return cleaned_dish_name_json['dish_name']
 
     def _clean_servings_input(self, user_input: str, language: str):
-        cleaned_servings_size = self.llm_helper.clean_servings_size(user_input, language)
-        cleaned_servings_size_json = json.loads(cleaned_servings_size.choices[0].message.content)
+        cleaned_servings = self.llm_helper.clean_servings(user_input, language)
+        cleaned_servings_json = json.loads(cleaned_servings.choices[0].message.content)
 
-        if not cleaned_servings_size_json['is_valid']:
+        if not cleaned_servings_json['is_valid']:
             logging.debug("(First Check) Input does not contain a valid servings size. ")
             return None
 
-        logging.debug("(First Check) Cleaned servings size " + str(cleaned_servings_size_json['number_of_people']))
+        logging.debug("(First Check) Cleaned servings size " + str(cleaned_servings_json['number_of_people']))
 
-        if not self.llm_helper.does_input_type_match(cleaned_servings_size_json['number_of_people'], "integer",
+        if not self.llm_helper.does_input_type_match(cleaned_servings_json['number_of_people'], "integer",
                                                      language):
             logging.debug("(Second Check): Input is not a real servings size.")
             return None
 
-        return cleaned_servings_size_json['number_of_people']
+        return cleaned_servings_json['number_of_people']
 
     # Return None if input is not valid, or the cleaned text/number.
     def clean_input(self, user_input: str, input_type: UserInputType, input_language):
@@ -72,24 +71,24 @@ class UserInputHandler:
         # Getting language of user prompt
         language = input_language
         if input_language is None:
-            language = self.llm_helper.ask_language(user_input)
+            language = self.llm_helper.determine_language(user_input).choices[0].message.content
         logging.debug("Language is: " + language)
 
         if input_type == UserInputType.DISH_NAME:
             return self._clean_dish_input(user_input, language)
-        elif input_type == UserInputType.SERVING_SIZE:
+        elif input_type == UserInputType.SERVINGS:
             return self._clean_servings_input(user_input, language)
         else:
             logging.debug("Error case")
             return None
 
-    def get_dish_name_and_serving_size_using_speech(self):
+    def get_dish_name_and_servings_using_speech(self):
         scraped_values = {
             'dish_name': self.get_speech_input_from_user(self.speech_recognizer, "Tell the dish name: ",
                                                          UserInputType.DISH_NAME),
-            'serving_size': self.get_speech_input_from_user(self.speech_recognizer,
-                                                            "Tell your serving size (Number of people): ",
-                                                            UserInputType.SERVING_SIZE)
+            'servings': self.get_speech_input_from_user(self.speech_recognizer,
+                                                        "Tell how many servings (Number of people): ",
+                                                        UserInputType.SERVINGS)
         }
         return scraped_values
 
@@ -101,7 +100,7 @@ class UserInputHandler:
             detected_language = speechsdk.AutoDetectSourceLanguageResult(user_input).language
 
             if user_input.reason == speechsdk.ResultReason.RecognizedSpeech:
-                cleaned_input = self.clean_input(user_input.text, user_input_type, None )
+                cleaned_input = self.clean_input(user_input.text, user_input_type, None)
                 if cleaned_input:
                     return cleaned_input
                 else:
@@ -130,30 +129,30 @@ class UserInputHandler:
                 print(f"Please enter a valid {user_input_type.name}")
                 continue
 
-    def get_dish_name_and_serving_size_using_text(self):
+    def get_dish_name_and_servings_using_text(self):
         # while True:
         scraped_values = {
             'dish_name': self.get_text_input_from_user("Tell the dish name: ", UserInputType.DISH_NAME),
-            'serving_size': self.get_text_input_from_user("Tell your serving size (Number of people): ",
-                                                          UserInputType.SERVING_SIZE)
+            'servings': self.get_text_input_from_user("Tell how many servings (Number of people): ",
+                                                      UserInputType.SERVINGS)
         }
         return scraped_values
 
-    def get_dish_name_and_serving_size(self):
-        user_input = input("Select input type: \n 1) Text \n 2) Speech \n")
+    def get_dish_name_and_servings(self):
+        output_data = None
 
-        if user_input == "1":
-            output_data = self.get_dish_name_and_serving_size_using_text()
-        elif user_input == "2":
-            output_data = self.get_dish_name_and_serving_size_using_speech()
-        else:
-            logging.debug("Error Input")
-            output_data = None
+        while output_data is None:
+            user_input = input("Select input type: \n 1) Text \n 2) Speech \n q) Quit \n")
+            if user_input == "1":
+                output_data = self.get_dish_name_and_servings_using_text()
+            elif user_input == "2":
+                output_data = self.get_dish_name_and_servings_using_speech()
+            elif user_input == "q":
+                exit(0)
+            else:
+                logging.debug("Error Input")
 
-        if output_data:
-            return output_data['dish_name'], output_data['serving_size']
-        else:
-            return None, None
+        return output_data['dish_name'], output_data['servings']
 
 
 if __name__ == "__main__":
@@ -166,7 +165,7 @@ if __name__ == "__main__":
     user_input_llm_helper = UserInputLlmHelper(azure_openai, azure_openai_model_name)
 
     user_input_handler = UserInputHandler(user_input_llm_helper, speech_recognizer)
-    dish_name, serving_size = user_input_handler.get_dish_name_and_serving_size()
+    dish_name, servings = user_input_handler.get_dish_name_and_servings()
     if dish_name:
         print(f"DISH: {dish_name}")
-        print(f"SERVINGS SIZE: {serving_size}")
+        print(f"SERVINGS: {servings}")

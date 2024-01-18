@@ -4,8 +4,8 @@ import azure.cognitiveservices.speech as speechsdk
 
 
 def create_speech_recognizer():
-    stt_key=os.environ.get('SPT_API_KEY')
-    stt_location=os.environ.get('SPT_REGION')
+    stt_key = os.environ.get('SPT_API_KEY')
+    stt_location = os.environ.get('SPT_REGION')
 
     speech_config = speechsdk.SpeechConfig(stt_key, stt_location)
     auto_detect_source_language_config = speechsdk.languageconfig.AutoDetectSourceLanguageConfig(

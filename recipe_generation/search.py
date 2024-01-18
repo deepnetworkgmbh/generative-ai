@@ -1,4 +1,5 @@
-from sentence_transformers import SentenceTransformer, util
+from sentence_transformers import util
+
 from embeddings import Embeddings
 
 

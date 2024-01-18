@@ -1,21 +1,20 @@
 import json
-import os
 from pathlib import Path
 
 from openai import AzureOpenAI
 
-from user_input_llm_helper import UserInputLlmHelper
-from user_input_handler import UserInputHandler, UserInputType
-from recipe_generator import RecipeGenerator
-from embeddings import Embeddings
-from search import Search
-from recipe_llm_helper import RecipeLlmHelper
-from recipe_constants import *
-from azure_speech_helper import create_speech_recognizer
 import logging_helper
+from azure_speech_helper import create_speech_recognizer
+from embeddings import Embeddings
+from recipe_constants import *
+from recipe_generator import RecipeGenerator
+from recipe_llm_helper import RecipeLlmHelper
+from search import Search
+from user_input_handler import UserInputHandler, UserInputType
+from user_input_llm_helper import UserInputLlmHelper
 
 IMPORTANT_INFORMATION = """
-- Dietary restrictions or preferences, eg. being vegeterian, having alergies
+- Dietary restrictions or preferences, eg. being vegetarian, having allergies
 - Style of cooking, eg. baked, fried
 - Preferred cuisines, eg. Italian, French
 """
@@ -100,7 +99,7 @@ def find_recipe_using_ingredients(ingredients, user_input_handler, recipe_gen, c
                 return None
             else:
                 servings = input("For how many servings?\n")
-                servings = user_input_handler.clean_input(servings, UserInputType.SERVING_SIZE, None)
+                servings = user_input_handler.clean_input(servings, UserInputType.SERVINGS, None)
                 recipe = recipe_gen.get_recipe(dish_name, servings)
                 return recipe
         elif prompt == "exit":

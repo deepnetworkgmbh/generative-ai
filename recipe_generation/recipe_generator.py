@@ -1,16 +1,16 @@
-import json
 import argparse
+import json
 import os
-from pprint import pprint
 from pathlib import Path
+from pprint import pprint
 
 from openai.lib.azure import AzureOpenAI
 
-from search import Search
-from embeddings import Embeddings
-from recipe_llm_helper import RecipeLlmHelper
-from recipe_constants import DEFAULT_NUMBER_OF_SERVINGS
 import logging_helper
+from embeddings import Embeddings
+from recipe_constants import DEFAULT_NUMBER_OF_SERVINGS
+from recipe_llm_helper import RecipeLlmHelper
+from search import Search
 
 
 class RecipeGenerator:
@@ -30,11 +30,12 @@ class RecipeGenerator:
                 ingredient["id"] = product[1]
         return recipe
 
-    def get_recipe(self, dish_name: str, serving_size: int = DEFAULT_NUMBER_OF_SERVINGS) -> dict:
+    def get_recipe(self, dish_name: str, servings: int = DEFAULT_NUMBER_OF_SERVINGS) -> dict:
         if db_entry := self.search.search_in_recipe_db(dish_name):
-            recipe = _adjust_ingredient_quantity(db_entry, serving_size)
+            recipe = _adjust_ingredient_quantity(db_entry, servings)
         else:
-            recipe = json.loads(self.recipe_llm_helper.generate_recipe(dish_name, serving_size))
+            response = self.recipe_llm_helper.generate_recipe(dish_name, servings)
+            recipe = json.loads(response.choices[0].message.content)
         recipe = self.remove_listed_items(recipe)
         recipe = self.add_product_ids(recipe)
         return recipe
