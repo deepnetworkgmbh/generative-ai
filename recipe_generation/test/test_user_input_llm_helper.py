@@ -6,7 +6,7 @@ from pathlib import Path
 
 from openai import AzureOpenAI
 
-from recipe_generator.user_input_llm_helper import UserInputLlmHelper
+from recipe_generation.user_input_llm_helper import UserInputLlmHelper
 import test_helpers
 
 

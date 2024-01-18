@@ -143,7 +143,7 @@ class UserInputHandler:
         output_data = None
 
         while output_data is None:
-            user_input = input("Select input type: \n 1) Text \n 2) Speech \n q) Quit")
+            user_input = input("Select input type: \n 1) Text \n 2) Speech \n q) Quit \n")
             if user_input == "1":
                 output_data = self.get_dish_name_and_servings_using_text()
             elif user_input == "2":
