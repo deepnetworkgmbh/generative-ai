@@ -56,15 +56,15 @@ def format_prompt(dish_name, servings):
 
 
 class RecipeLlmHelper:
-    def __init__(self, azure_openai_client:AzureOpenAI, azure_openai_model:str):
+    def __init__(self, azure_openai_client: AzureOpenAI, azure_openai_model: str):
         self.azure_openai_model = azure_openai_model
         self.azure_openai_client = azure_openai_client
 
     def generate_recipe(self, dish_name, servings):
         prompt = format_prompt(dish_name, servings)
-        return self.generate_completion(prompt).choices[0].message.content
+        return self._generate_completion(prompt)
 
-    def generate_completion(self, prompt):
+    def _generate_completion(self, prompt):
         return self.azure_openai_client.chat.completions.create(
             model=self.azure_openai_model,
             messages=[

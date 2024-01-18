@@ -1,6 +1,9 @@
 import json
+
 from sentence_transformers import SentenceTransformer
+
 from recipe_constants import *
+
 
 class Embeddings:
     product_names = []
@@ -9,6 +12,7 @@ class Embeddings:
     removal_list_embeddings = []
     recipes = []
     recipe_embeddings = []
+    ingredients_at_home_embeddings = []
 
     def __init__(self):
         self.__model = SentenceTransformer('all-mpnet-base-v2')
@@ -39,6 +43,11 @@ class Embeddings:
         with open(REMOVAL_LIST_PATH, 'r') as file:
             removal_list = json.load(file)
             self.removal_list_embeddings = self.__model.encode(removal_list)
+
+    def embed_ingredients_at_home(self):
+        with open(INGREDIENTS_AT_HOME, 'r') as file:
+            ingredients_at_home = json.load(file)
+            self.ingredients_at_home_embeddings = self.__model.encode(ingredients_at_home)
 
     def encode(self, input):
         return self.__model.encode(input)
