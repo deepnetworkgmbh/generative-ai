@@ -1,6 +1,50 @@
-There are 10 students in the classroom. - English
-Nasıl sushi yaparım? - Turkish
-Beş friends are coming to the party. - Turkish
-Es gibt 20 cars on the street. - German
-Seven employees attended the meeting. - English
-How do I make spaghetti bolognese? - English
+There are 10 students in the classroom. - English - integer
+Wie macht man eine Apfelkuchen? - German - dish name
+Nasıl bir chicken curry pişiririm? - Turkish - dish name
+Es gibt 20 cars on the street. - German - integer
+Siebzehn bicycles are parked outside. - German - integer
+On dokuz öğrenci sınavı geçti. - Turkish - integer
+Three cats are playing in the garden. - English - integer
+There are 15 guests at the dinner. - English - integer
+Ne şekilde bir tiramisu yapmalıyım? - Turkish - dish name
+How do I make mushroom risotto? - English - dish name
+Yirmi bir people attended the seminar. - Turkish - integer
+Wie macht man eine Schwarzwälder Kirschtorte? - German - dish name
+On dokuz participants joined the workshop. - Turkish - integer
+Nine puppies are sleeping in the basket. - English - integer
+There are 23 birds in the sky. - English - integer
+Nasıl bir falafel yaparım? - Turkish - dish name
+Two dozen cookies were baked for the party. - English - integer
+Es gibt 30 chairs in the conference room. - German - integer
+Forty people are waiting for the bus. - English - integer
+How do I make barbecue ribs? - English - dish name
+Kırk beş kişi otobüs durağında bekliyor. - Turkish - integer
+Wie macht man eine Kartoffelsuppe? - German - dish name
+Nasıl bir tiramisu yapmalıyım? - Turkish - dish name
+There are 50 apples in the basket. - English - integer
+Ne şekilde bir vegetable lasagna pişiririm? - Turkish - dish name
+Wie macht man eine Spaghetti Carbonara? - German - dish name
+There are 55 books on the shelf. - English - integer
+Nasıl bir seafood paella hazırlarım? - Turkish - dish name
+Es gibt 60 balloons at the celebration. - German - integer
+Nasıl bir mushroom risotto yaparım? - Turkish - dish name
+How do I make shrimp tacos? - English - dish name
+Nasıl bir chicken alfredo yaparım? - Turkish - dish name
+There are 70 trees in the park. - English - integer
+Wie macht man eine Käsespätzle? - German - dish name
+Nasıl bir beef Wellington pişiririm? - Turkish - dish name
+There are 75 chocolates in the box. - English - integer
+Wie macht man eine Tomatensuppe? - German - dish name
+Nasıl bir vegetable stir-fry yaparım? - Turkish - dish name
+There are 80 balloons at the party. - English - integer
+Nasıl bir key lime pie yaparım? - Turkish - dish name
+Wie macht man eine Bratwurst? - German - dish name
+There are 90 flowers in the garden. - English - integer
+Es gibt 95 passengers on the train. - German - integer
+Nasıl bir vegetable biryani hazırlarım? - Turkish - dish name
+Wie macht man eine Caesar Salad? - German - dish name
+Fifty people are waiting for the concert. - English - integer
+Nasıl bir shrimp scampi pişiririm? - Turkish - dish name
+There are 100 candies in the jar. - English - integer
+Wie macht man eine Sachertorte? - German - dish name
+Nasıl bir spinach and artichoke dip yaparım? - Turkish - dish name
