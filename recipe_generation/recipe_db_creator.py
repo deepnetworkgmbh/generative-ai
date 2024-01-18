@@ -3,11 +3,11 @@ import os
 
 from openai.lib.azure import AzureOpenAI
 
+from recipe_constants import DEFAULT_NUMBER_OF_SERVINGS
+from recipe_constants import RECIPE_DB_PATH
 from recipe_generation.embeddings import Embeddings
 from recipe_generation.search import Search
 from recipe_llm_helper import RecipeLlmHelper
-from recipe_constants import DEFAULT_NUMBER_OF_SERVINGS
-from recipe_constants import RECIPE_DB_PATH
 
 if __name__ == "__main__":
     azure_openai_model_name = os.getenv('AZURE_OPENAI_GPT_DEPLOYMENT')

@@ -1,18 +1,17 @@
 import json
-import os
 from pathlib import Path
 
 from openai import AzureOpenAI
 
-from user_input_llm_helper import UserInputLlmHelper
-from user_input_handler import UserInputHandler, UserInputType
-from recipe_generator import RecipeGenerator
-from embeddings import Embeddings
-from search import Search
-from recipe_llm_helper import RecipeLlmHelper
-from recipe_constants import *
-from azure_speech_helper import create_speech_recognizer
 import logging_helper
+from azure_speech_helper import create_speech_recognizer
+from embeddings import Embeddings
+from recipe_constants import *
+from recipe_generator import RecipeGenerator
+from recipe_llm_helper import RecipeLlmHelper
+from search import Search
+from user_input_handler import UserInputHandler, UserInputType
+from user_input_llm_helper import UserInputLlmHelper
 
 IMPORTANT_INFORMATION = """
 - Dietary restrictions or preferences, eg. being vegeterian, having alergies

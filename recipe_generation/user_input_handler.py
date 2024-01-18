@@ -7,10 +7,9 @@ from pathlib import Path
 import azure.cognitiveservices.speech as speechsdk
 from openai.lib.azure import AzureOpenAI
 
-from azure_speech_helper import create_speech_recognizer
-
-from user_input_llm_helper import UserInputLlmHelper
 import logging_helper
+from azure_speech_helper import create_speech_recognizer
+from user_input_llm_helper import UserInputLlmHelper
 
 
 class UserInputType(Enum):
