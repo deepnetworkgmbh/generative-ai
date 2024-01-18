@@ -30,7 +30,8 @@ if __name__ == "__main__":
     recipe_llm_helper = RecipeLlmHelper(azure_openai, azure_openai_model_name)
     recipe_gen = RecipeGenerator(search, recipe_llm_helper)
 
-    dish_name, serving_size = user_input_handler.get_dish_name_and_serving_size()
-    recipe = recipe_gen.get_recipe(dish_name, serving_size)
+    dish_name, servings = user_input_handler.get_dish_name_and_servings()
+    print(f"Getting recipe of {dish_name} for {servings} servings. ")
+    recipe = recipe_gen.get_recipe(dish_name, servings)
     print("Recipe is: ")
     pprint(recipe)

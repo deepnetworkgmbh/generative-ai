@@ -39,7 +39,7 @@ class UserInputLlmHelper:
             response_format={"type": "json_object"}
         )
 
-    def clean_servings_size(self, user_request, language):
+    def clean_servings(self, user_request, language):
         messages = [
             {
                 "role": "system",
@@ -60,7 +60,7 @@ class UserInputLlmHelper:
             },
             {
                 "role": "user",
-                "content": f"Get the serving size from the following paragraph: {user_request}"
+                "content": f"Get the servings from the following paragraph: {user_request}"
             }
         ]
 
@@ -92,10 +92,17 @@ class UserInputLlmHelper:
         )
         return response
 
-    def does_input_type_match(self, input, type,
-                              language):  # input, type --> if 'input' is really a 'type' -> type in system message, 'input' in user message
-        # 2. Ask - Double Check ---
-        messages_check = [
+    def does_input_type_match(self, input, type, language):
+        response = self.check_input_type_match(input, type, language)
+
+        try:
+            response_content_json = json.loads(response.choices[0].message.content)
+            return response_content_json['is_correct_type']
+        except ValueError as e:
+            return False
+
+    def check_input_type_match(self, input, type, language):
+        messages = [
             {
                 "role": "system",
                 "content": f"You are an assistant that check if the given input is actually a {type} or not in {language}."
@@ -114,14 +121,8 @@ class UserInputLlmHelper:
             }
         ]
 
-        response_check = self.azure_openai_client.chat.completions.create(
+        return self.azure_openai_client.chat.completions.create(
             model=self.azure_openai_model,
-            messages=messages_check,
+            messages=messages,
             response_format={"type": "json_object"}
         )
-
-        try:
-            response_content_json = json.loads(response_check.choices[0].message.content)
-            return response_content_json['is_correct_type']
-        except ValueError as e:
-            return False

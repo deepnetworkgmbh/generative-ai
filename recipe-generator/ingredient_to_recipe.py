@@ -100,7 +100,7 @@ def find_recipe_using_ingredients(ingredients, user_input_handler, recipe_gen, c
                 return None
             else:
                 servings = input("For how many servings?\n")
-                servings = user_input_handler.clean_input(servings, UserInputType.SERVING_SIZE, None)
+                servings = user_input_handler.clean_input(servings, UserInputType.SERVINGS, None)
                 recipe = recipe_gen.get_recipe(dish_name, servings)
                 return recipe
         elif prompt == "exit":
