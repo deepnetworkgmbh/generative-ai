@@ -72,7 +72,7 @@ class UserInputHandler:
         # Getting language of user prompt
         language = input_language
         if input_language is None:
-            language = self.llm_helper.determine_language(user_input)
+            language = self.llm_helper.determine_language(user_input).choices[0].message.content
         logging.debug("Language is: " + language)
 
         if input_type == UserInputType.DISH_NAME:

@@ -71,7 +71,7 @@ class UserInputLlmHelper:
         )
 
     def determine_language(self, user_request):
-        messages_check = [
+        messages = [
             {
                 "role": "system",
                 "content": "You are an assistant that determine the language used in user request."
@@ -86,25 +86,11 @@ class UserInputLlmHelper:
             }
         ]
 
-        response_check = self.azure_openai_client.chat.completions.create(
+        response = self.azure_openai_client.chat.completions.create(
             model=self.azure_openai_model,
-            messages=messages_check
+            messages=messages
         )
-        return response_check.choices[0].message.content
-
-    def ask_language_full_response(self, user_request):
-        messages_check = [
-            {"role": "system", "content": "You are an assistant that determine the language used in user request."
-                                          "Return only the language."
-                                          "Do not make sentence, only return language such as 'English', 'German'."
-                                          "If can not determine language, return 'not known language' only."
-                                          "Do not return full sentence such as 'Cannot determine language from the given input...' when could not determine language."
-             }, {"role": "user", "content": f"What language does the following paragraph use: {user_request}"}]
-
-        return self.azure_openai_client.chat.completions.create(
-            model=self.azure_openai_model,
-            messages=messages_check
-        )
+        return response
 
     def does_input_type_match(self, input, type,
                               language):  # input, type --> if 'input' is really a 'type' -> type in system message, 'input' in user message
