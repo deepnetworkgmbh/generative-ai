@@ -51,15 +51,15 @@ class TestUserInputLlmHelper(unittest.TestCase):
             for line in file:
                 cls.number_in_sentences_turkish.append(line.strip())
 
-        with open('test_data/dish_name_and_number_in_sentences_mixed_lang.txt', 'r') as file:
-            for line in file:
-                sentence = line.split(" - ")
-                cls.dish_name_and_number_in_sentences_mixed_lang.append([sentence[0], sentence[1]])
-
         with open('test_data/dish_name_or_number_in_sentences_mixed_lang.txt', 'r') as file:
             for line in file:
                 sentence = line.split(" - ")
-                cls.dish_name_or_number_in_sentences_mixed_lang.append([sentence[0], sentence[1], sentence[2]])
+                cls.dish_name_or_number_in_sentences_mixed_lang.append([sentence[0], sentence[1]])
+
+        with open('test_data/dish_name_and_number_in_sentences_mixed_lang.txt', 'r') as file:
+            for line in file:
+                sentence = line.split(" - ")
+                cls.dish_name_and_number_in_sentences_mixed_lang.append([sentence[0], sentence[1], sentence[2]])
 
     @classmethod
     def tearDownClass(cls):
@@ -134,10 +134,10 @@ class TestUserInputLlmHelper(unittest.TestCase):
 
     def test_determine_language_mixed_lang(self):
         results, total_time = run_determine_language(self.user_input_llm_helper,
-                                                     self.dish_name_and_number_in_sentences_mixed_lang)
+                                                     self.dish_name_or_number_in_sentences_mixed_lang)
         self.test_metrics.append(
             test_helpers.calculate_metrics(
-                "Determine Language: dish_name_and_number_in_sentences_mixed_lang:",
+                "Determine Language: dish_name_or_number_in_sentences_mixed_lang:",
                 results,
                 total_time
             )
@@ -145,10 +145,10 @@ class TestUserInputLlmHelper(unittest.TestCase):
 
     def test_does_input_type_match(self):
         results, total_time = run_check_input_type_match(self.user_input_llm_helper,
-                                                         self.dish_name_or_number_in_sentences_mixed_lang)
+                                                         self.dish_name_and_number_in_sentences_mixed_lang)
         self.test_metrics.append(
             test_helpers.calculate_metrics(
-                "Does Input Type Match: dish_name_or_number_in_sentences_mixed_lang:",
+                "Does Input Type Match: dish_name_and_number_in_sentences_mixed_lang:",
                 results,
                 total_time
             )
