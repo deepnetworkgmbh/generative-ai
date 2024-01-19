@@ -5,8 +5,6 @@ from openai.lib.azure import AzureOpenAI
 
 from recipe_constants import DEFAULT_NUMBER_OF_SERVINGS
 from recipe_constants import RECIPE_DB_PATH
-from recipe_generation.embeddings import Embeddings
-from recipe_generation.search import Search
 from recipe_llm_helper import RecipeLlmHelper
 
 if __name__ == "__main__":
@@ -18,8 +16,6 @@ if __name__ == "__main__":
 
     recipe_names = []
 
-    embeddings = Embeddings()
-    search = Search(embeddings)
     recipe_llm_helper = RecipeLlmHelper(azure_openai, azure_openai_model_name)
 
     with open(EXISTING_RECIPE_DB_PATH, 'r') as file:
@@ -30,7 +26,7 @@ if __name__ == "__main__":
     new_recipe_db = []
 
     for recipe_name in recipe_names[:NUMBER_OF_RECIPES]:
-        new_recipe_db.append(json.loads(recipe_llm_helper.generate_recipe(recipe_name, DEFAULT_NUMBER_OF_SERVINGS)))
+        new_recipe_db.append(json.loads(recipe_llm_helper.generate_recipe(recipe_name, DEFAULT_NUMBER_OF_SERVINGS).choices[0].message.content))
 
     with open(RECIPE_DB_PATH, 'w') as file:
         json.dump(new_recipe_db, file)
