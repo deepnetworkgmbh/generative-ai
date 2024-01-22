@@ -11,18 +11,21 @@ class UserInputLlmHelper:
         self.azure_openai_client = azure_openai_client
 
     def clean_dish_name(self, user_request, language):
+        lang_instruction = ""
+        if language != "not known language":
+            lang_instruction = f"Language of the dish is {language}, so please consider that language during evaluation."
+
         messages = [
             {
                 "role": "system",
-                "content": "You are an assistant that gets dish name from the statement."
-                           "Return json object which consists of 2 fields."
-                           "These fields are 'is_valid' and 'dish_name'"
+                "content": "You are an assistant that extracts dish name from the given text."
+
                            "Do not give other information in json."
                            "Do not give instructions or ingredients in json object."
-                           "If you can find meal name, set 'is_valid' to true, and 'dish_name' name of the dish."
-                           "Otherwise set set 'is_valid' to false, and 'dish_name' to \"not_stated\"."
-                           "Dish name can not be just a product such as apple, orange etc. If so, set 'is_valid' false, and 'dish_name' not_stated."
-                           f"Language of the dish is {language}, so please consider that language during evaluation."
+                           "If you can find dish name, set 'is_valid' to true, and 'dish_name' to name of the dish."
+                           "Otherwise set 'is_valid' to false, and 'dish_name' to \"not_stated\"."
+                           "If so, set 'is_valid' false, and 'dish_name' \"not_stated\"."
+                           # f"{lang_instruction}"
                            "You must give the list of ingredients using the following JSON schema."
                            "Do not put the resulting Json into ```json ``` code block."
                            "JSON schema:\n"
@@ -30,7 +33,7 @@ class UserInputLlmHelper:
             },
             {
                 "role": "user",
-                "content": f"Get the dish name from the following paragraph: {user_request}"
+                "content": f"Extract the dish name from the following text: {user_request}"
             }
         ]
 
@@ -48,12 +51,12 @@ class UserInputLlmHelper:
                            "Return json object which consists of 2 fields."
                            "These fields are 'is_valid' and 'number_of_people'"
                            "Do not give other information in json."
-                           "If you can find number of people, set 'is_valid' true, and 'number_of_people' people count"
-                           "If you can not find number of people, set 'is_valid' false, and 'number_of_people' not_stated"
+                           "If you can find number of people, set 'is_valid' true, and 'number_of_people' people count."
+                           "If you can not find number of people, set 'is_valid' false, and 'number_of_people' not_stated."
                            "People count can be given such as '5 people', '3 men' or just '2000'. Always return just integer not other words."
-                           "Number can be given as string, such as 'five' or 'zwei' etc. In that case, convert them to integer (5, 2 respectively) and set 'number_of_people'"
-                           "If given value is not integer such as '3.5' or '4/5' etc.; set 'is_valid' false and 'number_of_people' not_stated"
-                           f"User input can be given any language such as 'five men', 'vier mensch' or 'bes kisi'. Consider {language} while responding."
+                           "Number can be given as string, such as 'five' or 'zwei' etc. In that case, convert them to integer (5, 2 respectively) and set 'number_of_people'."
+                           "If given value is not integer such as '3.5' or '4/5' etc.; set 'is_valid' false and 'number_of_people' not_stated."
+                           # f"User input can be given any language such as 'five men', 'vier mensch' or 'bes kisi'. Consider {language} while responding."
                            "You must give the list of ingredients using the following JSON schema."
                            "Do not put the resulting Json into ```json ``` code block."
                            "JSON schema:\n"
@@ -71,19 +74,17 @@ class UserInputLlmHelper:
             response_format={"type": "json_object"}
         )
 
-    def determine_language(self, user_request):
+    def determine_language(self, user_request: str):
         messages = [
             {
-                "role": "system",
-                "content": "You are an assistant that determine the language used in user request."
-                           "Return only the language."
-                           "Do not make sentence, only return language such as 'English', 'German'."
-                           "If can not determine language, return 'not known language' only."
-                           "Do not return full sentence such as 'Cannot determine language from the given input...' when could not determine language."
-            },
-            {
                 "role": "user",
-                "content": f"What language does the following paragraph use: {user_request}"
+                "content":
+                    "You are an assistant that determines the language for a given text."
+                    "Only if the input does not match with any language, return 'not known language'."
+                    "Only return the language such as 'English', 'German'."
+                    "Respond with 'English' if the input matches with multiple languages."
+                    "If the input consists of only numbers, return 'not known language'. "
+                    f"What language is the following text?: {user_request}."
             }
         ]
 
