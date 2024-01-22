@@ -53,7 +53,7 @@ class UserInputLlmHelper:
                            "Do not give other information in json."
                            "If you can find number of people, set 'is_valid' true, and 'number_of_people' people count."
                            "If you can not find number of people, set 'is_valid' false, and 'number_of_people' not_stated."
-                           "People count can be given such as '5 people', '3 men' or just '2000'. Always return just integer not other words."
+                           "People count can be given such as '5 people', '3 men', '6 guests', '8 customers' or just '2000'. Always return just integer not other words."
                            "Number can be given as string, such as 'five' or 'zwei' etc. In that case, convert them to integer (5, 2 respectively) and set 'number_of_people'."
                            "If given value is not integer such as '3.5' or '4/5' etc.; set 'is_valid' false and 'number_of_people' not_stated."
                            # f"User input can be given any language such as 'five men', 'vier mensch' or 'bes kisi'. Consider {language} while responding."
@@ -71,7 +71,9 @@ class UserInputLlmHelper:
         return self.azure_openai_client.chat.completions.create(
             model=self.azure_openai_model,
             messages=messages,
-            response_format={"type": "json_object"}
+            response_format={"type": "json_object"},
+            top_p=0.2,
+            temperature=0.2
         )
 
     def determine_language(self, user_request: str):
@@ -127,5 +129,7 @@ class UserInputLlmHelper:
         return self.azure_openai_client.chat.completions.create(
             model=self.azure_openai_model,
             messages=messages,
-            response_format={"type": "json_object"}
+            response_format={"type": "json_object"},
+            top_p=0.2,
+            temperature=0.2
         )
