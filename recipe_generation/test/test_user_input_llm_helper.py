@@ -100,8 +100,7 @@ class TestUserInputLlmHelper(unittest.TestCase):
         )
 
     def test_clean_servings_english(self):
-        results, total_time = run_clean_servings(self.user_input_llm_helper, self.number_in_sentences_english,
-                                                 "English")
+        results, total_time = self.run_clean_servings(self.number_in_sentences_english,"English")
         self.test_metrics.append(
             test_helpers.calculate_metrics(
                 "Clean Servings: number_in_sentences_english:",
@@ -111,8 +110,7 @@ class TestUserInputLlmHelper(unittest.TestCase):
         )
 
     def test_clean_servings_german(self):
-        results, total_time = run_clean_servings(self.user_input_llm_helper, self.dish_name_in_sentences_german,
-                                                 "German")
+        results, total_time = self.run_clean_servings(self.dish_name_in_sentences_german,"German")
         self.test_metrics.append(
             test_helpers.calculate_metrics(
                 "Clean Servings: dish_name_in_sentences_german:",
@@ -122,8 +120,7 @@ class TestUserInputLlmHelper(unittest.TestCase):
         )
 
     def test_clean_servings_turkish(self):
-        results, total_time = run_clean_servings(self.user_input_llm_helper, self.number_in_sentences_turkish,
-                                                 "Turkish")
+        results, total_time = self.run_clean_servings(self.number_in_sentences_turkish,"Turkish")
         self.test_metrics.append(
             test_helpers.calculate_metrics(
                 "Clean Servings: number_in_sentences_turkish:",
@@ -154,25 +151,30 @@ class TestUserInputLlmHelper(unittest.TestCase):
             )
         )
 
+    def run_clean_servings(self, data, language):
+        start_time = time.time()
+        results = []
+        for input_sentence in data:
+            response = self.user_input_llm_helper.clean_servings(input_sentence, language)
+            results.append({
+                "completion_tokens": response.usage.completion_tokens,
+                "prompt_tokens": response.usage.prompt_tokens
+            })
+            try:
+                cleaned_servings_json = json.loads(response.choices[0].message.content)
+                self.assertEqual(True, cleaned_servings_json['is_valid'], f"Got is_valid False for: {input_sentence}")
+            except json.decoder.JSONDecodeError:
+                self.fail("Non-valid JSON")
+        end_time = time.time()
+        return results, (end_time - start_time)
+
+
 
 def run_clean_dish_name(user_input_llm_helper, data, language):
     start_time = time.time()
     results = []
     for input_sentence in data:
         response = user_input_llm_helper.clean_dish_name(input_sentence, language)
-        results.append({
-            "completion_tokens": response.usage.completion_tokens,
-            "prompt_tokens": response.usage.prompt_tokens
-        })
-    end_time = time.time()
-    return results, (end_time - start_time)
-
-
-def run_clean_servings(user_input_llm_helper, data, language):
-    start_time = time.time()
-    results = []
-    for input_sentence in data:
-        response = user_input_llm_helper.clean_servings(input_sentence, language)
         results.append({
             "completion_tokens": response.usage.completion_tokens,
             "prompt_tokens": response.usage.prompt_tokens
