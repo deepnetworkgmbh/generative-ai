@@ -1,14 +1,3 @@
 Eighty - English - integer
-Fifty-three - English - integer
-Ninety-seven - English - integer
-Dreiundfünfzig - German - integer
-Siebenundneunzig - German - integer
-Zweiundzwanzig - German - integer
-Yirmi dokuz - Turkish - integer
-Kırk beş - Turkish - integer
-Otuz sekiz - Turkish - integer
-Elli altı - Turkish - integer
-Twenty-two - English - integer
-Sixteen - English - integer
-Achtzig - German - integer
-Yetmiş bir - Turkish - integer
+Sechzehn - German - integer
+Yirmi dokuz - Turkish - integer --- few shotta vermeme ragmen calismadi
