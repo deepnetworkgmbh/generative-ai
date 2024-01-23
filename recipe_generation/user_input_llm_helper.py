@@ -44,6 +44,16 @@ class UserInputLlmHelper:
         )
 
     def clean_servings(self, user_request, language):
+
+        FEW_SHOTS = [
+            {"role": "user", "content": "Elf Touristen besuchten das Museum."},
+            {"role": "assistant", "content": '{"number_of_people": "11", "is_valid": True}'},
+            {"role": "user", "content": "Eight men go fishing"},
+            {"role": "assistant", "content": '{"number_of_people": "8", "is_valid": True}'},
+            {"role": "user", "content": "Beş adam kafede oturuyorlar."},
+            {"role": "assistant", "content": '{"number_of_people": "5", "is_valid": True}'}
+        ]
+
         messages = [
             {
                 "role": "system",
@@ -54,7 +64,7 @@ class UserInputLlmHelper:
                            "If you can find number of people, set 'is_valid' true, and 'number_of_people' people count."
                            "If you can not find number of people, set 'is_valid' false, and 'number_of_people' not_stated."
                            "People count can be given such as '5 people', '3 men', '6 guests', '8 customers' or just '2000'. Always return just integer not other words."
-                           "Number can be given as string, such as 'five' or 'zwei' etc. In that case, convert them to integer (5, 2 respectively) and set 'number_of_people'."
+                           "Number can be given as string, such as 'five', 'elf', 'elli' or 'zwei' etc. In that case, convert them to integer (5, 2 respectively) and set 'number_of_people'."
                            "If given value is not integer such as '3.5' or '4/5' etc.; set 'is_valid' false and 'number_of_people' not_stated."
                            # f"User input can be given any language such as 'five men', 'vier mensch' or 'bes kisi'. Consider {language} while responding."
                            "You must give the list of ingredients using the following JSON schema."
@@ -62,6 +72,7 @@ class UserInputLlmHelper:
                            "JSON schema:\n"
                            "{\"number_of_people\": '[NUMBER_OF_PEOPLE]', \"is_valid\": [IS_VALID]}"
             },
+            *FEW_SHOTS,
             {
                 "role": "user",
                 "content": f"Get the servings from the following paragraph: {user_request}"
@@ -73,7 +84,7 @@ class UserInputLlmHelper:
             messages=messages,
             response_format={"type": "json_object"},
             top_p=0.2,
-            temperature=0.2
+            temperature=0.1
         )
 
     def determine_language(self, user_request: str):
@@ -107,19 +118,37 @@ class UserInputLlmHelper:
             return False
 
     def check_input_type_match(self, input, type, language):
+        FEW_SHOTS = [
+            {"role": "user", "content": "'Eighty' is integer"},
+            {"role": "assistant", "content": '{"is_correct_type": True}'},
+            {"role": "user", "content": "'Sechzehn' is integer"},
+            {"role": "assistant", "content": '{"is_correct_type": True}'},
+            {"role": "user", "content": "'Yirmi dokuz' is integer"},
+            {"role": "assistant", "content": '{"is_correct_type": True}'},
+            {"role": "user", "content": "'Grilled chicken' is dish name"},
+            {"role": "assistant", "content": '{"is_correct_type": True}'},
+            {"role": "user", "content": "'Kartoffelsalat' is dish name"},
+            {"role": "assistant", "content": '{"is_correct_type": True}'},
+            {"role": "user", "content": "'Hamsi tava' is dish name"},
+            {"role": "assistant", "content": '{"is_correct_type": True}'}
+        ]
+
+
         messages = [
             {
                 "role": "system",
-                "content": f"You are an assistant that check if the given input is actually a {type} or not in {language}."
+                "content": f"You are an assistant that check if the given input is actually a {type} or not."
                            "Return json object which consists of 1 field called 'is_correct_type'."
-                           f"Set 'is_correct_type' field true in boolean format if it is {type} in {language}."
-                           f"Set 'is_correct_type' field false in boolean format if it is not {type} in {language}."
-                           f"Language of the input is {language}, so please consider that language during type check."
+                           f"Set 'is_correct_type' field true in boolean format if it is {type}."
+                           f"Set 'is_correct_type' field false in boolean format if it is not {type}."
+                           # f"Language of sentences (And numbers) can be given German, English or Turkish. So please consider all of these 3 languages."
+                           # f"Language of the input is {language}, so please consider that language during type check."
                            "You must give the list of ingredients using the following JSON schema."
                            "Do not put the resulting Json into ```json ``` code block."
                            "JSON schema:\n"
                            "{\"is_correct_type\": [IS_CORRECT_TYPE]}"
             },
+            *FEW_SHOTS,
             {
                 "role": "user",
                 "content": str(input)
@@ -131,5 +160,5 @@ class UserInputLlmHelper:
             messages=messages,
             response_format={"type": "json_object"},
             top_p=0.2,
-            temperature=0.2
+            temperature=0.1
         )

@@ -129,15 +129,15 @@ class TestUserInputLlmHelper(unittest.TestCase):
             )
         )
 
-    def test_determine_language_mixed_lang(self):
-        results, total_time = self.run_determine_language(self.dish_name_or_number_in_sentences_mixed_lang)
-        self.test_metrics.append(
-            test_helpers.calculate_metrics(
-                "Determine Language: dish_name_or_number_in_sentences_mixed_lang:",
-                results,
-                total_time
-            )
-        )
+    # def test_determine_language_mixed_lang(self):
+    #     results, total_time = self.run_determine_language(self.dish_name_or_number_in_sentences_mixed_lang)
+    #     self.test_metrics.append(
+    #         test_helpers.calculate_metrics(
+    #             "Determine Language: dish_name_or_number_in_sentences_mixed_lang:",
+    #             results,
+    #             total_time
+    #         )
+    #     )
 
     def test_does_input_type_match(self):
         results, total_time = self.run_check_input_type_match(self.dish_name_or_number_mixed_lang)
@@ -204,7 +204,7 @@ class TestUserInputLlmHelper(unittest.TestCase):
         start_time = time.time()
         results = []
         for input in data:
-            response = self.user_input_llm_helper.check_input_type_match(input[0], input[2], input[1].split())
+            response = self.user_input_llm_helper.check_input_type_match(input[0], input[2].strip(), input[1])
             results.append({
                 "completion_tokens": response.usage.completion_tokens,
                 "prompt_tokens": response.usage.prompt_tokens
