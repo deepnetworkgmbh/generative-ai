@@ -47,3 +47,4 @@ Eighty - English - number
 Sechzehn - German - number
 Yirmi dokuz - Turkish - number
 Yirmi iki - Turkish - number
+Seksen sekiz - Turkish - number

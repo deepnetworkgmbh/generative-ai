@@ -26,7 +26,7 @@ CLEAN_SERVINGS_MESSAGES = {
                 Otherwise set 'is_valid' to false, and 'number' to \"not_stated\".
                 Do not put the resulting Json into ```json ``` code block.
                 JSON schema:
-                {\"number\": \"[number]\", \"is_valid\": [IS_VALID]}"""
+                {\"number\": [number], \"is_valid\": [IS_VALID]}"""
         },
         {
             "role": "user",
@@ -40,7 +40,7 @@ CLEAN_SERVINGS_MESSAGES = {
                 Andernfalls setzen Sie 'is_valid' auf false und 'number' auf \"not_stated\".
                 Fügen Sie den resultierenden JSON nicht in den Codeblock ```json ``` ein.
                 JSON schema:
-                {\"number\": \"[nummer]\", \"is_valid\": [IS_VALID]}"""
+                {\"number\": [nummer], \"is_valid\": [IS_VALID]}"""
         },
         {
             "role": "user",
@@ -50,8 +50,9 @@ CLEAN_SERVINGS_MESSAGES = {
         {
             "role": "system",
             "content": """Bundan sonra sana bir metin vereceğim ve sen de verilen metindeki sayıyı bulup bana sayısal biçimde vereceksin.
+                Metin, yazılı (iki, beş) olarak sayı içerebilir.
                 Cevap verirken aşağıdaki json şemasını kullan.
-                {\"number\": \"[SAYI]\", \"is_valid\": [IS_VALID]}
+                {\"number\": [sayı], \"is_valid\": [IS_VALID]}
                 Eğer metinde sayı varsa, 'is_valid' değerini true olarak ve 'number' değerini bulduğun sayı olarak ayarla.
                 Eğer metinde sayı yoksa 'is_valid' değerini false olarak ve 'number' değerini \"not_stated\" olarak ayarla.
                 Ortaya çıkan Json'u ```json ``` kod bloğuna koyma."""
@@ -205,7 +206,7 @@ class UserInputLlmHelper:
         self.azure_openai_client = azure_openai_client
 
     def clean_dish_name(self, user_request, language: Language):
-        messages = CLEAN_DISH_NAME_MESSAGES[language]
+        messages = deepcopy(CLEAN_DISH_NAME_MESSAGES[language])
         messages[1]['content'] = messages[1]['content'].format(user_request=user_request)
 
         return self.azure_openai_client.chat.completions.create(
@@ -215,7 +216,7 @@ class UserInputLlmHelper:
         )
 
     def clean_servings(self, user_request, language: Language):
-        messages = CLEAN_SERVINGS_MESSAGES[language]
+        messages = deepcopy(CLEAN_SERVINGS_MESSAGES[language])
         messages[1]['content'] = messages[1]['content'].format(user_request=user_request)
 
         return self.azure_openai_client.chat.completions.create(
@@ -233,7 +234,7 @@ class UserInputLlmHelper:
                 "content":
                     "You are an assistant that determines the language for a given text."
                     "Only if the input does not match with any language, return 'not known language'."
-                    "Only return the language such as 'English', 'German'."
+                    "Only return the language such as 'English', 'German' or 'Turkish'."
                     "Respond with 'English' if the input matches with multiple languages."
                     "If the input consists of only numbers, return 'not known language'. "
                     f"What language is the following text?: {user_request}."
