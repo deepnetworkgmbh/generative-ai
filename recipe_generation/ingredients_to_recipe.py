@@ -10,8 +10,8 @@ from recipe_constants import *
 from recipe_generator import RecipeGenerator
 from recipe_llm_helper import RecipeLlmHelper
 from search import Search
-from user_input_handler import UserInputHandler, UserInputType
-from user_input_llm_helper import UserInputLlmHelper
+from user_input_handler import UserInputHandler
+from user_input_llm_helper import UserInputLlmHelper, UserInputType
 
 IMPORTANT_INFORMATION = """
 - Dietary restrictions or preferences, eg. being vegetarian, having allergies

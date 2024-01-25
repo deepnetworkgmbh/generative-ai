@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 from openai import AzureOpenAI
 import test_helpers
-from recipe_generation.user_input_llm_helper import UserInputLlmHelper, Language
+from recipe_generation.user_input_llm_helper import UserInputLlmHelper, Language, UserInputType
 
 
 class TestUserInputLlmHelper(unittest.TestCase):
@@ -127,15 +127,15 @@ class TestUserInputLlmHelper(unittest.TestCase):
             )
         )
 
-    # def test_determine_language_mixed_lang(self):
-    #     results, total_time = self.run_determine_language(self.dish_name_or_number_in_sentences_mixed_lang)
-    #     self.test_metrics.append(
-    #         test_helpers.calculate_metrics(
-    #             "Determine Language: dish_name_or_number_in_sentences_mixed_lang:",
-    #             results,
-    #             total_time
-    #         )
-    #     )
+    def test_determine_language_mixed_lang(self):
+        results, total_time = self.run_determine_language(self.dish_name_or_number_in_sentences_mixed_lang)
+        self.test_metrics.append(
+            test_helpers.calculate_metrics(
+                "Determine Language: dish_name_or_number_in_sentences_mixed_lang:",
+                results,
+                total_time
+            )
+        )
 
     def test_does_input_type_match(self):
         results, total_time = self.run_check_input_type_match(self.dish_name_or_number_mixed_lang)
@@ -208,11 +208,18 @@ class TestUserInputLlmHelper(unittest.TestCase):
             lang_inp = ''
             if input[1] == "English":
                 lang_inp = Language.ENGLISH
-            if input[1] == "German":
+            elif input[1] == "German":
                 lang_inp = Language.GERMAN
             else:
                 lang_inp = Language.TURKISH
-            response = self.user_input_llm_helper.check_input_type_match(input[0], input[2].strip(), lang_inp)
+
+            type_inp = ''
+            if input[2].strip() == "dish name":
+                type_inp = UserInputType.DISH_NAME
+            elif input[2].strip() == "number":
+                type_inp = UserInputType.SERVINGS
+
+            response = self.user_input_llm_helper.check_input_type_match(input[0], type_inp, lang_inp)
             results.append({
                 "completion_tokens": response.usage.completion_tokens,
                 "prompt_tokens": response.usage.prompt_tokens

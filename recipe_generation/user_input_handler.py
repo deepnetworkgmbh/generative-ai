@@ -1,7 +1,6 @@
 import json
 import logging
 import os
-from enum import Enum
 from pathlib import Path
 
 import azure.cognitiveservices.speech as speechsdk
@@ -9,12 +8,7 @@ from openai.lib.azure import AzureOpenAI
 
 import logging_helper
 from azure_speech_helper import create_speech_recognizer
-from user_input_llm_helper import UserInputLlmHelper
-
-
-class UserInputType(Enum):
-    DISH_NAME = 1
-    SERVINGS = 2
+from user_input_llm_helper import UserInputLlmHelper, UserInputType, Language
 
 
 def _eliminate_punctuations(user_input):
@@ -34,7 +28,14 @@ class UserInputHandler:
         self.speech_recognizer = speech_recognizer
 
     def _clean_dish_input(self, user_input: str, language: str):
-        cleaned_dish_name = self.llm_helper.clean_dish_name(user_input, language)
+        lang_inp = ""
+        if language == "English":
+            lang_inp = Language.ENGLISH
+        elif language == "German":
+            lang_inp = Language.GERMAN
+        else:
+            lang_inp = Language.TURKISH
+        cleaned_dish_name = self.llm_helper.clean_dish_name(user_input, lang_inp)
         cleaned_dish_name_json = json.loads(cleaned_dish_name.choices[0].message.content)
         if not cleaned_dish_name_json['is_valid']:
             logging.debug("(First Check) Input does not contain a valid dish name. ")
@@ -42,14 +43,21 @@ class UserInputHandler:
 
         logging.debug("(First Check) Cleaned dish name: " + str(cleaned_dish_name_json['dish_name']))
 
-        if not self.llm_helper.does_input_type_match(cleaned_dish_name_json['dish_name'], "dish name", language):
+        if not self.llm_helper.does_input_type_match(cleaned_dish_name_json['dish_name'], UserInputType.DISH_NAME, lang_inp):
             logging.debug("(Second Check): Input is not a real dish name.")
             return None
 
         return cleaned_dish_name_json['dish_name']
 
     def _clean_servings_input(self, user_input: str, language: str):
-        cleaned_servings = self.llm_helper.clean_servings(user_input, language)
+        lang_inp = ""
+        if language == "English":
+            lang_inp = Language.ENGLISH
+        elif language == "German":
+            lang_inp = Language.GERMAN
+        else:
+            lang_inp = Language.TURKISH
+        cleaned_servings = self.llm_helper.clean_servings(user_input, lang_inp)
         cleaned_servings_json = json.loads(cleaned_servings.choices[0].message.content)
 
         if not cleaned_servings_json['is_valid']:
@@ -58,8 +66,8 @@ class UserInputHandler:
 
         logging.debug("(First Check) Cleaned servings size " + str(cleaned_servings_json['number']))
 
-        if not self.llm_helper.does_input_type_match(cleaned_servings_json['number'], "integer",
-                                                     language):
+        if not self.llm_helper.does_input_type_match(cleaned_servings_json['number'], UserInputType.SERVINGS,
+                                                     lang_inp):
             logging.debug("(Second Check): Input is not a real servings size.")
             return None
 

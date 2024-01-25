@@ -11,6 +11,11 @@ class Language(Enum):
     TURKISH = 3
 
 
+class UserInputType(Enum):
+    DISH_NAME = 1
+    SERVINGS = 2
+
+
 CLEAN_SERVINGS_MESSAGES = {
     Language.ENGLISH: [
         {
@@ -101,12 +106,13 @@ CLEAN_DISH_NAME_MESSAGES = {
         }]
 }
 
-VALIDATION_MESSAGES = {
+VALIDATION_MESSAGES_DISH_NAME = {
     Language.ENGLISH: [
         {
             "role": "system",
-            "content":"""From now on I will give you a text and you will find if given text is {type_of_text} or not.
-                Set 'is_correct_type' field true if given text is number, otherwise set 'is_correct_type' false.
+            "content":"""From now on I will give you a text and you will find if given text is dish name or not.
+                Set 'is_correct_type' field true if given text is dish name.
+                Set 'is_correct_type' field false if given text is not dish name.
                 Do not put the resulting Json into ```json ``` code block.
                 JSON schema:
                 {\"is_correct_type\": [IS_CORRECT_TYPE]}"""
@@ -118,8 +124,9 @@ VALIDATION_MESSAGES = {
     Language.GERMAN: [
         {
             "role": "system",
-            "content":"""Von nun an werde ich Ihnen einen Text geben und Sie werden herausfinden, ob der angegebene Text {type} ist oder nicht.
-                Setzen Sie das Feld 'is_correct_type' auf true, wenn der angegebene text {type} ist, andernfalls setzen Sie 'is_correct_type' auf false.
+            "content":"""Von nun an werde ich Ihnen einen Text geben und Sie werden herausfinden, ob der angegebene Text Gerichtname ist oder nicht.
+                Setzen Sie das Feld 'is_correct_type' auf true, wenn der angegebene Text der Name des Gerichts ist.
+                Setzen Sie das Feld 'is_correct_type' auf false, wenn der angegebene Text nicht der Name des Gerichts ist.
                 Fügen Sie den resultierenden JSON nicht in den Codeblock ```json ``` ein.
                 JSON schema:
                 {\"is_correct_type\": [IS_CORRECT_TYPE]}"""
@@ -131,7 +138,7 @@ VALIDATION_MESSAGES = {
     Language.TURKISH: [
         {
             "role": "system",
-            "content":"""Bundan sonra sana bir metin vereceğim ve verilen metnin {type} olup olmadığını söyleyeceksin.
+            "content":"""Bundan sonra sana bir metin vereceğim ve verilen metnin yemek ismi olup olmadığını söyleyeceksin.
                 Eğer metin {type} ise, 'is_correct_type' alanını true olarak ayarla.
                 Eğer metin {type} değilse, 'is_correct_type' alanını false olarak ayarla.
                 Ortaya çıkan Json'u ```json ``` kod bloğuna koyma.
@@ -144,6 +151,50 @@ VALIDATION_MESSAGES = {
     }]
 }
 
+VALIDATION_MESSAGES_SERVINGS_COUNT = {
+    Language.ENGLISH: [
+        {
+            "role": "system",
+            "content":"""From now on I will give you a text and you will find if given text is number or not.
+                Set 'is_correct_type' field true if given text is number.
+                Set 'is_correct_type' field false if given text is not number.
+                Do not put the resulting Json into ```json ``` code block.
+                JSON schema:
+                {\"is_correct_type\": [IS_CORRECT_TYPE]}"""
+        },
+        {
+            "role": "user",
+            "content": "{input}"
+        }],
+    Language.GERMAN: [
+        {
+            "role": "system",
+            "content":"""Von nun an werde ich Ihnen einen Text geben und Sie werden herausfinden, ob der angegebene Text eine Nummer ist oder nicht.
+                Setzen Sie das Feld 'is_correct_type' auf true, wenn der angegebene Text eine Nummer ist.
+                Setzen Sie das Feld 'is_correct_type' auf false, wenn der angegebene Text keine Nummer ist.
+                Fügen Sie den resultierenden JSON nicht in den Codeblock ```json ``` ein.
+                JSON schema:
+                {\"is_correct_type\": [IS_CORRECT_TYPE]}"""
+        },
+        {
+            "role": "user",
+            "content": "{input}"
+        }],
+    Language.TURKISH: [
+        {
+            "role": "system",
+            "content":"""Bundan sonra sana bir metin vereceğim ve verilen metnin sayı olup olmadığını söyleyeceksin.
+                Cevap verirken aşağıdaki json şemasını kullan.
+                    {\"is_correct_type\": [IS_CORRECT_TYPE]}
+                Eğer metin sayı ise, 'is_correct_type' alanını true olarak ayarla.
+                Eğer metin sayı değilse, 'is_correct_type' alanını false olarak ayarla.
+                Ortaya çıkan Json'u ```json ``` kod bloğuna koyma."""
+        },
+        {
+            "role": "user",
+            "content": "{input}"
+        }]
+}
 
 class UserInputLlmHelper:
 
@@ -193,7 +244,7 @@ class UserInputLlmHelper:
         )
         return response
 
-    def does_input_type_match(self, input, type, language: Language):
+    def does_input_type_match(self, input, type: UserInputType, language: Language):
         response = self.check_input_type_match(input, type, language)
 
         try:
@@ -203,16 +254,16 @@ class UserInputLlmHelper:
             logging.debug(e)
             return False
 
-    def check_input_type_match(self, input, type, language: Language):
-        messages = VALIDATION_MESSAGES[language]
-        print("................")
-        print(messages[0]['content'])
-        print(messages[1]['content'])
-        print(type)
-        print("................")
-        messages[0]['content'] = messages[0]['content'].format(type_of_text='dish name')
+    def check_input_type_match(self, input, type: UserInputType, language: Language):
+        messages = ""
+        if type == UserInputType.DISH_NAME:
+            messages = VALIDATION_MESSAGES_DISH_NAME[language]
+        else:
+            messages = VALIDATION_MESSAGES_SERVINGS_COUNT[language]
         messages[1]['content'] = messages[1]['content'].format(input=input)
 
+        print(messages[0]['content'])
+        print(messages[1]['content'])
         return self.azure_openai_client.chat.completions.create(
             model=self.azure_openai_model,
             messages=messages,
