@@ -3,11 +3,9 @@ import os
 import time
 import unittest
 from pathlib import Path
-
 from openai import AzureOpenAI
-
 import test_helpers
-from recipe_generation.user_input_llm_helper import UserInputLlmHelper
+from recipe_generation.user_input_llm_helper import UserInputLlmHelper, Language
 
 
 class TestUserInputLlmHelper(unittest.TestCase):
@@ -68,7 +66,7 @@ class TestUserInputLlmHelper(unittest.TestCase):
 
     def test_clean_dish_name_english(self):
         results, total_time = self.run_clean_dish_name(self.dish_name_in_sentences_english,
-                                                  "English")
+                                                  Language.ENGLISH)
         self.test_metrics.append(
             test_helpers.calculate_metrics(
                 "Clean Dish Name: dish_name_in_sentences_english:",
@@ -79,7 +77,7 @@ class TestUserInputLlmHelper(unittest.TestCase):
 
     def test_clean_dish_name_german(self):
         results, total_time = self.run_clean_dish_name(self.dish_name_in_sentences_german,
-                                                  "German")
+                                                  Language.GERMAN)
         self.test_metrics.append(
             test_helpers.calculate_metrics(
                 "Clean Dish Name: dish_name_in_sentences_german:",
@@ -90,7 +88,7 @@ class TestUserInputLlmHelper(unittest.TestCase):
 
     def test_clean_dish_name_turkish(self):
         results, total_time = self.run_clean_dish_name(self.dish_name_in_sentences_turkish,
-                                                  "Turkish")
+                                                  Language.TURKISH)
         self.test_metrics.append(
             test_helpers.calculate_metrics(
                 "Clean Dish Name: dish_name_in_sentences_turkish:",
@@ -100,7 +98,7 @@ class TestUserInputLlmHelper(unittest.TestCase):
         )
 
     def test_clean_servings_english(self):
-        results, total_time = self.run_clean_servings(self.number_in_sentences_english,"English")
+        results, total_time = self.run_clean_servings(self.number_in_sentences_english,Language.ENGLISH)
         self.test_metrics.append(
             test_helpers.calculate_metrics(
                 "Clean Servings: number_in_sentences_english:",
@@ -110,7 +108,7 @@ class TestUserInputLlmHelper(unittest.TestCase):
         )
 
     def test_clean_servings_german(self):
-        results, total_time = self.run_clean_servings(self.number_in_sentences_german,"German")
+        results, total_time = self.run_clean_servings(self.number_in_sentences_german,Language.GERMAN)
         self.test_metrics.append(
             test_helpers.calculate_metrics(
                 "Clean Servings: dish_name_in_sentences_german:",
@@ -120,7 +118,7 @@ class TestUserInputLlmHelper(unittest.TestCase):
         )
 
     def test_clean_servings_turkish(self):
-        results, total_time = self.run_clean_servings(self.number_in_sentences_turkish,"Turkish")
+        results, total_time = self.run_clean_servings(self.number_in_sentences_turkish,Language.TURKISH)
         self.test_metrics.append(
             test_helpers.calculate_metrics(
                 "Clean Servings: number_in_sentences_turkish:",
@@ -149,7 +147,7 @@ class TestUserInputLlmHelper(unittest.TestCase):
             )
         )
 
-    def run_clean_dish_name(self, data, language):
+    def run_clean_dish_name(self, data, language: Language):
         start_time = time.time()
         results = []
         for input_sentence in data:
@@ -166,7 +164,7 @@ class TestUserInputLlmHelper(unittest.TestCase):
         end_time = time.time()
         return results, (end_time - start_time)
 
-    def run_clean_servings(self, data, language):
+    def run_clean_servings(self, data, language: Language):
         start_time = time.time()
         results = []
         for input_sentence in data:
@@ -178,8 +176,11 @@ class TestUserInputLlmHelper(unittest.TestCase):
             try:
                 cleaned_servings_json = json.loads(response.choices[0].message.content)
                 self.assertEqual(True, cleaned_servings_json['is_valid'], f"Got is_valid False for: {input_sentence}")
+                int(cleaned_servings_json['number'])
             except json.decoder.JSONDecodeError:
                 self.fail("Non-valid JSON")
+            except ValueError:
+                self.fail("Non-integer for cleaned_servings_json['number']")
         end_time = time.time()
         return results, (end_time - start_time)
 
@@ -204,7 +205,14 @@ class TestUserInputLlmHelper(unittest.TestCase):
         start_time = time.time()
         results = []
         for input in data:
-            response = self.user_input_llm_helper.check_input_type_match(input[0], input[2].strip(), input[1])
+            lang_inp = ''
+            if input[1] == "English":
+                lang_inp = Language.ENGLISH
+            if input[1] == "German":
+                lang_inp = Language.GERMAN
+            else:
+                lang_inp = Language.TURKISH
+            response = self.user_input_llm_helper.check_input_type_match(input[0], input[2].strip(), lang_inp)
             results.append({
                 "completion_tokens": response.usage.completion_tokens,
                 "prompt_tokens": response.usage.prompt_tokens

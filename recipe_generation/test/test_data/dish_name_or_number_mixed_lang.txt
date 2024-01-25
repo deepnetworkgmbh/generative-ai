@@ -4,7 +4,6 @@ Shrimp Scampi - English - dish name
 Margherita Pizza - English - dish name
 Caesar Salad - English - dish name
 Spaghetti Bolognese - English - dish name
-Grilled Salmon - English - dish name
 Chicken Parmesan - English - dish name
 Chocolate Fondue - English - dish name
 Rinderrouladen - German - dish name
@@ -25,26 +24,26 @@ Kuzu Tandır - Turkish - dish name
 Menemen - Turkish - dish name
 Kısır - Turkish - dish name
 İçli Köfte - Turkish - dish name
-13 - English - integer
-45 - English - integer
-87 - English - integer
-5 - English - integer
-2 - English - integer
-Fifty three - English - integer
-Ninety seven - English - integer
-Dreiundfünfzig - German - integer
-Siebenundneunzig - German - integer
-Zweiundzwanzig - German - integer
-Kırk beş - Turkish - integer
-Otuz sekiz - Turkish - integer
-Elli altı - Turkish - integer
-Twenty two - English - integer
-Sixteen - English - integer
-Achtzig - German - integer
-Yetmiş bir - Turkish - integer
+13 - English - number
+45 - English - number
+87 - English - number
+5 - English - number
+2 - English - number
+Fifty three - English - number
+Ninety seven - English - number
+Dreiundfünfzig - German - number
+Siebenundneunzig - German - number
+Zweiundzwanzig - German - number
+Kırk beş - Turkish - number
+Otuz sekiz - Turkish - number
+Elli altı - Turkish - number
+Twenty two - English - number
+Sixteen - English - number
+Achtzig - German - number
+Yetmiş bir - Turkish - number
 Rouladen - German - dish name
 Sauerbraten - German - dish name
-Eighty - English - integer
-Sechzehn - German - integer
-Yirmi dokuz - Turkish - integer
-Yirmi iki - Turkish - integer
+Eighty - English - number
+Sechzehn - German - number
+Yirmi dokuz - Turkish - number
+Yirmi iki - Turkish - number

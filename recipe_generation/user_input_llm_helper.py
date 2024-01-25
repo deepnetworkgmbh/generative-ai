@@ -1,7 +1,148 @@
 import json
 import logging
+from enum import Enum
 
 from openai import AzureOpenAI
+
+
+class Language(Enum):
+    ENGLISH = 1
+    GERMAN = 2
+    TURKISH = 3
+
+
+CLEAN_SERVINGS_MESSAGES = {
+    Language.ENGLISH: [
+        {
+            "role": "system",
+            "content": """From now on I will give you a text and you will find the number in the given text and give me the number in numeric form. 
+                If you can find number, set 'is_valid' to true, and 'number' to number.
+                Otherwise set 'is_valid' to false, and 'number' to \"not_stated\".
+                Do not put the resulting Json into ```json ``` code block.
+                JSON schema:
+                {\"number\": \"[number]\", \"is_valid\": [IS_VALID]}"""
+        },
+        {
+            "role": "user",
+            "content": "Get the number from this text: {user_request}"
+        }],
+    Language.GERMAN: [
+        {
+            "role": "system",
+            "content": """Von nun an werde ich Ihnen einen Text geben und Sie werden die Nummer im angegebenen Text finden und mir die Nummer in numerischer Form geben.
+                Wenn Sie die Zahl finden können, setzen Sie 'is_valid' auf true und 'number' auf den nummer.
+                Andernfalls setzen Sie 'is_valid' auf false und 'number' auf \"not_stated\".
+                Fügen Sie den resultierenden JSON nicht in den Codeblock ```json ``` ein.
+                JSON schema:
+                {\"number\": \"[nummer]\", \"is_valid\": [IS_VALID]}"""
+        },
+        {
+            "role": "user",
+            "content": "Holen Sie sich die Nummer aus diesem Text: {user_request}"
+        }],
+    Language.TURKISH: [
+        {
+            "role": "system",
+            "content": """Bundan sonra sana bir metin vereceğim ve sen de verilen metindeki sayıyı bulup bana sayısal biçimde vereceksin.
+                Cevap verirken aşağıdaki json şemasını kullan.
+                {\"number\": \"[SAYI]\", \"is_valid\": [IS_VALID]}
+                Eğer metinde sayı varsa, 'is_valid' değerini true olarak ve 'number' değerini bulduğun sayı olarak ayarla.
+                Eğer metinde sayı yoksa 'is_valid' değerini false olarak ve 'number' değerini \"not_stated\" olarak ayarla.
+                Ortaya çıkan Json'u ```json ``` kod bloğuna koyma."""
+        },
+        {
+            "role": "user",
+            "content": "Verilen metindeki sayıyı bul: {user_request}"
+        }]
+}
+
+CLEAN_DISH_NAME_MESSAGES = {
+    Language.ENGLISH: [
+        {
+            "role": "system",
+            "content":"""From now on I will give you a text and you will find the dish name in the given text and give me the dish name.
+                If you can find dish name, set 'is_valid' to true, and 'dish_name' to name of the dish.
+                Otherwise set 'is_valid' to false, and 'dish_name' to \"not_stated\".
+                Do not put the resulting Json into ```json ``` code block.
+                JSON schema:
+                {\"dish_name\": \"[DISH_NAME]\", \"is_valid\": [IS_VALID]}"""
+        },
+        {
+            "role": "user",
+            "content": "Find the name of the dish in the given text: {user_request}"
+        }],
+    Language.GERMAN: [
+        {
+            "role": "system",
+            "content": """From now on I will give you a text and you will find the dish name in the given text and give me the dish name.
+                If you can find dish name, set 'is_valid' to true, and 'dish_name' to name of the dish.
+                Otherwise set 'is_valid' to false, and 'dish_name' to \"not_stated\".
+                Do not put the resulting Json into ```json ``` code block.
+                JSON schema:
+                {\"dish_name\": \"[DISH_NAME]\", \"is_valid\": [IS_VALID]}"""
+        },
+        {
+            "role": "user",
+            "content": "Finden Sie den Namen des Lebensmittels im angegebenen Text: {user_request}"
+        }],
+    Language.TURKISH: [
+        {
+            "role": "system",
+            "content": """Bundan sonra sana bir metin vereceğim ve sen de verilen metinde yemeğin adını bulup bana yemeğin adını vereceksin.
+                Eğer metinde yemek ismi varsa, 'is_valid'i true olarak ve 'dish_name'i yemeğin adı olarak ayarla.
+                Eğer metinde yemek ismi yoksa 'is_valid'i false ve 'dish_name'i \"not_stated\" yap.
+                Ortaya çıkan Json'u ```json ``` kod bloğuna koyma.
+                JSON schema:
+                {\"dish_name\": \"[DISH_NAME]\", \"is_valid\": [IS_VALID]}"""
+        },
+        {
+            "role": "user",
+            "content": "Verilen metindeki yemek ismini bul: {user_request}"
+        }]
+}
+
+VALIDATION_MESSAGES = {
+    Language.ENGLISH: [
+        {
+            "role": "system",
+            "content":"""From now on I will give you a text and you will find if given text is {type_of_text} or not.
+                Set 'is_correct_type' field true if given text is number, otherwise set 'is_correct_type' false.
+                Do not put the resulting Json into ```json ``` code block.
+                JSON schema:
+                {\"is_correct_type\": [IS_CORRECT_TYPE]}"""
+        },
+        {
+            "role": "user",
+            "content": "{input}"
+    }],
+    Language.GERMAN: [
+        {
+            "role": "system",
+            "content":"""Von nun an werde ich Ihnen einen Text geben und Sie werden herausfinden, ob der angegebene Text {type} ist oder nicht.
+                Setzen Sie das Feld 'is_correct_type' auf true, wenn der angegebene text {type} ist, andernfalls setzen Sie 'is_correct_type' auf false.
+                Fügen Sie den resultierenden JSON nicht in den Codeblock ```json ``` ein.
+                JSON schema:
+                {\"is_correct_type\": [IS_CORRECT_TYPE]}"""
+        },
+        {
+            "role": "user",
+            "content": "{input}"
+    }],
+    Language.TURKISH: [
+        {
+            "role": "system",
+            "content":"""Bundan sonra sana bir metin vereceğim ve verilen metnin {type} olup olmadığını söyleyeceksin.
+                Eğer metin {type} ise, 'is_correct_type' alanını true olarak ayarla.
+                Eğer metin {type} değilse, 'is_correct_type' alanını false olarak ayarla.
+                Ortaya çıkan Json'u ```json ``` kod bloğuna koyma.
+                JSON schema:
+                {\"is_correct_type\": [IS_CORRECT_TYPE]}"""
+        },
+        {
+            "role": "user",
+            "content": "{input}"
+    }]
+}
 
 
 class UserInputLlmHelper:
@@ -10,32 +151,9 @@ class UserInputLlmHelper:
         self.azure_openai_model = azure_openai_model
         self.azure_openai_client = azure_openai_client
 
-    def clean_dish_name(self, user_request, language):
-        lang_instruction = ""
-        if language != "not known language":
-            lang_instruction = f"Language of the dish is {language}, so please consider that language during evaluation."
-
-        messages = [
-            {
-                "role": "system",
-                "content": "You are an assistant that extracts dish name from the given text."
-
-                           "Do not give other information in json."
-                           "Do not give instructions or ingredients in json object."
-                           "If you can find dish name, set 'is_valid' to true, and 'dish_name' to name of the dish."
-                           "Otherwise set 'is_valid' to false, and 'dish_name' to \"not_stated\"."
-                           "If so, set 'is_valid' false, and 'dish_name' \"not_stated\"."
-                           # f"{lang_instruction}"
-                           "You must give the list of ingredients using the following JSON schema."
-                           "Do not put the resulting Json into ```json ``` code block."
-                           "JSON schema:\n"
-                           "{\"dish_name\": \"[DISH_NAME]\", \"is_valid\": [IS_VALID]}"
-            },
-            {
-                "role": "user",
-                "content": f"Extract the dish name from the following text: {user_request}"
-            }
-        ]
+    def clean_dish_name(self, user_request, language: Language):
+        messages = CLEAN_DISH_NAME_MESSAGES[language]
+        messages[1]['content'] = messages[1]['content'].format(user_request=user_request)
 
         return self.azure_openai_client.chat.completions.create(
             model=self.azure_openai_model,
@@ -43,41 +161,9 @@ class UserInputLlmHelper:
             response_format={"type": "json_object"}
         )
 
-    def clean_servings(self, user_request, language):
-
-        FEW_SHOTS = [
-            {"role": "user", "content": "Elf Touristen besuchten das Museum."},
-            {"role": "assistant", "content": '{"number_of_people": "11", "is_valid": True}'},
-            {"role": "user", "content": "Eight men go fishing"},
-            {"role": "assistant", "content": '{"number_of_people": "8", "is_valid": True}'},
-            {"role": "user", "content": "Beş adam kafede oturuyorlar."},
-            {"role": "assistant", "content": '{"number_of_people": "5", "is_valid": True}'}
-        ]
-
-        messages = [
-            {
-                "role": "system",
-                "content": "You are an assistant that gets number of people from the statement."
-                           "Return json object which consists of 2 fields."
-                           "These fields are 'is_valid' and 'number_of_people'"
-                           "Do not give other information in json."
-                           "If you can find number of people, set 'is_valid' true, and 'number_of_people' people count."
-                           "If you can not find number of people, set 'is_valid' false, and 'number_of_people' not_stated."
-                           "People count can be given such as '5 people', '3 men', '6 guests', '8 customers' or just '2000'. Always return just integer not other words."
-                           "Number can be given as string, such as 'five', 'elf', 'elli' or 'zwei' etc. In that case, convert them to integer (5, 2 respectively) and set 'number_of_people'."
-                           "If given value is not integer such as '3.5' or '4/5' etc.; set 'is_valid' false and 'number_of_people' not_stated."
-                           # f"User input can be given any language such as 'five men', 'vier mensch' or 'bes kisi'. Consider {language} while responding."
-                           "You must give the list of ingredients using the following JSON schema."
-                           "Do not put the resulting Json into ```json ``` code block."
-                           "JSON schema:\n"
-                           "{\"number_of_people\": '[NUMBER_OF_PEOPLE]', \"is_valid\": [IS_VALID]}"
-            },
-            *FEW_SHOTS,
-            {
-                "role": "user",
-                "content": f"Get the servings from the following paragraph: {user_request}"
-            }
-        ]
+    def clean_servings(self, user_request, language: Language):
+        messages = CLEAN_SERVINGS_MESSAGES[language]
+        messages[1]['content'] = messages[1]['content'].format(user_request=user_request)
 
         return self.azure_openai_client.chat.completions.create(
             model=self.azure_openai_model,
@@ -107,7 +193,7 @@ class UserInputLlmHelper:
         )
         return response
 
-    def does_input_type_match(self, input, type, language):
+    def does_input_type_match(self, input, type, language: Language):
         response = self.check_input_type_match(input, type, language)
 
         try:
@@ -117,43 +203,15 @@ class UserInputLlmHelper:
             logging.debug(e)
             return False
 
-    def check_input_type_match(self, input, type, language):
-        FEW_SHOTS = [
-            {"role": "user", "content": "'Eighty' is integer"},
-            {"role": "assistant", "content": '{"is_correct_type": True}'},
-            {"role": "user", "content": "'Sechzehn' is integer"},
-            {"role": "assistant", "content": '{"is_correct_type": True}'},
-            {"role": "user", "content": "'Yirmi dokuz' is integer"},
-            {"role": "assistant", "content": '{"is_correct_type": True}'},
-            {"role": "user", "content": "'Grilled chicken' is dish name"},
-            {"role": "assistant", "content": '{"is_correct_type": True}'},
-            {"role": "user", "content": "'Kartoffelsalat' is dish name"},
-            {"role": "assistant", "content": '{"is_correct_type": True}'},
-            {"role": "user", "content": "'Hamsi tava' is dish name"},
-            {"role": "assistant", "content": '{"is_correct_type": True}'}
-        ]
-
-
-        messages = [
-            {
-                "role": "system",
-                "content": f"You are an assistant that check if the given input is actually a {type} or not."
-                           "Return json object which consists of 1 field called 'is_correct_type'."
-                           f"Set 'is_correct_type' field true in boolean format if it is {type}."
-                           f"Set 'is_correct_type' field false in boolean format if it is not {type}."
-                           # f"Language of sentences (And numbers) can be given German, English or Turkish. So please consider all of these 3 languages."
-                           # f"Language of the input is {language}, so please consider that language during type check."
-                           "You must give the list of ingredients using the following JSON schema."
-                           "Do not put the resulting Json into ```json ``` code block."
-                           "JSON schema:\n"
-                           "{\"is_correct_type\": [IS_CORRECT_TYPE]}"
-            },
-            *FEW_SHOTS,
-            {
-                "role": "user",
-                "content": str(input)
-            }
-        ]
+    def check_input_type_match(self, input, type, language: Language):
+        messages = VALIDATION_MESSAGES[language]
+        print("................")
+        print(messages[0]['content'])
+        print(messages[1]['content'])
+        print(type)
+        print("................")
+        messages[0]['content'] = messages[0]['content'].format(type_of_text='dish name')
+        messages[1]['content'] = messages[1]['content'].format(input=input)
 
         return self.azure_openai_client.chat.completions.create(
             model=self.azure_openai_model,

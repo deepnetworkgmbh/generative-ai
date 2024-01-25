@@ -56,14 +56,14 @@ class UserInputHandler:
             logging.debug("(First Check) Input does not contain a valid servings size. ")
             return None
 
-        logging.debug("(First Check) Cleaned servings size " + str(cleaned_servings_json['number_of_people']))
+        logging.debug("(First Check) Cleaned servings size " + str(cleaned_servings_json['number']))
 
-        if not self.llm_helper.does_input_type_match(cleaned_servings_json['number_of_people'], "integer",
+        if not self.llm_helper.does_input_type_match(cleaned_servings_json['number'], "integer",
                                                      language):
             logging.debug("(Second Check): Input is not a real servings size.")
             return None
 
-        return cleaned_servings_json['number_of_people']
+        return cleaned_servings_json['number']
 
     # Return None if input is not valid, or the cleaned text/number.
     def clean_input(self, user_input: str, input_type: UserInputType, input_language):

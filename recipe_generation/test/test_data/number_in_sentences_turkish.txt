@@ -40,7 +40,6 @@ Doksan yedi davetli gala yemeğinde bekleniyor.
 On beş katılımcı, bilinçli yaşam etkinliğine aktif olarak katılıyor.
 Yirmiüç gönüllü, topluluk bahçesine yardım ediyor.
 Altı meslektaş proje üzerinde çalışıyor.
-On üye kulüp toplantısında hazır bulunuyor.
 On bir turist müzeyi ziyaret etti.
 Yirmi iki arkadaş bir geziye gidiyor.
 Yirmi altı katılımcı meydan okumayı tamamladı.
@@ -48,3 +47,4 @@ Elli beş katılımcı maratonda yarışıyor.
 Elli öğrenci sınava katılmak katılıyor.
 On iki öğrenci sınavı geçti.
 Kırk dokuz öğrenci kodlama hackathon'ında işbirliği yapıyor.
+On üye kulüp toplantısında hazır bulunuyor.

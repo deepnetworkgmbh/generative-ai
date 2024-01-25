@@ -9,7 +9,6 @@ Acht Schüler nehmen an dem Wettbewerb teil.
 Sechs Kollegen arbeiten an dem Projekt.
 Neunzehn Teilnehmer nahmen am Workshop teil.
 Zehn Mitglieder sind in der Clubversammlung anwesend.
-Vierzehn Schüler lernen in der Bibliothek.
 Es gibt 35 Schüler im Tanzkurs.
 Sechzehn Freiwillige halfen bei der Veranstaltung.
 Achtzehn Athleten nehmen am Rennen teil.
@@ -48,3 +47,4 @@ Dreiundzwanzig Freiwillige helfen im Gemeinschaftsgarten.
 Neunundvierzig Studierende arbeiten gemeinsam am Codierungs-Hackathon.
 Fünfundfünfzig Teilnehmer nehmen an der jährlichen Versammlung teil.
 Elf Touristen besuchten das Museum.
+Vierzehn Schüler lernen in der Bibliothek.
