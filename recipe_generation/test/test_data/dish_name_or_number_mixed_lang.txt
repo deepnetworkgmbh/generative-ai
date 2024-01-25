@@ -1,0 +1,50 @@
+Chicken Alfredo - English - dish name
+Beef Stroganoff - English - dish name
+Shrimp Scampi - English - dish name
+Margherita Pizza - English - dish name
+Caesar Salad - English - dish name
+Spaghetti Bolognese - English - dish name
+Chicken Parmesan - English - dish name
+Chocolate Fondue - English - dish name
+Rinderrouladen - German - dish name
+Kartoffelknödel - German - dish name
+Sauerbraten mit Rotkohl - German - dish name
+Käsespätzle - German - dish name
+Apfelstrudel - German - dish name
+Rösti mit Speck - German - dish name
+Grünkohl mit Pinkel - German - dish name
+Kirschsuppe mit Klößen - German - dish name
+İskender Kebap - Turkish - dish name
+Karnabahar Kızartması - Turkish - dish name
+Hünkar Beğendi - Turkish - dish name
+Kuymak - Turkish - dish name
+İmam Bayıldı - Turkish - dish name
+Mantarlı Börek - Turkish - dish name
+Kuzu Tandır - Turkish - dish name
+Menemen - Turkish - dish name
+Kısır - Turkish - dish name
+İçli Köfte - Turkish - dish name
+13 - English - number
+45 - English - number
+87 - English - number
+5 - English - number
+2 - English - number
+Fifty three - English - number
+Ninety seven - English - number
+Dreiundfünfzig - German - number
+Siebenundneunzig - German - number
+Zweiundzwanzig - German - number
+Kırk beş - Turkish - number
+Otuz sekiz - Turkish - number
+Elli altı - Turkish - number
+Twenty two - English - number
+Sixteen - English - number
+Achtzig - German - number
+Yetmiş bir - Turkish - number
+Rouladen - German - dish name
+Sauerbraten - German - dish name
+Eighty - English - number
+Sechzehn - German - number
+Yirmi dokuz - Turkish - number
+Yirmi iki - Turkish - number
+Seksen sekiz - Turkish - number
