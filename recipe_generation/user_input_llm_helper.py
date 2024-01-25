@@ -1,6 +1,7 @@
 import json
 import logging
 from enum import Enum
+from copy import deepcopy
 
 from openai import AzureOpenAI
 
@@ -110,57 +111,57 @@ VALIDATION_MESSAGES_DISH_NAME = {
     Language.ENGLISH: [
         {
             "role": "system",
-            "content":"""From now on I will give you a text and you will find if given text is dish name or not.
-                Set 'is_correct_type' field true if given text is dish name.
-                Set 'is_correct_type' field false if given text is not dish name.
-                Do not put the resulting Json into ```json ``` code block.
-                JSON schema:
+            "content":"""Starting now, I'll provide you with text, and your task is to determine whether the given text represents a dish or not.
+                If the text is a dish name, set the 'is_correct_type' field to true.
+                If the text is not a dish name, set the 'is_correct_type' field to false.
+                Ensure the resulting JSON follows this schema:
                 {\"is_correct_type\": [IS_CORRECT_TYPE]}"""
         },
         {
             "role": "user",
             "content": "{input}"
-    }],
+        }
+    ],
     Language.GERMAN: [
         {
             "role": "system",
-            "content":"""Von nun an werde ich Ihnen einen Text geben und Sie werden herausfinden, ob der angegebene Text Gerichtname ist oder nicht.
-                Setzen Sie das Feld 'is_correct_type' auf true, wenn der angegebene Text der Name des Gerichts ist.
-                Setzen Sie das Feld 'is_correct_type' auf false, wenn der angegebene Text nicht der Name des Gerichts ist.
-                Fügen Sie den resultierenden JSON nicht in den Codeblock ```json ``` ein.
-                JSON schema:
+            "content":"""Ab sofort werde ich Ihnen einen Text geben, und Ihre Aufgabe ist es festzustellen, ob der gegebene Text ein Gericht repräsentiert oder nicht.
+                Falls der Text den Namen eines Gerichts darstellt, setzen Sie das Feld 'is_correct_type' auf true.
+                Falls der Text keinen Gerichtsnamen darstellt, setzen Sie das Feld 'is_correct_type' auf false.
+                Stellen Sie sicher, dass das resultierende JSON diesem Schema folgt:
                 {\"is_correct_type\": [IS_CORRECT_TYPE]}"""
         },
         {
             "role": "user",
             "content": "{input}"
-    }],
+        }
+    ],
     Language.TURKISH: [
         {
             "role": "system",
-            "content":"""Bundan sonra sana bir metin vereceğim ve verilen metnin yemek ismi olup olmadığını söyleyeceksin.
-                Eğer metin {type} ise, 'is_correct_type' alanını true olarak ayarla.
-                Eğer metin {type} değilse, 'is_correct_type' alanını false olarak ayarla.
-                Ortaya çıkan Json'u ```json ``` kod bloğuna koyma.
-                JSON schema:
+            "content":"""Artık size bir metin vereceğim ve verilen metnin bir yemek olup olmadığını belirlemeniz gerekecek.
+                Eğer metin bir yemek adını temsil ediyorsa, 'is_correct_type' alanını true olarak ayarlayın.
+                Eğer metin bir yemek adı değilse, 'is_correct_type' alanını false olarak ayarlayın.
+                Sonuçlanan JSON'un şu şemaya uymasını sağlayın:
                 {\"is_correct_type\": [IS_CORRECT_TYPE]}"""
         },
         {
             "role": "user",
             "content": "{input}"
-    }]
+        }
+    ]
 }
 
 VALIDATION_MESSAGES_SERVINGS_COUNT = {
     Language.ENGLISH: [
         {
             "role": "system",
-            "content":"""From now on I will give you a text and you will find if given text is number or not.
-                Set 'is_correct_type' field true if given text is number.
-                Set 'is_correct_type' field false if given text is not number.
-                Do not put the resulting Json into ```json ``` code block.
-                JSON schema:
-                {\"is_correct_type\": [IS_CORRECT_TYPE]}"""
+            "content":"""Starting now, I'll provide you with text, and your task is to determine whether the given text represents a number.
+                It can be a number in text (e.g. twenty five) or numerical form (25).
+                If the text is a representation of a number, set the 'is_correct_type' field to true.
+                Otherwise, set the 'is_correct_type' field to false.
+                Ensure the resulting JSON follows this schema:
+                {\"is_correct_type\": IS_CORRECT_TYPE}"""
         },
         {
             "role": "user",
@@ -169,12 +170,12 @@ VALIDATION_MESSAGES_SERVINGS_COUNT = {
     Language.GERMAN: [
         {
             "role": "system",
-            "content":"""Von nun an werde ich Ihnen einen Text geben und Sie werden herausfinden, ob der angegebene Text eine Nummer ist oder nicht.
-                Setzen Sie das Feld 'is_correct_type' auf true, wenn der angegebene Text eine Nummer ist.
-                Setzen Sie das Feld 'is_correct_type' auf false, wenn der angegebene Text keine Nummer ist.
-                Fügen Sie den resultierenden JSON nicht in den Codeblock ```json ``` ein.
-                JSON schema:
-                {\"is_correct_type\": [IS_CORRECT_TYPE]}"""
+            "content":"""Ab sofort werde ich Ihnen Texte zur Verfügung stellen, und Ihre Aufgabe besteht darin, festzustellen, ob der gegebene Text eine Zahl darstellt.
+             Es kann sich um eine Zahl im Text handeln (z.B. fünfundzwanzig) oder in numerischer Form (25).
+             Wenn der Text eine Darstellung einer Zahl ist, setzen Sie das Feld 'is_correct_type' auf true. 
+             Andernfalls setzen Sie das Feld 'is_correct_type' auf false. 
+             Stellen Sie sicher, dass das resultierende JSON diesem Schema folgt:
+                {\"is_correct_type\": IS_CORRECT_TYPE}"""
         },
         {
             "role": "user",
@@ -183,12 +184,13 @@ VALIDATION_MESSAGES_SERVINGS_COUNT = {
     Language.TURKISH: [
         {
             "role": "system",
-            "content":"""Bundan sonra sana bir metin vereceğim ve verilen metnin sayı olup olmadığını söyleyeceksin.
-                Cevap verirken aşağıdaki json şemasını kullan.
-                    {\"is_correct_type\": [IS_CORRECT_TYPE]}
-                Eğer metin sayı ise, 'is_correct_type' alanını true olarak ayarla.
-                Eğer metin sayı değilse, 'is_correct_type' alanını false olarak ayarla.
-                Ortaya çıkan Json'u ```json ``` kod bloğuna koyma."""
+            "content":"""Bundan sonra sana bir metin vereceğim ve senin görevin verilen metnin bir sayıyı temsil edip etmediğini belirlemektir.
+                Metin, rakamsal (25) ya da yazılı (yirmi beş) olarak sayı içerebilir.
+                Eğer metin bir sayıyı ifade ediyorsa, 'is_correct_type' alanını true olarak ayarla.
+                Aksi halde, 'is_correct_type' alanını false olarak ayarla.
+                Sonuçlanan JSON'un şu şemaya uymasını sağla:
+                {\"is_correct_type\": IS_CORRECT_TYPE}
+                """
         },
         {
             "role": "user",
@@ -255,11 +257,10 @@ class UserInputLlmHelper:
             return False
 
     def check_input_type_match(self, input, type: UserInputType, language: Language):
-        messages = ""
         if type == UserInputType.DISH_NAME:
-            messages = VALIDATION_MESSAGES_DISH_NAME[language]
+            messages = deepcopy(VALIDATION_MESSAGES_DISH_NAME[language])
         else:
-            messages = VALIDATION_MESSAGES_SERVINGS_COUNT[language]
+            messages = deepcopy(VALIDATION_MESSAGES_SERVINGS_COUNT[language])
         messages[1]['content'] = messages[1]['content'].format(input=input)
 
         print(messages[0]['content'])
@@ -268,6 +269,6 @@ class UserInputLlmHelper:
             model=self.azure_openai_model,
             messages=messages,
             response_format={"type": "json_object"},
-            top_p=0.2,
+            top_p=0.1,
             temperature=0.1
         )

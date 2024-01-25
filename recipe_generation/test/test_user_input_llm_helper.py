@@ -25,39 +25,39 @@ class TestUserInputLlmHelper(unittest.TestCase):
         azure_openai_client = AzureOpenAI(api_version="2023-09-01-preview")
         cls.user_input_llm_helper = UserInputLlmHelper(azure_openai_client, azure_openai_model_name)
 
-        with open('test_data/dish_name_in_sentences_english.txt', 'r') as file:
+        with open('test_data/dish_name_in_sentences_english.txt', 'r', encoding='utf-8') as file:
             for line in file:
                 cls.dish_name_in_sentences_english.append(line.strip())
 
-        with open('test_data/dish_name_in_sentences_german.txt', 'r') as file:
+        with open('test_data/dish_name_in_sentences_german.txt', 'r', encoding='utf-8') as file:
             for line in file:
                 cls.dish_name_in_sentences_german.append(line.strip())
 
-        with open('test_data/dish_name_in_sentences_turkish.txt', 'r') as file:
+        with open('test_data/dish_name_in_sentences_turkish.txt', 'r', encoding='utf-8') as file:
             for line in file:
                 cls.dish_name_in_sentences_turkish.append(line.strip())
 
-        with open('test_data/number_in_sentences_english.txt', 'r') as file:
+        with open('test_data/number_in_sentences_english.txt', 'r', encoding='utf-8') as file:
             for line in file:
                 cls.number_in_sentences_english.append(line.strip())
 
-        with open('test_data/number_in_sentences_german.txt', 'r') as file:
+        with open('test_data/number_in_sentences_german.txt', 'r', encoding='utf-8') as file:
             for line in file:
                 cls.number_in_sentences_german.append(line.strip())
 
-        with open('test_data/number_in_sentences_turkish.txt', 'r') as file:
+        with open('test_data/number_in_sentences_turkish.txt', 'r', encoding='utf-8') as file:
             for line in file:
                 cls.number_in_sentences_turkish.append(line.strip())
 
-        with open('test_data/dish_name_or_number_in_sentences_mixed_lang.txt', 'r') as file:
+        with open('test_data/dish_name_or_number_in_sentences_mixed_lang.txt', 'r', encoding='utf-8') as file:
             for line in file:
                 sentence = line.split(" - ")
-                cls.dish_name_or_number_in_sentences_mixed_lang.append([sentence[0], sentence[1]])
+                cls.dish_name_or_number_in_sentences_mixed_lang.append([sentence[0], sentence[1].strip()])
 
-        with open('test_data/dish_name_or_number_mixed_lang.txt', 'r') as file:
+        with open('test_data/dish_name_or_number_mixed_lang.txt', 'r', encoding='utf-8') as file:
             for line in file:
                 sentence = line.split(" - ")
-                cls.dish_name_or_number_mixed_lang.append([sentence[0], sentence[1], sentence[2]])
+                cls.dish_name_or_number_mixed_lang.append([sentence[0], sentence[1], sentence[2].strip()])
 
     @classmethod
     def tearDownClass(cls):
@@ -214,9 +214,9 @@ class TestUserInputLlmHelper(unittest.TestCase):
                 lang_inp = Language.TURKISH
 
             type_inp = ''
-            if input[2].strip() == "dish name":
+            if input[2] == "dish name":
                 type_inp = UserInputType.DISH_NAME
-            elif input[2].strip() == "number":
+            elif input[2] == "number":
                 type_inp = UserInputType.SERVINGS
 
             response = self.user_input_llm_helper.check_input_type_match(input[0], type_inp, lang_inp)
