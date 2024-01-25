@@ -264,8 +264,6 @@ class UserInputLlmHelper:
             messages = deepcopy(VALIDATION_MESSAGES_SERVINGS_COUNT[language])
         messages[1]['content'] = messages[1]['content'].format(input=input)
 
-        print(messages[0]['content'])
-        print(messages[1]['content'])
         return self.azure_openai_client.chat.completions.create(
             model=self.azure_openai_model,
             messages=messages,
