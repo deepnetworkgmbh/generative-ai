@@ -34,8 +34,10 @@ There is also extra costs if you want to use [Custom Entity Lookup Skill](https:
 
 ## Azure AI Search RAG
 This images shows a way to use Azure AI Search for RAG purposes. This is the flow used in [azure-search-openai-demo](https://github.com/Azure-Samples/azure-search-openai-demo) repository by Microsoft.
+
 ![Azure AI Search RAG flow](images/RAG%20flow.drawio.png)
 
+When using Azure AI Search [this](https://techcommunity.microsoft.com/t5/ai-azure-ai-services-blog/azure-cognitive-search-outperforming-vector-search-with-hybrid/ba-p/3929167) might be helpful to decide on which searching method to use.
 
 ## Elasticsearch RAG
 We tried to create a similar flow to the one in the Azure AI Search example. For more information, please check [Elasticsearch README.md](elastic_search/README.md).
