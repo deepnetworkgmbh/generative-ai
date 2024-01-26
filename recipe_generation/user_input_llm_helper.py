@@ -21,8 +21,10 @@ CLEAN_SERVINGS_MESSAGES = {
     Language.ENGLISH: [
         {
             "role": "system",
-            "content": """From now on I will give you a text and you will find the number in the given text and give me the number in numeric form. 
-                If you can find number, set 'is_valid' to true, and 'number' to number.
+            "content": """From now on I'll provide you with text, and your task is to find the number in the given text and give me the number in numeric form.
+                The number in the given text can be in textual (e.g. twenty five) or numerical form (e.g. 25). 
+                You give me the number in numerical form.
+                If you can find number, set 'is_valid' to true, and 'number' to the number in numeric form (e.g. 25).
                 Otherwise set 'is_valid' to false, and 'number' to \"not_stated\".
                 Do not put the resulting Json into ```json ``` code block.
                 JSON schema:
@@ -35,27 +37,30 @@ CLEAN_SERVINGS_MESSAGES = {
     Language.GERMAN: [
         {
             "role": "system",
-            "content": """Von nun an werde ich Ihnen einen Text geben und Sie werden die Nummer im angegebenen Text finden und mir die Nummer in numerischer Form geben.
-                Wenn Sie die Zahl finden können, setzen Sie 'is_valid' auf true und 'number' auf den nummer.
+            "content": """Von nun an stelle ich Ihnen Text zur Verfügung, und Ihre Aufgabe ist es, die Zahl im gegebenen Text zu finden und mir die Zahl in numerischer Form zu geben.
+                Die Zahl im angegebenen Text kann in Textform (z. B. fünfundzwanzig) oder in numerischer Form (z. B. 25) vorliegen.
+                Sie geben mir die Zahl in numerischer Form.
+                Wenn Sie eine Zahl finden können, setzen Sie 'is_valid' auf true und 'number' auf die Zahl in numerischer Form (z. B. 25).
                 Andernfalls setzen Sie 'is_valid' auf false und 'number' auf \"not_stated\".
                 Fügen Sie den resultierenden JSON nicht in den Codeblock ```json ``` ein.
                 JSON schema:
-                {\"number\": [nummer], \"is_valid\": [IS_VALID]}"""
+                {\"number\": [Zahl], \"is_valid\": [IS_VALID]}"""
         },
         {
             "role": "user",
-            "content": "Holen Sie sich die Nummer aus diesem Text: {user_request}"
+            "content": "Holen Sie sich die Zahl aus diesem Text: {user_request}"
         }],
     Language.TURKISH: [
         {
             "role": "system",
-            "content": """Bundan sonra sana bir metin vereceğim ve sen de verilen metindeki sayıyı bulup bana sayısal biçimde vereceksin.
-                Metin, yazılı (iki, beş) olarak sayı içerebilir.
-                Cevap verirken aşağıdaki json şemasını kullan.
-                {\"number\": [sayı], \"is_valid\": [IS_VALID]}
+            "content": """Bundan sonra sana bir metin vereceğim ve senin görevin verilen metindeki sayıyı bulup bana sayısal biçimde vermektir.
+                Verilen metindeki sayı, rakamsal (25) ya da yazılı (yirmi beş) olarak yer alabilir.
+                Bulduğun sayıyı bana rakamsal olarak vereceksin.
                 Eğer metinde sayı varsa, 'is_valid' değerini true olarak ve 'number' değerini bulduğun sayı olarak ayarla.
                 Eğer metinde sayı yoksa 'is_valid' değerini false olarak ve 'number' değerini \"not_stated\" olarak ayarla.
-                Ortaya çıkan Json'u ```json ``` kod bloğuna koyma."""
+                Ortaya çıkan Json'u ```json ``` kod bloğuna koyma.
+                Cevap verirken aşağıdaki json şemasını kullan.
+                {\"number\": [sayı], \"is_valid\": [IS_VALID]}"""
         },
         {
             "role": "user",
