@@ -14,7 +14,6 @@ Fine-tuning an LLM is the process of further training a pre-trained model with a
 + Have not tried prompt engineering
 + Working with user data
 + Up-to-date data requirements
-+ Not enough available domain-specific data 
 + Need general purpose capabilities
 
 ## Fine-Tuning OpenAI Models
@@ -47,11 +46,11 @@ When fine-tuning OpenAI models, there are two types of costs to keep in mind: **
 
 Below is an example fine-tuning cost with gpt-3.5-turbo:
 
-![fine-tuning cost with gpt-3.5-turbo](/recipe_generation/images/gpt-3.5-turbo-fine-tuning.png)
+![fine-tuning cost with gpt-3.5-turbo](/general_concepts/images/gpt-3.5-turbo-fine-tuning.png)
 
 Cost of using the fine-tuned models is much more expensive compared to the base models. But one important thing to keep in mind is that a smaller fine-tuned model can have similar output quality to a larger model. Below table shows average costs for **base gpt-3.5-turbo**, **fine-tuned gpt-3.5-turbo** and **gpt-4-turbo**:
 
-![average cost table](/recipe_generation/images/model-costs-per-month.png)
+![average cost table](/general_concepts/images/model-costs-per-month.png)
 
 As we can see from the table, it is much cheaper to run a **fine-tuned gpt-3.5-turbo** compared to **base gpt-4-turbo**, if it can reach the desired quality. It is also important to keep in mind that since smaller models run faster, **fine-tuned gpt-3.5-turbo** will have lower latencies.
 
@@ -59,7 +58,7 @@ As we can see from the table, it is much cheaper to run a **fine-tuned gpt-3.5-t
 
 Pricing of Azure OpenAI service is different compared to OpenAI pricing. Current fine-tuning pricing for Azure can be seen below:
 
-![Azure cost table](/recipe_generation/images/azure-costs.png)
+![Azure cost table](/general_concepts/images/azure-costs.png)
 
 Main differences are that costs for fine-tuning are not in tokens but instead in **compute hours**, and running fine tuned models has a **fixed hosting cost** as well as **per 1k token cost**. Upside of using Azure is that the **per 1k token cost** in Azure is much cheaper. This makes it cheaper overall if you are using more than **~2.5 million tokens per hour**.
 
