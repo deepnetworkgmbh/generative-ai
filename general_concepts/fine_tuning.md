@@ -12,8 +12,8 @@ Fine-tuning an LLM is the process of further training a pre-trained model with a
 ### When not to Use
 
 + Have not tried prompt engineering
-+ Working with user data
-+ Up-to-date data requirements
++ Working with user data (use RAG instead)
++ Up-to-date data requirements (use RAG instead)
 + Need general purpose capabilities
 
 ## Fine-Tuning OpenAI Models
