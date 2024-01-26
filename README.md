@@ -1,28 +1,33 @@
 # Generative AI
+This repository contains projects that use LLMs. Some of these projects are mainly there to demonstrate different use-cases while others are more about the technologies and methods that can be used with LLMs. 
 
-Useful links:
+Brief descriptions of the projects are listed below, more details are available in the Readme files in the corresponding subfolders.
 
-* https://www.youtube.com/watch?v=CuUOt5djqSs
-* https://github.com/Azure/openai-samples
-* [How Transformers work](https://www.youtube.com/watch?v=4Bdc55j80l8)
-* https://techcommunity.microsoft.com/t5/ai-azure-ai-services-blog/azure-cognitive-search-outperforming-vector-search-with-hybrid/ba-p/3929167
+## General Concepts
+This folder includes documentation about general LLM topics.
 
+## Comment Reasoner
+This project is showcase for summarization features of LLM. Common problems about a given product is listed by extracting information from the comments about the product. The comments in a marketplace (Trendyol) is retrieved and most common 3 problems are listed.
 
-## Prompt Engineering
+## (Prompt) Flow
+This project demonstrates the implementation, testing and deployment of Azure Machine Learning Prompt Flow. and acts as a step-by-step guide on how to setup a prompt flow yourself.
 
-To improve the quality of the output you can:
+## Retrieval Augmented Generation (RAG)
+This project contains an example RAG application for a chatbot that helps employees of a company with their questions using company documents. This is done by searching through company documents with vector search and providing relevant parts to the LLM. For the search engine, Azure AI Search and Elasticsearch usage is demonstrated.
 
-* Put the instructions in the beginning instead of the end (Does not matter with GPT-4)
+## Recipe Generation
+The recipe generation project serves for two main use-cases:
 
-* Instruct the model to provide predefined replies based on specific conditions or situations (System message).
+* Recipe Generation (Recipe to Ingredients): The user provides the dish name and the number of servings, and receives the ingredients list as the output. The list includes the name and quantity (including unit) of each item.
+* Ingredients to Recipe: The user is asked about their preferences by the chatbot and is offered a suitable recipe using mostly the ingredients they already have. Once the user agrees on the recipe, the missing ingredients list is created.
 
-* Give prompt-completion examples in the prompt (Few-shot learning)
-* Put a few words at the end of the prompt to get output in desired format (Priming)
-* Use clear syntax
-* Break down the task into smaller steps
-* Provide grounding data
+## Resume Parser
+This project uses LLMs to extract only information we care about from any given resume. This is done through OpenAI Function Calling API.
 
-More information can be found [here](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/advanced-prompt-engineering?pivots=programming-language-chat-completions).
+## Speech to Text
+This project uses Azure Speech-to-Text convert speech input to text. Then it showcases the differences in LLM behavior between asking questions directly to an LLM versus translating the questions to English with Azure AI Translation and then asking them.
 
-
-More details about subjects can be found in the Readme files of the subfolders.
+## Useful links:
+* [Introduction to AI with Azure](https://www.youtube.com/watch?v=CuUOt5djqSs)
+* [Azure OpenAI Samples Repository](https://github.com/Azure/openai-samples)
+* [How Transformers Work](https://www.youtube.com/watch?v=4Bdc55j80l8)
