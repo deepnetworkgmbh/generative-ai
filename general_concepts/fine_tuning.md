@@ -6,10 +6,10 @@ Fine-tuning an LLM is the process of further training a pre-trained model with a
 
 + Cannot get good enough results with prompt engineering
 + Want to lower latency and costs by using a smaller model while maintaining output quality
-+ Need best performance for a specific task
++ Need better performance for a specific task
 + Context size is not enough to fit all of the few-shots
 
-### When **not** to Use
+### When not to Use
 
 + Have not tried prompt engineering
 + Working with user data
@@ -18,7 +18,7 @@ Fine-tuning an LLM is the process of further training a pre-trained model with a
 
 ## Fine-Tuning OpenAI Models
 
-OpenAI makes the fine-tuning process very simple. You only need to prepare the dataset for fine-tuning and they handle the rest of it. While this makes it very approachable for even people without any ML experience, it is also quite constraining. The only hyperparameters you can change in the fine-tuning process are:
+OpenAI makes the fine-tuning process very simple. You only need to prepare the dataset for fine-tuning and they handle the rest of the process. While this makes it very approachable for even people without any ML experience, it is also quite constraining. The only hyper-parameters you can change in the fine-tuning process are:
 
 + **Number of epochs:** An epoch is a full pass of the training dataset
 + **Learning rate multiplier:** How much the model weights change with each error
@@ -41,12 +41,11 @@ One thing to keep in mind is that each example should not exceed the context siz
 ### OpenAI Pricing
 
 When fine-tuning OpenAI models, there are two types of costs to keep in mind: **initial cost of training** and **cost of using the model**. Initial cost can be calculated by:
-    
     base cost per 1k tokens * number of tokens in the input file * number of epochs
 
 Below is an example fine-tuning cost with gpt-3.5-turbo:
 
-![fine-tuning cost with gpt-3.5-turbo](/general_concepts/images/gpt-3.5-turbo-fine-tuning.png)
+![fine-tuning cost with gpt-3.5-turbo](images/gpt-3.5-turbo-fine-tuning.png)
 
 Cost of using the fine-tuned models is much more expensive compared to the base models. But one important thing to keep in mind is that a smaller fine-tuned model can have similar output quality to a larger model. Below table shows average costs for **base gpt-3.5-turbo**, **fine-tuned gpt-3.5-turbo** and **gpt-4-turbo**:
 
