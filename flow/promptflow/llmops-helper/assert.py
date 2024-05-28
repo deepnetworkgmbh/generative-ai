@@ -13,8 +13,7 @@ def assert_metric(file_path:str, expected_value: str) -> bool:
     return float(metric_value) >= float(expected_value)
     
 def main():
-    cwd = os.getcwd()
-    path = os.path.join(cwd,'/',sys.argv[1])
+    path = os.path.join('./',sys.argv[1])
     expected_value = sys.argv[2]
 
     pass_bool = assert_metric(path, expected_value)
