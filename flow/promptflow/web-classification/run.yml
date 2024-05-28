@@ -7,8 +7,8 @@ runtime: llm-runtime
 
 connections:
   classify_with_llm:
-    connection: cenk-openai-connection
+    connection: openaidn
     deployment_name: test-deployment
   summarize_text_content:
-    connection: cenk-openai-connection
+    connection: openaidn
     deployment_name: test-deployment
