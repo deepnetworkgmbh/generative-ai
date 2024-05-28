@@ -167,7 +167,8 @@ jobs:
       - name: Install promptflow
         run: pip install -r flow/promptflow/web-classification/requirements.txt
       - name: Register promptflow model
-        run: az ml model create --file flow/promptflow/deployment/model.yaml  -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
+        id: model
+        run: echo "version=$(az ml model create --file flow/promptflow/deployment/model.yaml  -g ${{env.GROUP}} -w ${{env.WORKSPACE}} | jq -r '.version')" >> $GITHUB_OUTPUT
       - name: Set Endpoint Name
         run: |
           echo "${{ github.run_id }}"
@@ -188,6 +189,8 @@ jobs:
         run: |
           PRT_CONFIG_OVERRIDE=deployment.subscription_id=${{ env.SUBSCRIPTION }},deployment.resource_group=${{ env.GROUP }},deployment.workspace_name=${{ env.WORKSPACE }},deployment.endpoint_name=${{ env.ENDPOINT_NAME }},deployment.deployment_name=${{ env.DEPLOYMENT_NAME }}
           sed -i "s/PRT_CONFIG_OVERRIDE:.*/PRT_CONFIG_OVERRIDE: $PRT_CONFIG_OVERRIDE/g" flow/promptflow/deployment/deployment.yaml
+      - name: Set model version
+        run: sed -i 's/<VERSION>/${{steps.model.outputs.version}}/g' flow/promptflow/deployment/deployment.yaml
       - name: Setup deployment
         run: az ml online-deployment create --file flow/promptflow/deployment/deployment.yaml --endpoint-name ${{env.ENDPOINT_NAME}} --all-traffic -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
       - name: Check the status of the deployment
