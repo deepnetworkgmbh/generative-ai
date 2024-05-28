@@ -136,7 +136,7 @@ jobs:
       - name: Get assert eval results
         id: EvalResult
         run: |
-          export ASSERT=$(python flow/promptflow/llmops-helper/assert.py result.json 0.6)
+          export ASSERT=$(python flow/promptflow/llmops-helper/assert.py eval_result.json 0.6)
           if ${ASSERT,,} ; then
             echo "eval_result=true" >> $GITHUB_OUTPUT
           else
