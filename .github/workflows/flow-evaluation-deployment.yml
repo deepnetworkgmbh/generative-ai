@@ -51,7 +51,7 @@ jobs:
       - name: Set Compute and Runtime Names
         run: |
           echo "${{ github.run_id }}"
-          unique_identifier=${{ github.run_id }}
+          unique_identifier="1234567890"
           echo "$unique_identifier"
           unique_identifier_first_10="${unique_identifier:0:10}"
           echo "$unique_identifier_first_10"
@@ -86,10 +86,12 @@ jobs:
         run: |
           az role assignment create --assignee-object-id ${{env.PRINCIPAL_ID}} --assignee-principal-type ServicePrincipal --role "AzureML Data Scientist" --scope "/subscriptions/${{env.SUBSCRIPTION}}/resourcegroups/${{env.GROUP}}/providers/Microsoft.MachineLearningServices/workspaces/${{env.WORKSPACE}}"
       - name: Create Azure ML Compute Instance
+        continue-on-error: true
         run: |
           echo "Creating compute instance: ${{env.COMPUTE_NAME}}"
           az ml compute create --name ${{env.COMPUTE_NAME}} --size Standard_DS1_v2 --identity-type UserAssigned --type ComputeInstance --resource-group ${{env.GROUP}} --workspace-name ${{env.WORKSPACE}} --user-assigned-identities ${{env.USER_MANAGED_ID}}
       - name: Create Test Runtime
+        continue-on-error: true
         run: |
           access_token=$(az account get-access-token | jq -r ".accessToken")
           runtime_url_post=$(echo "https://ml.azure.com/api/${{env.LOCATION}}/flow/api/subscriptions/${{env.SUBSCRIPTION}}/resourceGroups/${{env.GROUP}}/providers/Microsoft.MachineLearningServices/workspaces/${{env.WORKSPACE}}/FlowRuntimes/${{env.RUNTIME_NAME}}?asyncCall=true")
@@ -105,15 +107,15 @@ jobs:
           http_response="Unavailable"
           while : ; do
             echo "Waiting runtime... 1"
-            if [ "$http_response" = "null" ]; then
-                echo "Exiting from the while loop..."
-                break
-            fi
             runtime_url_get=$(echo "https://ml.azure.com/api/${{env.LOCATION}}/flow/api/subscriptions/${{env.SUBSCRIPTION}}/resourceGroups/${{env.GROUP}}/providers/Microsoft.MachineLearningServices/workspaces/${{env.WORKSPACE}}/FlowRuntimes/${{env.RUNTIME_NAME}}")
             http_response=$(curl --request GET \
               --url "$runtime_url_get" \
               --header "Authorization: Bearer $access_token" \
               | jq -r '.status')
+            if [ "$http_response" = "null" ]; then
+                echo "Exiting from the while loop..."
+                break
+            fi
             echo "Waiting runtime... 2"
             echo $http_response
             sleep 500
@@ -143,6 +145,7 @@ jobs:
             echo "eval_result=false" >> $GITHUB_OUTPUT
           fi
       - name: Delete Test Sources
+        if: github.ref == 'refs/heads/main'
         run: |
           az ml compute delete --yes --name ${{env.COMPUTE_NAME}} --resource-group ${{env.GROUP}} --workspace-name ${{env.WORKSPACE}}
 
