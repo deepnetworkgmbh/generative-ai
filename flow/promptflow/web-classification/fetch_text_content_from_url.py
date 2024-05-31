@@ -17,7 +17,7 @@ def fetch_text_content_from_url(url: str):
             # Parse the HTML content using BeautifulSoup
             soup = bs4.BeautifulSoup(response.text, "html.parser")
             soup.prettify()
-            return soup.get_text()[:2000]
+            return soup.get_text()[:50]
         else:
             msg = (
                 f"Get url failed with status code {response.status_code}.\nURL: {url}\nResponse: "
