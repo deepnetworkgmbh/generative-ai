@@ -189,8 +189,8 @@ jobs:
         id: endpoint
         run: |
           echo "principal_id=$(az ml online-endpoint create --file flow/promptflow/deployment/endpoint.yaml \
-          --name ${{env.ENDPOINT_NAME}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}})\
-          | jq -r '.identity.principal_id')" >> $GITHUB_OUTPUT"
+          --name ${{env.ENDPOINT_NAME}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}}) \
+          | jq -r '.identity.principal_id')" >> $GITHUB_OUTPUT
       - name: Check the status of the endpoint
         run: az ml online-endpoint show -n ${{env.ENDPOINT_NAME}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
       - name: Update deployment PRT_CONFIG variable
