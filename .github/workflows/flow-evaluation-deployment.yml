@@ -191,6 +191,11 @@ jobs:
           echo "principal_id=$(az ml online-endpoint create --file flow/promptflow/deployment/endpoint.yaml \
           --name ${{env.ENDPOINT_NAME}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}}) \
           | jq -r '.identity.principal_id')" >> $GITHUB_OUTPUT
+      - name: Assign "AzureML Data Scientist" role to endpoint
+        run: |
+          az role assignment create --assignee-object-id ${{steps.endpoint.outputs.principal_id}} \
+          --assignee-principal-type ServicePrincipal --role "AzureML Data Scientist" \
+          --scope "/subscriptions/${{env.SUBSCRIPTION}}/resourcegroups/${{env.GROUP}}/providers/Microsoft.MachineLearningServices/workspaces/${{env.WORKSPACE}}"      
       - name: Check the status of the endpoint
         run: az ml online-endpoint show -n ${{env.ENDPOINT_NAME}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
       - name: Update deployment PRT_CONFIG variable
@@ -199,14 +204,14 @@ jobs:
           sed -i "s/PRT_CONFIG_OVERRIDE:.*/PRT_CONFIG_OVERRIDE: $PRT_CONFIG_OVERRIDE/g" flow/promptflow/deployment/deployment.yaml
       - name: Set model version
         run: sed -i 's/<VERSION>/${{steps.model.outputs.version}}/g' flow/promptflow/deployment/deployment.yaml
-      - name: Setup deployment
+      - name: Create deployment
+        id: create_deployment
         run: az ml online-deployment create --file flow/promptflow/deployment/deployment.yaml --endpoint-name ${{env.ENDPOINT_NAME}} --all-traffic -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
+      - name: Update deployment
+        if: steps.create_deployment.outcome == 'failure'
+        run: az ml online-deployment update --file flow/promptflow/deployment/deployment.yaml --endpoint-name ${{env.ENDPOINT_NAME}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
       - name: Check the status of the deployment
         run: az ml online-deployment get-logs --name test-1 --endpoint-name ${{env.ENDPOINT_NAME}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
-      - name: Assign "AzureML Data Scientist" role to endpoint
-        run: |
-          az role assignment create --assignee-object-id ${{steps.endpoint.outputs.principal_id}} --assignee-principal-type ServicePrincipal --role "AzureML Data Scientist" --scope "/subscriptions/${{env.SUBSCRIPTION}}/resourcegroups/${{env.GROUP}}/providers/Microsoft.MachineLearningServices/workspaces/${{env.WORKSPACE}}"
-
 
 
 
