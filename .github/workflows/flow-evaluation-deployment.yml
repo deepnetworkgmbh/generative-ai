@@ -122,8 +122,7 @@ jobs:
           done
       - name: Run promptflow
         run: |
-          pfazure run create -f flow/promptflow/web-classification/run.yml --subscription ${{env.SUBSCRIPTION}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}} --stream
-          pfazure run create -f flow/promptflow/web-classification/run.yml --subscription ${{env.SUBSCRIPTION}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}} --stream > flow/promptflow/llmops-helper/run_info.txt
+          pfazure run create -f flow/promptflow/web-classification/run.yml --subscription ${{env.SUBSCRIPTION}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}} --stream | tee flow/promptflow/llmops-helper/run_info.txt
           echo "RUN_NAME=$(python flow/promptflow/llmops-helper/parse_run_output.py run_info.txt)" >> "$GITHUB_ENV"
       - name: Show promptflow results
         run: pfazure run show-details --name ${{env.RUN_NAME}} --subscription ${{env.SUBSCRIPTION}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
@@ -178,7 +177,7 @@ jobs:
       - name: Set Endpoint Name
         run: |
           echo "${{ github.run_id }}"
-          unique_identifier=${{ github.run_id }}
+          unique_identifier=1234567890
           unique_identifier_first_10="${unique_identifier:0:10}"
           
           new_endpoint_name="${{env.ENDPOINT_NAME}}$unique_identifier_first_10"
