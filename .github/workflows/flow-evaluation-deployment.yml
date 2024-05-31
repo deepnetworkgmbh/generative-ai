@@ -209,7 +209,7 @@ jobs:
         id: create_deployment
         run: az ml online-deployment create --file flow/promptflow/deployment/deployment.yaml --endpoint-name ${{env.ENDPOINT_NAME}} --all-traffic -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
       - name: Update deployment
-        if: steps.create_deployment.outcome == 'failure'
+        if: failure() && steps.create_deployment.outcome == 'failure'
         run: az ml online-deployment update --file flow/promptflow/deployment/deployment.yaml --endpoint-name ${{env.ENDPOINT_NAME}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
       - name: Check the status of the deployment
         run: az ml online-deployment get-logs --name test-1 --endpoint-name ${{env.ENDPOINT_NAME}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
