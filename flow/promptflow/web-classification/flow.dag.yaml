@@ -1,7 +1,7 @@
 inputs:
   url:
     type: string
-    default: https://play.google.com/store/apps/details?id=com.twitter.android
+    default: https://arxiv.org/abs/2307.04767
 outputs:
   category:
     type: string
