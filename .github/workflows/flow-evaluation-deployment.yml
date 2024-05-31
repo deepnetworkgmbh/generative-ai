@@ -192,6 +192,7 @@ jobs:
           --name ${{env.ENDPOINT_NAME}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}}) \
           | jq -r '.identity.principal_id')" >> $GITHUB_OUTPUT
       - name: Assign "AzureML Data Scientist" role to endpoint
+        continue-on-error: true
         run: |
           az role assignment create --assignee-object-id ${{steps.endpoint.outputs.principal_id}} \
           --assignee-principal-type ServicePrincipal --role "AzureML Data Scientist" \
