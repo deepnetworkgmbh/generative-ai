@@ -5,3 +5,5 @@
 {"url": "https://www.imdb.com/title/tt12037194/", "answer": "Movie", "evidence": "Both"}
 {"url": "https://apps.shopify.com/google", "answer": "App", "evidence": "Both"}
 {"url": "https://tr.linkedin.com/company/google", "answer": "Profile", "evidence": "Both"}
+{"url": "https://www.rottentomatoes.com/", "answer": "Movie", "evidence": "Text content"}
+{"url": "https://www.beyazperde.com/", "answer": "Movie", "evidence": "Both"}
