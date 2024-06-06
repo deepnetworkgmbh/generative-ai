@@ -1,7 +1,7 @@
 inputs:
   url:
     type: string
-    default: https://play.google.com/store/apps/details?id=com.twitter.android
+    reference: ${inputs.url}
 outputs:
   category:
     type: string
@@ -28,7 +28,7 @@ nodes:
     temperature: 0.2
     text: ${fetch_text_content_from_url.output}
   provider: AzureOpenAI
-  connection: cenk-openai-connection
+  connection: openaidn
   api: chat
   module: promptflow.tools.aoai
 - name: prepare_examples
@@ -50,7 +50,7 @@ nodes:
     text_content: ${summarize_text_content.output}
     examples: ${prepare_examples.output}
   provider: AzureOpenAI
-  connection: cenk-openai-connection
+  connection: openaidn
   api: chat
 - name: convert_to_dict
   type: python
