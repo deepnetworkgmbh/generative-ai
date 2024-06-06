@@ -171,17 +171,6 @@ jobs:
           echo "version=$(az ml model create --file flow/promptflow/deployment/model.yaml  \
           -g ${{env.GROUP}} -w ${{env.WORKSPACE}} \
           | jq -r '.version')" >> $GITHUB_OUTPUT
-      - name: Set Endpoint Name
-        run: |
-          echo "${{ github.run_id }}"
-          unique_identifier=1234567890
-          unique_identifier_first_10="${unique_identifier:0:10}"
-          
-          new_endpoint_name="${{env.ENDPOINT_NAME}}$unique_identifier_first_10"
-          echo $new_endpoint_name
-          
-          echo "ENDPOINT_NAME=$new_endpoint_name" >> "$GITHUB_ENV"
-
       - name: Setup endpoint
         id: endpoint
         run: |
@@ -202,12 +191,12 @@ jobs:
           sed -i "s/PRT_CONFIG_OVERRIDE:.*/PRT_CONFIG_OVERRIDE: $PRT_CONFIG_OVERRIDE/g" flow/promptflow/deployment/deployment.yaml
       - name: Set model version
         run: sed -i 's/<VERSION>/${{steps.model.outputs.version}}/g' flow/promptflow/deployment/deployment.yaml
+      # Fails after the first time
       - name: Create deployment
         continue-on-error: true
         id: create_deployment
         run: az ml online-deployment create --file flow/promptflow/deployment/deployment.yaml --endpoint-name ${{env.ENDPOINT_NAME}} --all-traffic -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
       - name: Update deployment
-        if: steps.create_deployment.outcome == 'failure'
         run: az ml online-deployment update --file flow/promptflow/deployment/deployment.yaml --endpoint-name ${{env.ENDPOINT_NAME}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
       - name: Check the status of the deployment
         run: az ml online-deployment get-logs --name test-1 --endpoint-name ${{env.ENDPOINT_NAME}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}}
