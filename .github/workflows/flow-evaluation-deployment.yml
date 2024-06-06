@@ -175,7 +175,7 @@ jobs:
         id: endpoint
         run: |
           echo "principal_id=$(az ml online-endpoint create --file flow/promptflow/deployment/endpoint.yaml \
-          --name ${{env.ENDPOINT_NAME}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}}) \
+          --name ${{env.ENDPOINT_NAME}} -g ${{env.GROUP}} -w ${{env.WORKSPACE}} \
           | jq -r '.identity.principal_id')" >> $GITHUB_OUTPUT
       - name: Assign "AzureML Data Scientist" role to endpoint
         continue-on-error: true
