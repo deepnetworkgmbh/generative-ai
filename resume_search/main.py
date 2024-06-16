@@ -9,7 +9,7 @@ def main_generic():
     results = parse_generic.search(parsed_description)
     return results
 
-def main_static():
+def main_static(job_description):
     parsed_description = parse_static.create_query(job_description)
     results = parse_static.search(parsed_description)
     return results
@@ -17,6 +17,6 @@ def main_static():
 if __name__ == "__main__":
     job_description = read_job()
 
-    print("generic:"+main_generic(job_description))
-    main_static("static:"+job_description)
+    #print("generic:"+ main_generic(job_description))
+    main_static(job_description)
     
