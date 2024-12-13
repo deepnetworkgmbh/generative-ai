@@ -118,6 +118,7 @@ def direct_ask_to_openai(user_input, detected_language, speech):
     if speech:
         text_to_speech(detected_language[:2], response_to_user_input)
 
+
 def translate_ask_to_openai(user_input, detected_language, speech):
     english_user_input = translater(detected_language[:2], "en", user_input.text)
     # print("English version of user input: ", english_user_input)
@@ -130,6 +131,7 @@ def translate_ask_to_openai(user_input, detected_language, speech):
 
     if speech:
         text_to_speech(detected_language[:2], translated_response_to_user_input)
+
 
 def recognize_from_microphone():
     # This example requires environment variables named "SPEECH_KEY" and "SPEECH_REGION"
